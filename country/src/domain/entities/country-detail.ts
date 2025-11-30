@@ -21,25 +21,25 @@ export class MapDetails {
 }
 
 // Entity
-export class CountryDetail {
+export class CountryFacts {
   private readonly countryCode: string;
   private readonly countryName: string;
-  private readonly capitalCityName: string;
-  private readonly flagUrl: string;
+  private readonly capitalCityName: string | null;
+  private readonly flagUrl: string | null;
   private readonly languages: string[];
   private readonly currency: Currency;
   private readonly coordinates: Coordinates;
-  private readonly maps: MapDetails;
+  private readonly maps: MapDetails | null;
 
   constructor(details: {
     countryCode: string;
     countryName: string;
-    capitalCityName: string;
-    flagUrl: string;
+    capitalCityName: string | null;
+    flagUrl: string | null;
     languages: string[];
     currency: Currency;
     coordinates: Coordinates;
-    maps: MapDetails;
+    maps: MapDetails | null;
   }) {
     this.countryCode = details.countryCode;
     this.countryName = details.countryName;
@@ -59,11 +59,11 @@ export class CountryDetail {
     return this.countryName;
   }
 
-  get capital(): string {
+  get capital(): string | null {
     return this.capitalCityName;
   }
 
-  get flag(): string {
+  get flag(): string | null {
     return this.flagUrl;
   }
 
@@ -79,7 +79,7 @@ export class CountryDetail {
     return this.coordinates;
   }
 
-  get mapLinks(): MapDetails {
+  get mapLinks(): MapDetails | null {
     return this.maps;
   }
 
@@ -99,8 +99,8 @@ export class CountryDetail {
         longitude: this.coordinates.longitude,
       },
       maps: {
-        googleMaps: this.maps.googleMaps,
-        openStreetMaps: this.maps.openStreetMaps,
+        googleMaps: this.maps?.googleMaps,
+        openStreetMaps: this.maps?.openStreetMaps,
       },
     };
   }

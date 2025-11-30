@@ -1,4 +1,4 @@
-import { CountryDetail, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
 
 describe('Currency Value Object', () => {
   it('should create a currency with name and symbol', () => {
@@ -36,7 +36,7 @@ describe('MapDetails Value Object', () => {
 
 describe('CountryDetail Entity', () => {
   const createTestCountry = () => {
-    return new CountryDetail({
+    return new CountryFacts({
       countryCode: 'ES',
       countryName: 'Spain',
       capitalCityName: 'Madrid',
@@ -89,8 +89,8 @@ describe('CountryDetail Entity', () => {
       const country = createTestCountry();
       const maps = country.mapLinks;
 
-      expect(maps.googleMaps).toBe('https://goo.gl/maps/spain');
-      expect(maps.openStreetMaps).toBe('https://osm.org/spain');
+      expect(maps?.googleMaps).toBe('https://goo.gl/maps/spain');
+      expect(maps?.openStreetMaps).toBe('https://osm.org/spain');
     });
   });
 
@@ -121,7 +121,7 @@ describe('CountryDetail Entity', () => {
     });
 
     it('should handle empty languages array', () => {
-      const country = new CountryDetail({
+      const country = new CountryFacts({
         countryCode: 'XX',
         countryName: 'Test Country',
         capitalCityName: 'Test City',

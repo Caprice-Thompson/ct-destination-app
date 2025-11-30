@@ -1,16 +1,19 @@
-import { ListCountryInformationUseCase } from '@application/list-country-information';
-import type { CountryApiRepository, CountryDataRepository } from '@application/interfaces/repositories';
+import { ListCountryInformation } from '@application/list-country-information';
+import type {
+  CountryApiRepositoryInterface,
+  CountryDatabaseRepositoryInterface,
+} from '@application/interfaces/repositories';
 import { RestCountriesApiRepository } from './repositories/rest-countries-api-repository';
-import { CountryDBRepository } from './repositories/country-repository';
+import { CountryDatabaseBRepository } from './repositories/country-database-repository';
 import { rdsClient, type DbClient } from './repositories/db/rds_client';
 import { makeConfig, type ApplicationConfig } from './config';
 
 export interface Dependencies {
   config: ApplicationConfig;
   rdsClient: DbClient;
-  countryApiRepository: CountryApiRepository;
-  countryDataRepository: CountryDataRepository;
-  listCountryInformationUseCase: ListCountryInformationUseCase;
+  countryApiRepository: CountryApiRepositoryInterface;
+  countryDataRepository: CountryDatabaseRepositoryInterface;
+  listCountryInformationUseCase: ListCountryInformation;
 }
 
 export async function makeDependencies(): Promise<Dependencies> {
@@ -43,17 +46,17 @@ async function makeRdsClient(config: ApplicationConfig): Promise<DbClient> {
   }
 }
 
-function makeCountryApiRepository(config: ApplicationConfig): CountryApiRepository {
+function makeCountryApiRepository(config: ApplicationConfig): CountryApiRepositoryInterface {
   return new RestCountriesApiRepository(config.api.restCountriesUrl);
 }
 
-function makeCountryDataRepository(dbClient: DbClient): CountryDataRepository {
-  return new CountryDBRepository(dbClient);
+function makeCountryDataRepository(dbClient: DbClient): CountryDatabaseRepositoryInterface {
+  return new CountryDatabaseBRepository(dbClient);
 }
 
 function makeListCountryInformationUseCase(
-  countryApiRepository: CountryApiRepository,
-  countryDataRepository: CountryDataRepository,
-): ListCountryInformationUseCase {
-  return new ListCountryInformationUseCase(countryApiRepository, countryDataRepository);
+  countryApiRepository: CountryApiRepositoryInterface,
+  countryDataRepository: CountryDatabaseRepositoryInterface,
+): ListCountryInformation {
+  return new ListCountryInformation(countryApiRepository, countryDataRepository);
 }

@@ -1,4 +1,4 @@
-import { CountryDetail, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 
@@ -17,8 +17,8 @@ export const createTestCountry = (
     coordinates: Coordinates;
     maps: MapDetails;
   }>,
-): CountryDetail => {
-  return new CountryDetail({
+): CountryFacts => {
+  return new CountryFacts({
     countryCode: 'ES',
     countryName: 'Spain',
     capitalCityName: 'Madrid',
@@ -36,19 +36,20 @@ export const createTestCityPopulation = (
   countryCode = 'ES',
   population = 3223334,
 ): CityPopulation => {
-  return new CityPopulation(cityName, countryCode, population);
+  return new CityPopulation({ cityName, countryCode, population });
 };
 
 export const createTestNationalDish = (
   countryCode = 'ES',
   dishName = 'Paella',
+  imageUrl: string | null = null,
   description = 'A traditional Spanish rice dish',
 ): NationalDish => {
-  return new NationalDish(countryCode, dishName, description);
+  return new NationalDish(countryCode, dishName, imageUrl, description);
 };
 
 export const mockRestCountriesApiResponse = (countryName: string) => {
-  const responses: Record<string, any> = {
+  const responses: Record<string, unknown> = {
     Spain: {
       name: { common: 'Spain' },
       cca2: 'ES',

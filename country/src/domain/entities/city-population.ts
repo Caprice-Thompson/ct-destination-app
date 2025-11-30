@@ -1,19 +1,19 @@
 export class CityPopulation {
-  constructor(
-    public readonly cityName: string,
-    public readonly countryCode: string,
-    public readonly population: number,
-  ) {
-    if (population < 0) {
-      throw new Error('Population cannot be negative');
-    }
+  public readonly cityName: string;
+  public readonly countryCode: string;
+  public readonly population: number;
+  constructor(cityPopulation: { cityName: string; countryCode: string; population: number }) {
+    this.cityName = cityPopulation.cityName;
+    this.countryCode = cityPopulation.countryCode;
+    this.population = cityPopulation.population;
   }
-
-  toJSON() {
-    return {
-      cityName: this.cityName,
-      countryCode: this.countryCode,
-      population: this.population,
-    };
+  public getPopulation() {
+    return this.population;
+  }
+  public getCountryCode() {
+    return this.countryCode;
+  }
+  public getCityName() {
+    return this.cityName;
   }
 }

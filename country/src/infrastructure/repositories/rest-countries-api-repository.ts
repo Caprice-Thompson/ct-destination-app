@@ -1,5 +1,5 @@
-import { CountryApiRepository } from '@application/interfaces/repositories';
-import { CountryDetail, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryApiRepositoryInterface } from '@application/interfaces/repositories';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
 import { logger } from '@infrastructure/logger';
 
 interface RestCountriesApiResponse {
@@ -27,14 +27,14 @@ interface RestCountriesApiResponse {
   };
 }
 
-export class RestCountriesApiRepository implements CountryApiRepository {
+export class RestCountriesApiRepository implements CountryApiRepositoryInterface {
   private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
 
-  async getCountryDetailsByName(countryName: string): Promise<CountryDetail | null> {
+  async getCountryDetailsByName(countryName: string): Promise<CountryFacts | null> {
     try {
       const response = await fetch(`${this.baseUrl}/name/${encodeURIComponent(countryName)}`);
 
@@ -64,7 +64,7 @@ export class RestCountriesApiRepository implements CountryApiRepository {
     }
   }
 
-  private mapToCountryDetail(data: RestCountriesApiResponse): CountryDetail {
+  private mapToCountryDetail(data: RestCountriesApiResponse): CountryFacts {
     const currencyCode = data.currencies ? Object.keys(data.currencies)[0] : null;
     const currencyData = currencyCode && data.currencies ? data.currencies[currencyCode] : null;
     const currency = new Currency(currencyData?.name || 'Unknown', currencyData?.symbol || '');
@@ -74,18 +74,17 @@ export class RestCountriesApiRepository implements CountryApiRepository {
 
     // Extract coordinates
     const coordinates = new Coordinates(data.latlng?.[0] || 0, data.latlng?.[1] || 0);
-
     // Extract map details
-    const maps = new MapDetails(data.maps?.googleMaps || '', data.maps?.openStreetMaps || '');
+    const maps = new MapDetails(data.maps?.googleMaps ?? '', data.maps?.openStreetMaps ?? '');
 
-    const capital = data.capital?.[0] || 'Unknown';
+    const capital = data.capital?.[0];
 
-    const flagUrl = data.flags?.svg || data.flags?.png || '';
+    const flagUrl = data.flags?.svg ?? data.flags?.png ?? null;
 
-    return new CountryDetail({
+    return new CountryFacts({
       countryCode: data.cca2,
       countryName: data.name.common,
-      capitalCityName: capital,
+      capitalCityName: capital ?? null,
       flagUrl,
       languages,
       currency,

@@ -1,7 +1,7 @@
 import { validateCountryInformationRequest } from '@application/validator';
 import { makeDependencies, type Dependencies } from '@infrastructure/dependencies';
 import { logger } from '@infrastructure/logger';
-import { APIGatewayEvent, APIGatewayProxyResult, CountryInformationResponse, ErrorResponse } from '../types';
+import { APIGatewayEvent, APIGatewayProxyResult, ErrorResponse } from '../types';
 
 let dependencies: Dependencies | null = null;
 
@@ -19,18 +19,12 @@ export const listCountryInformationHandler = async (event: APIGatewayEvent): Pro
 
     const useCase = dependencies.listCountryInformationUseCase;
 
-    const result = await useCase.executeUseCase(query.countryName);
-
-    const response: CountryInformationResponse = {
-      countryDetails: result.countryDetails!.toJSON(),
-      capitalPopulation: result.capitalPopulation?.toJSON(),
-      nationalDish: result.nationalDish?.toJSON(),
-    };
+    const response = await useCase.listCountryInfo(query.countryName);
 
     logger.info('Successfully retrieved country information', {
       countryName: query.countryName,
-      hasPopulation: !!result.capitalPopulation,
-      hasDish: !!result.nationalDish,
+      hasPopulation: !!response.capitalPopulation,
+      hasDish: !!response.nationalDish,
     });
 
     return {

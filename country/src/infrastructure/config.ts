@@ -13,6 +13,7 @@ export interface ApplicationConfig {
   };
   api: {
     restCountriesUrl: string;
+    populationApiUrl: string;
   };
   isTestEnv: boolean;
 }
@@ -25,6 +26,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     DB_CONNECTION_TIMEOUT: z.string().optional(),
     DB_USE_SSL: z.string().optional(),
     REST_COUNTRIES_API_URL: z.string().optional(),
+    POPULATION_API_URL: z.string().optional(),
   });
 
   const parsedEnv = schema.parse(process.env);
@@ -42,6 +44,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     },
     api: {
       restCountriesUrl: parsedEnv.REST_COUNTRIES_API_URL || 'https://restcountries.com/v3.1',
+      populationApiUrl: parsedEnv.POPULATION_API_URL ?? '',
     },
     isTestEnv,
   };

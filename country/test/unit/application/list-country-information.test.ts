@@ -1,13 +1,16 @@
-import { ListCountryInformationUseCase } from '@application/list-country-information';
-import { CountryApiRepository, CountryDataRepository } from '@application/interfaces/repositories';
-import { CountryDetail, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { ListCountryInformation } from '@application/list-country-information';
+import {
+  CountryApiRepositoryInterface,
+  CountryDatabaseRepositoryInterface,
+} from '@application/interfaces/repositories';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 
 describe('ListCountryInformationUseCase', () => {
-  let mockApiRepository: jest.Mocked<CountryApiRepository>;
-  let mockDataRepository: jest.Mocked<CountryDataRepository>;
-  let useCase: ListCountryInformationUseCase;
+  let mockApiRepository: jest.Mocked<CountryApiRepositoryInterface>;
+  let mockDataRepository: jest.Mocked<CountryDatabaseRepositoryInterface>;
+  let useCase: ListCountryInformation;
 
   beforeEach(() => {
     mockApiRepository = {
@@ -15,16 +18,16 @@ describe('ListCountryInformationUseCase', () => {
     };
 
     mockDataRepository = {
-      getCityPopulation: jest.fn(),
+      getTopCityPopulations: jest.fn(),
       getNationalDish: jest.fn(),
     };
 
-    useCase = new ListCountryInformationUseCase(mockApiRepository, mockDataRepository);
+    useCase = new ListCountryInformation(mockApiRepository, mockDataRepository);
   });
 
   describe('Successful Execution', () => {
     it('should return complete country information when all data is available', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -35,26 +38,25 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('https://google.com', 'https://osm.org'),
       });
 
-      const mockPopulation = new CityPopulation('Madrid', 'ES', 3223334);
-      const mockDish = new NationalDish('ES', 'Paella', 'A rice dish');
+      const mockPopulation = new CityPopulation({ cityName: 'Madrid', countryCode: 'ES', population: 3223334 });
+      const mockDish = new NationalDish('ES', 'Paella', null, 'A rice dish');
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(mockPopulation);
+      mockDataRepository.getTopCityPopulations.mockResolvedValue(mockPopulation);
       mockDataRepository.getNationalDish.mockResolvedValue(mockDish);
 
-      const result = await useCase.executeUseCase('Spain');
-
-      expect(result.countryDetails).toBe(mockCountry);
-      expect(result.capitalPopulation).toBe(mockPopulation);
-      expect(result.nationalDish).toBe(mockDish);
+      const result = await useCase.listCountryInfo('Spain');
+      expect(result.countryDetails).toEqual(mockCountry.toJSON());
+      expect(result.capitalPopulation).toEqual(mockPopulation);
+      expect(result.nationalDish).toEqual(mockDish.toJSON());
 
       expect(mockApiRepository.getCountryDetailsByName).toHaveBeenCalledWith('Spain');
-      expect(mockDataRepository.getCityPopulation).toHaveBeenCalledWith('Madrid', 'ES');
-      expect(mockDataRepository.getNationalDish).toHaveBeenCalledWith('ES');
+      expect(mockDataRepository.getTopCityPopulations).toHaveBeenCalledWith('Spain');
+      expect(mockDataRepository.getNationalDish).toHaveBeenCalledWith('Spain');
     });
 
     it('should return null for population when not found in database', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'XX',
         countryName: 'Test Country',
         capitalCityName: 'Test City',
@@ -66,18 +68,18 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(null);
+      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
-      const result = await useCase.executeUseCase('Test Country');
+      const result = await useCase.listCountryInfo('Test Country');
 
-      expect(result.countryDetails).toBe(mockCountry);
-      expect(result.capitalPopulation).toBeNull();
-      expect(result.nationalDish).toBeNull();
+      expect(result.countryDetails).toEqual(mockCountry.toJSON());
+      expect(result.capitalPopulation).toBeUndefined();
+      expect(result.nationalDish).toBeUndefined();
     });
 
     it('should call database queries in parallel', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'FR',
         countryName: 'France',
         capitalCityName: 'Paris',
@@ -89,19 +91,16 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(null);
+      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
       const startTime = Date.now();
-      await useCase.executeUseCase('France');
+      await useCase.listCountryInfo('France');
       const duration = Date.now() - startTime;
 
-      // Verify both methods were called
-      expect(mockDataRepository.getCityPopulation).toHaveBeenCalled();
+      expect(mockDataRepository.getTopCityPopulations).toHaveBeenCalled();
       expect(mockDataRepository.getNationalDish).toHaveBeenCalled();
 
-      // If they were called sequentially with delays, this would take longer
-      // This is a basic check that they're called in parallel
       expect(duration).toBeLessThan(100);
     });
   });
@@ -110,22 +109,22 @@ describe('ListCountryInformationUseCase', () => {
     it('should throw error when country is not found', async () => {
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(null);
 
-      await expect(useCase.executeUseCase('NonExistentCountry')).rejects.toThrow(
+      await expect(useCase.listCountryInfo('NonExistentCountry')).rejects.toThrow(
         'Country not found: NonExistentCountry',
       );
 
-      expect(mockDataRepository.getCityPopulation).not.toHaveBeenCalled();
+      expect(mockDataRepository.getTopCityPopulations).not.toHaveBeenCalled();
       expect(mockDataRepository.getNationalDish).not.toHaveBeenCalled();
     });
 
     it('should propagate API repository errors', async () => {
       mockApiRepository.getCountryDetailsByName.mockRejectedValue(new Error('API connection failed'));
 
-      await expect(useCase.executeUseCase('Spain')).rejects.toThrow('API connection failed');
+      await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('API connection failed');
     });
 
     it('should propagate database errors from getCityPopulation', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -137,14 +136,14 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockRejectedValue(new Error('Database error'));
+      mockDataRepository.getTopCityPopulations.mockRejectedValue(new Error('Database error'));
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
-      await expect(useCase.executeUseCase('Spain')).rejects.toThrow('Database error');
+      await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('Database error');
     });
 
     it('should propagate database errors from getNationalDish', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -156,38 +155,16 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(null);
+      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockRejectedValue(new Error('Database error'));
 
-      await expect(useCase.executeUseCase('Spain')).rejects.toThrow('Database error');
+      await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('Database error');
     });
   });
 
   describe('Edge Cases', () => {
-    it('should handle country with no capital city', async () => {
-      const mockCountry = new CountryDetail({
-        countryCode: 'XX',
-        countryName: 'Test',
-        capitalCityName: '',
-        flagUrl: '',
-        languages: [],
-        currency: new Currency('', ''),
-        coordinates: new Coordinates(0, 0),
-        maps: new MapDetails('', ''),
-      });
-
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(null);
-      mockDataRepository.getNationalDish.mockResolvedValue(null);
-
-      const result = await useCase.executeUseCase('Test');
-
-      expect(result.countryDetails).toBe(mockCountry);
-      expect(mockDataRepository.getCityPopulation).toHaveBeenCalledWith('', 'XX');
-    });
-
     it('should handle country with multiple languages', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'CH',
         countryName: 'Switzerland',
         capitalCityName: 'Bern',
@@ -199,12 +176,12 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
-      mockDataRepository.getCityPopulation.mockResolvedValue(null);
+      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
-      const result = await useCase.executeUseCase('Switzerland');
+      const result = await useCase.listCountryInfo('Switzerland');
 
-      expect(result.countryDetails?.languageList).toHaveLength(4);
+      expect(result.countryDetails?.languages).toHaveLength(4);
     });
   });
 });

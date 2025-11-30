@@ -1,7 +1,7 @@
 import { makeDependencies } from '@infrastructure/dependencies';
-import { ListCountryInformationUseCase } from '@application/list-country-information';
+import { ListCountryInformation } from '@application/list-country-information';
 import { RestCountriesApiRepository } from '@infrastructure/repositories/rest-countries-api-repository';
-import { CountryDBRepository } from '@infrastructure/repositories/country-repository';
+import { CountryDatabaseBRepository } from '@infrastructure/repositories/country-database-repository';
 
 jest.mock('@infrastructure/repositories/db/rds_client', () => ({
   rdsClient: jest.fn().mockResolvedValue({
@@ -54,20 +54,20 @@ describe('makeDependencies', () => {
   it('should create PostgresCountryDataRepository', async () => {
     const dependencies = await makeDependencies();
 
-    expect(dependencies.countryDataRepository).toBeInstanceOf(CountryDBRepository);
+    expect(dependencies.countryDataRepository).toBeInstanceOf(CountryDatabaseBRepository);
   });
 
   it('should create ListCountryInformationUseCase', async () => {
     const dependencies = await makeDependencies();
 
-    expect(dependencies.listCountryInformationUseCase).toBeInstanceOf(ListCountryInformationUseCase);
+    expect(dependencies.listCountryInformationUseCase).toBeInstanceOf(ListCountryInformation);
   });
 
   it('should wire dependencies correctly', async () => {
     const dependencies = await makeDependencies();
 
     expect(dependencies.listCountryInformationUseCase).toBeDefined();
-    expect(dependencies.listCountryInformationUseCase.executeUseCase).toBeDefined();
+    expect(dependencies.listCountryInformationUseCase.listCountryInfo).toBeDefined();
   });
 
   it('should create new instances on each call', async () => {

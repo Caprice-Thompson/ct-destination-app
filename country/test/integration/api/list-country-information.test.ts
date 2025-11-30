@@ -1,28 +1,34 @@
 import { listCountryInformationHandler, resetDependencies } from '@infrastructure/../api/list-country-information';
 import { makeDependencies } from '@infrastructure/dependencies';
-import { CountryDetail, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
-import { APIGatewayEvent } from '../../src/types';
+import { APIGatewayEvent } from 'src';
 
 jest.mock('@infrastructure/dependencies');
 
 describe('listCountryInformationHandler', () => {
-  let mockExecute: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
     resetDependencies();
-    mockExecute = jest.fn();
+
+    const mockCountryApiRepository = {
+      getCountryDetailsByName: jest.fn(),
+    };
+
+    const mockCountryDatabaseRepository = {
+      getTopCityPopulations: jest.fn(),
+      getNationalDish: jest.fn(),
+    };
 
     (makeDependencies as jest.Mock).mockResolvedValue({
       listCountryInformationUseCase: {
-        executeUseCase: mockExecute,
+        listCountryInfo: jest.fn(),
       },
       config: {},
       rdsClient: {},
-      countryApiRepository: {},
-      countryDataRepository: {},
+      countryApiRepository: mockCountryApiRepository,
+      countryDataRepository: mockCountryDatabaseRepository,
     });
 
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -35,7 +41,7 @@ describe('listCountryInformationHandler', () => {
 
   describe('Successful Requests', () => {
     it('should return 200 with complete country information', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -46,11 +52,12 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('https://google.com', 'https://osm.org'),
       });
 
-      const mockPopulation = new CityPopulation('Madrid', 'ES', 3223334);
+      const mockPopulation = new CityPopulation({ cityName: 'Madrid', countryCode: 'ES', population: 3223334 });
       const mockDish = new NationalDish('ES', 'Paella', 'A rice dish');
 
-      mockExecute.mockResolvedValue({
-        countryDetails: mockCountry,
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
+        countryDetails: mockCountry.toJSON(),
         capitalPopulation: mockPopulation,
         nationalDish: mockDish,
       });
@@ -60,7 +67,6 @@ describe('listCountryInformationHandler', () => {
       };
 
       const response = await listCountryInformationHandler(event);
-
       expect(response.statusCode).toBe(200);
       expect(response.headers?.['Content-Type']).toBe('application/json');
 
@@ -72,7 +78,7 @@ describe('listCountryInformationHandler', () => {
     });
 
     it('should handle missing optional data (population and dish)', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'XX',
         countryName: 'Test',
         capitalCityName: 'Test City',
@@ -83,7 +89,8 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockExecute.mockResolvedValue({
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
         capitalPopulation: null,
         nationalDish: null,
@@ -98,8 +105,8 @@ describe('listCountryInformationHandler', () => {
 
       const body = JSON.parse(response.body);
       expect(body.countryDetails.countryCode).toBe('XX');
-      expect(body.capitalPopulation).toBeUndefined();
-      expect(body.nationalDish).toBeUndefined();
+      expect(body.capitalPopulation).toBeNull();
+      expect(body.nationalDish).toBeNull();
     });
   });
 
@@ -160,7 +167,10 @@ describe('listCountryInformationHandler', () => {
 
   describe('Not Found Errors', () => {
     it('should return 404 when country is not found', async () => {
-      mockExecute.mockRejectedValue(new Error('Country not found: NonExistent'));
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockRejectedValue(
+        new Error('Country not found: NonExistent'),
+      );
 
       const event: APIGatewayEvent = {
         queryStringParameters: { countryName: 'NonExistent' },
@@ -177,7 +187,10 @@ describe('listCountryInformationHandler', () => {
 
   describe('Internal Server Errors', () => {
     it('should return 500 for use case errors', async () => {
-      mockExecute.mockRejectedValue(new Error('Database connection failed'));
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       const event: APIGatewayEvent = {
         queryStringParameters: { countryName: 'Spain' },
@@ -192,7 +205,10 @@ describe('listCountryInformationHandler', () => {
     });
 
     it('should return 500 for unexpected errors', async () => {
-      mockExecute.mockRejectedValue(new Error('Unexpected error'));
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockRejectedValue(
+        new Error('Unexpected error'),
+      );
 
       const event: APIGatewayEvent = {
         queryStringParameters: { countryName: 'Spain' },
@@ -210,7 +226,10 @@ describe('listCountryInformationHandler', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      mockExecute.mockRejectedValue(new Error('Test error'));
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockRejectedValue(
+        new Error('Test error'),
+      );
 
       const event: APIGatewayEvent = {
         queryStringParameters: { countryName: 'Spain' },
@@ -229,7 +248,8 @@ describe('listCountryInformationHandler', () => {
       process.env.NODE_ENV = 'development';
 
       const error = new Error('Test error');
-      mockExecute.mockRejectedValue(error);
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockRejectedValue(error);
 
       const event: APIGatewayEvent = {
         queryStringParameters: { countryName: 'Spain' },
@@ -247,7 +267,7 @@ describe('listCountryInformationHandler', () => {
 
   describe('Dependency Injection', () => {
     it('should get use case from dependency container', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'FR',
         countryName: 'France',
         capitalCityName: 'Paris',
@@ -258,7 +278,8 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockExecute.mockResolvedValue({
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
         capitalPopulation: null,
         nationalDish: null,
@@ -271,13 +292,13 @@ describe('listCountryInformationHandler', () => {
       await listCountryInformationHandler(event);
 
       expect(makeDependencies).toHaveBeenCalled();
-      expect(mockExecute).toHaveBeenCalledWith('France');
+      expect(dependencies.listCountryInformationUseCase.listCountryInfo).toHaveBeenCalledWith('France');
     });
   });
 
   describe('Response Format', () => {
     it('should include correct content-type header', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -288,7 +309,8 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockExecute.mockResolvedValue({
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
         capitalPopulation: null,
         nationalDish: null,
@@ -305,7 +327,7 @@ describe('listCountryInformationHandler', () => {
     });
 
     it('should return valid JSON', async () => {
-      const mockCountry = new CountryDetail({
+      const mockCountry = new CountryFacts({
         countryCode: 'ES',
         countryName: 'Spain',
         capitalCityName: 'Madrid',
@@ -316,7 +338,8 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockExecute.mockResolvedValue({
+      const dependencies = await makeDependencies();
+      (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
         capitalPopulation: null,
         nationalDish: null,

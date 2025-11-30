@@ -1,13 +1,13 @@
-import { CountryDataRepository } from '@application/interfaces/repositories';
+import { CountryDatabaseRepositoryInterface } from '@application/interfaces/repositories';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 import { DbClient } from './db/rds_client';
 import { logger } from '@infrastructure/logger';
 
-export class CountryDBRepository implements CountryDataRepository {
+export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInterface {
   constructor(private readonly dbClient: DbClient) {}
 
-  async getCityPopulation(cityName: string, countryCode: string): Promise<CityPopulation | null> {
+  async getTopCityPopulations(countryName: string): Promise<CityPopulation | null> {
     try {
       const result = await this.dbClient.querySingleRowOptional<{
         city_name: string;
@@ -17,16 +17,21 @@ export class CountryDBRepository implements CountryDataRepository {
         query: `
           SELECT city_name, country_code, population
           FROM city_populations
-          WHERE city_name = $1 AND country_code = $2
+          WHERE country_name = $1
+          ORDER BY CAST(REPLACE(population, ',', '') AS NUMERIC) DESC LIMIT 4;
         `,
-        bindVariables: [cityName, countryCode],
+        bindVariables: [countryName],
       });
 
       if (!result) {
         return null;
       }
 
-      return new CityPopulation(result.city_name, result.country_code, result.population);
+      return new CityPopulation({
+        cityName: result.city_name,
+        countryCode: result.country_code,
+        population: result.population,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.debug('Error fetching city population', {
@@ -37,26 +42,27 @@ export class CountryDBRepository implements CountryDataRepository {
     }
   }
 
-  async getNationalDish(countryCode: string): Promise<NationalDish | null> {
+  async getNationalDish(countryName: string): Promise<NationalDish | null> {
     try {
       const result = await this.dbClient.querySingleRowOptional<{
-        country_code: string;
+        country_name: string;
         dish_name: string;
+        image_url: string | null;
         description: string | null;
       }>({
         query: `
-          SELECT country_code, dish_name, description
+          SELECT country_name, dish_name, image_url, description
           FROM national_dishes
-          WHERE country_code = $1
+          WHERE country_name = $1
         `,
-        bindVariables: [countryCode],
+        bindVariables: [countryName],
       });
 
       if (!result) {
         return null;
       }
 
-      return new NationalDish(result.country_code, result.dish_name, result.description || undefined);
+      return new NationalDish(result.country_name, result.dish_name, result.image_url, result.description ?? undefined);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.debug('Error fetching national dish', {

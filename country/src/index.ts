@@ -1,19 +1,22 @@
 // Domain
-export { CountryDetail, Currency, Coordinates, MapDetails } from './domain/entities/country-detail';
+export { CountryFacts as CountryDetail, Currency, Coordinates, MapDetails } from './domain/entities/country-detail';
 export { CityPopulation } from './domain/entities/city-population';
 export { NationalDish } from './domain/entities/national-dish';
 
 // Application
-export { ListCountryInformationUseCase } from './application/list-country-information';
+export { ListCountryInformation as ListCountryInformationUseCase } from './application/list-country-information';
 export type { CountryInformationResult } from './application/list-country-information';
 export { validateCountryInformationRequest } from './application/validator';
 
 // Application Interfaces
-export type { CountryApiRepository, CountryDataRepository } from './application/interfaces/repositories';
+export type {
+  CountryApiRepositoryInterface as CountryApiRepository,
+  CountryDatabaseRepositoryInterface as CountryDataRepository,
+} from './application/interfaces/repositories';
 
 // Infrastructure
 export { RestCountriesApiRepository } from './infrastructure/repositories/rest-countries-api-repository';
-export { CountryDBRepository as PostgresCountryDataRepository } from './infrastructure/repositories/country-repository';
+export { CountryDatabaseBRepository as PostgresCountryDataRepository } from './infrastructure/repositories/country-database-repository';
 export { makeDependencies } from './infrastructure/dependencies';
 export type { Dependencies } from './infrastructure/dependencies';
 export { makeConfig } from './infrastructure/config';

@@ -43,6 +43,7 @@ export interface CountryInformationResponse {
   nationalDish?: {
     countryCode: string;
     dishName: string;
+    imageUrl: string | null;
     description?: string;
   };
 }
