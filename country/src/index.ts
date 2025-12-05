@@ -1,5 +1,5 @@
 // Domain
-export { CountryFacts as CountryDetail, Currency, Coordinates, MapDetails } from './domain/entities/country-detail';
+export { CountryFacts as CountryDetail, Currency, Coordinates, MapDetails } from './domain/entities/country-facts';
 export { CityPopulation } from './domain/entities/city-population';
 export { NationalDish } from './domain/entities/national-dish';
 

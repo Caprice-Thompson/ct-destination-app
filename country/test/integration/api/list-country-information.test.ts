@@ -1,6 +1,6 @@
 import { listCountryInformationHandler, resetDependencies } from '@infrastructure/../api/list-country-information';
 import { makeDependencies } from '@infrastructure/dependencies';
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 import { APIGatewayEvent } from 'src';

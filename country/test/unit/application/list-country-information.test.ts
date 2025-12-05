@@ -3,7 +3,7 @@ import {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
 } from '@application/interfaces/repositories';
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 
@@ -14,7 +14,7 @@ describe('ListCountryInformationUseCase', () => {
 
   beforeEach(() => {
     mockApiRepository = {
-      getCountryDetailsByName: jest.fn(),
+      getCountryFacts: jest.fn(),
     };
 
     mockDataRepository = {
@@ -41,7 +41,7 @@ describe('ListCountryInformationUseCase', () => {
       const mockPopulation = new CityPopulation({ cityName: 'Madrid', countryCode: 'ES', population: 3223334 });
       const mockDish = new NationalDish('ES', 'Paella', null, 'A rice dish');
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockResolvedValue(mockPopulation);
       mockDataRepository.getNationalDish.mockResolvedValue(mockDish);
 
@@ -50,7 +50,7 @@ describe('ListCountryInformationUseCase', () => {
       expect(result.capitalPopulation).toEqual(mockPopulation);
       expect(result.nationalDish).toEqual(mockDish.toJSON());
 
-      expect(mockApiRepository.getCountryDetailsByName).toHaveBeenCalledWith('Spain');
+      expect(mockApiRepository.getCountryFacts).toHaveBeenCalledWith('Spain');
       expect(mockDataRepository.getTopCityPopulations).toHaveBeenCalledWith('Spain');
       expect(mockDataRepository.getNationalDish).toHaveBeenCalledWith('Spain');
     });
@@ -67,7 +67,7 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
@@ -90,7 +90,7 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
@@ -107,7 +107,7 @@ describe('ListCountryInformationUseCase', () => {
 
   describe('Error Handling', () => {
     it('should throw error when country is not found', async () => {
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(null);
+      mockApiRepository.getCountryFacts.mockResolvedValue(null);
 
       await expect(useCase.listCountryInfo('NonExistentCountry')).rejects.toThrow(
         'Country not found: NonExistentCountry',
@@ -118,7 +118,7 @@ describe('ListCountryInformationUseCase', () => {
     });
 
     it('should propagate API repository errors', async () => {
-      mockApiRepository.getCountryDetailsByName.mockRejectedValue(new Error('API connection failed'));
+      mockApiRepository.getCountryFacts.mockRejectedValue(new Error('API connection failed'));
 
       await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('API connection failed');
     });
@@ -135,7 +135,7 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockRejectedValue(new Error('Database error'));
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
@@ -154,7 +154,7 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockRejectedValue(new Error('Database error'));
 
@@ -175,7 +175,7 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('', ''),
       });
 
-      mockApiRepository.getCountryDetailsByName.mockResolvedValue(mockCountry);
+      mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 

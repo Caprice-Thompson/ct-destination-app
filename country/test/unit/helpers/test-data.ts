@@ -1,4 +1,4 @@
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 

@@ -1,5 +1,5 @@
 import { CountryApiRepositoryInterface } from '@application/interfaces/repositories';
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 import { logger } from '@infrastructure/logger';
 
 interface RestCountriesApiResponse {
@@ -34,7 +34,7 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
     this.baseUrl = baseUrl;
   }
 
-  async getCountryDetailsByName(countryName: string): Promise<CountryFacts | null> {
+  async getCountryFacts(countryName: string): Promise<CountryFacts | null> {
     try {
       const response = await fetch(`${this.baseUrl}/name/${encodeURIComponent(countryName)}`);
 

@@ -1,4 +1,4 @@
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-detail';
+import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 
 describe('Currency Value Object', () => {
   it('should create a currency with name and symbol', () => {
