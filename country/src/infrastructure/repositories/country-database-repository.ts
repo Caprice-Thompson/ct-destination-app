@@ -72,4 +72,68 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
       throw new Error(`Failed to fetch national dish: ${errorMessage}`);
     }
   }
+
+  async saveCityPopulation(cityPopulation: CityPopulation, countryName: string): Promise<void> {
+    try {
+      await this.dbClient.update({
+        query: `
+          INSERT INTO city_populations (city_name, country_code, country_name, population)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (city_name, country_name)
+          DO UPDATE SET 
+            population = EXCLUDED.population,
+            updated_at = CURRENT_TIMESTAMP
+        `,
+        bindVariables: [cityPopulation.cityName, cityPopulation.countryCode, countryName, cityPopulation.population],
+      });
+
+      logger.info('Successfully saved city population', {
+        cityName: cityPopulation.cityName,
+        countryName,
+        population: cityPopulation.population,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Error saving city population', {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw new Error(`Failed to save city population: ${errorMessage}`);
+    }
+  }
+
+  async saveNationalDish(nationalDish: NationalDish): Promise<void> {
+    try {
+      await this.dbClient.update({
+        query: `
+          INSERT INTO national_dishes (country_name, dish_name, image_url, description)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (country_name)
+          DO UPDATE SET 
+            dish_name = EXCLUDED.dish_name,
+            image_url = EXCLUDED.image_url,
+            description = EXCLUDED.description,
+            updated_at = CURRENT_TIMESTAMP
+        `,
+        bindVariables: [
+          nationalDish.countryCode,
+          nationalDish.dishName,
+          nationalDish.imageUrl,
+          nationalDish.description ?? null,
+        ],
+      });
+
+      logger.info('Successfully saved national dish', {
+        countryName: nationalDish.countryCode,
+        dishName: nationalDish.dishName,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Error saving national dish', {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw new Error(`Failed to save national dish: ${errorMessage}`);
+    }
+  }
 }

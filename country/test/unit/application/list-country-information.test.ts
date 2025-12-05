@@ -20,6 +20,8 @@ describe('ListCountryInformationUseCase', () => {
     mockDataRepository = {
       getTopCityPopulations: jest.fn(),
       getNationalDish: jest.fn(),
+      saveCityPopulation: jest.fn(),
+      saveNationalDish: jest.fn(),
     };
 
     useCase = new ListCountryInformation(mockApiRepository, mockDataRepository);

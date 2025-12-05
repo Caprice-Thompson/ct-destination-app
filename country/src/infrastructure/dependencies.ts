@@ -1,9 +1,12 @@
 import { ListCountryInformation } from '@application/list-country-information';
+import { IngestCountryData } from '@application/ingest-country-data';
 import type {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
+  PopulationApiRepositoryInterface,
 } from '@application/interfaces/repositories';
 import { RestCountriesApiRepository } from './repositories/rest-countries-api-repository';
+import { PopulationApiRepository } from './repositories/population-api-repository';
 import { CountryDatabaseBRepository } from './repositories/country-database-repository';
 import { rdsClient, type DbClient } from './repositories/db/rds_client';
 import { makeConfig, type ApplicationConfig } from './config';
@@ -12,23 +15,33 @@ export interface Dependencies {
   config: ApplicationConfig;
   rdsClient: DbClient;
   countryApiRepository: CountryApiRepositoryInterface;
+  populationApiRepository: PopulationApiRepositoryInterface;
   countryDataRepository: CountryDatabaseRepositoryInterface;
   listCountryInformationUseCase: ListCountryInformation;
+  ingestCountryDataUseCase: IngestCountryData;
 }
 
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
   const dbClient = await makeRdsClient(config);
   const countryApiRepository = makeCountryApiRepository(config);
+  const populationApiRepository = makePopulationApiRepository(config);
   const countryDataRepository = makeCountryDataRepository(dbClient);
   const listCountryInformationUseCase = makeListCountryInformationUseCase(countryApiRepository, countryDataRepository);
+  const ingestCountryDataUseCase = makeIngestCountryDataUseCase(
+    countryApiRepository,
+    populationApiRepository,
+    countryDataRepository,
+  );
 
   return {
     config,
     rdsClient: dbClient,
     countryApiRepository,
+    populationApiRepository,
     countryDataRepository,
     listCountryInformationUseCase,
+    ingestCountryDataUseCase,
   };
 }
 
@@ -50,6 +63,10 @@ function makeCountryApiRepository(config: ApplicationConfig): CountryApiReposito
   return new RestCountriesApiRepository(config.api.restCountriesUrl);
 }
 
+function makePopulationApiRepository(config: ApplicationConfig): PopulationApiRepositoryInterface {
+  return new PopulationApiRepository(config.api.populationApiUrl);
+}
+
 function makeCountryDataRepository(dbClient: DbClient): CountryDatabaseRepositoryInterface {
   return new CountryDatabaseBRepository(dbClient);
 }
@@ -59,4 +76,12 @@ function makeListCountryInformationUseCase(
   countryDataRepository: CountryDatabaseRepositoryInterface,
 ): ListCountryInformation {
   return new ListCountryInformation(countryApiRepository, countryDataRepository);
+}
+
+function makeIngestCountryDataUseCase(
+  countryApiRepository: CountryApiRepositoryInterface,
+  populationApiRepository: PopulationApiRepositoryInterface,
+  countryDataRepository: CountryDatabaseRepositoryInterface,
+): IngestCountryData {
+  return new IngestCountryData(countryApiRepository, populationApiRepository, countryDataRepository);
 }
