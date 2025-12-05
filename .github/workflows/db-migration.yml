@@ -8,7 +8,7 @@ on:
 jobs:
   run-migrations:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,10 +22,7 @@ jobs:
         run: |
           cd country
           chmod +x runMigrations.sh
-          DB_HOST=${{ secrets.PROD_DB_HOST }} \
-          DB_USER=${{ secrets.PROD_DB_USER }} \
-          DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }} \
-          DB_NAME=${{ secrets.PROD_DB_NAME }} \
           ./runMigrations.sh
         env:
-          NODE_ENV: production 
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          NODE_ENV: production
