@@ -52,8 +52,6 @@ jobs:
       - name: Deploy to AWS Lambda
         working-directory: ./country
         run: |
-          aws lambda update-function-code \
-            --function-name ${{ secrets.LIST_COUNTRY_INFORMATION_LAMBDA }} \
-            --zip-file fileb://lambda-function.zip
+          aws lambda update-function-code --function-name=listCountryInformationHandler --s3-bucket destination-lambda-deploy-storage --s3-key lambda-function.zip
 
 
