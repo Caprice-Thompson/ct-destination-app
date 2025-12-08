@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "db:start": "cd .. && docker-compose up -d postgres",
     "db:stop": "cd .. && docker-compose stop postgres",
     "db:restart": "cd .. && docker-compose restart postgres",
