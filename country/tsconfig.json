@@ -12,7 +12,7 @@
     "lib": ["esnext", "dom"],
     "module": "commonjs",
     "outDir": "./dist",
-    "types": ["node", "jest"],
+    "types": ["node"],
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
