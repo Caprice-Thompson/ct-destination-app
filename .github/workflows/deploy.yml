@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Lambda Function
 
 on:
   push:
@@ -22,14 +22,11 @@ jobs:
           cache: "npm"
           cache-dependency-path: country/package-lock.json
 
-      - name: Install dependencies
-        working-directory: ./country
-        run: npm ci --production
-
-      - name: Build
+      - name: Install dependencies and Build
         working-directory: ./country
         run: |
-          npx tsc --noEmit -p tsconfig.build.json
+          npm install
+          npm run build
           echo "Build completed successfully"
 
       - name: Package Lambda function
