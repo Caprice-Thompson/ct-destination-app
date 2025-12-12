@@ -7,12 +7,9 @@ export interface CountryApiRepositoryInterface {
 }
 
 export interface CountryDatabaseRepositoryInterface {
-  getTopCityPopulations(countryName: string): Promise<CityPopulation | null>;
   getNationalDish(countryName: string): Promise<NationalDish | null>;
-  saveCityPopulation(cityPopulation: CityPopulation, countryName: string): Promise<void>;
   saveNationalDish(nationalDish: NationalDish): Promise<void>;
 }
-// trade off
 export interface PopulationApiRepositoryInterface {
-  getTopCityPopulations(countryName: string): Promise<CityPopulation | null>;
+  getTopCityPopulations(countryName: string): Promise<CityPopulation[]>;
 }

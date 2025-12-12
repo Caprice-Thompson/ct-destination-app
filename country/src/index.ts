@@ -6,8 +6,6 @@ export { NationalDish } from './domain/entities/national-dish';
 // Application
 export { ListCountryInformation as ListCountryInformationUseCase } from './application/list-country-information';
 export type { CountryInformationResult } from './application/list-country-information';
-export { IngestCountryData as IngestCountryDataUseCase } from './application/ingest-country-data';
-export type { IngestCountryDataResult } from './application/ingest-country-data';
 export { validateCountryInformationRequest } from './application/validator';
 
 // Application Interfaces
@@ -30,8 +28,6 @@ export type { DbClient } from './infrastructure/repositories/db/rds_client';
 
 // API Layer
 export { listCountryInformationHandler } from './api/list-country-information';
-export { ingestCountryDataHandler } from './api/ingest-country-data';
-export type { EventBridgeEvent, IngestCountryDataResponse } from './api/ingest-country-data';
 
 // Types
 export type {

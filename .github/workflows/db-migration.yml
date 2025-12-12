@@ -1,28 +1,131 @@
 name: Database Migrations
 
 on:
+  workflow_dispatch:
+    inputs:
+      migration_action:
+        description: "Migration action"
+        required: true
+        default: "migrate"
+        type: choice
+        options:
+          - migrate
+          - status
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "country/src/infrastructure/repositories/db/migrations/**"
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
 
 jobs:
-  run-migrations:
+  migrate:
+    name: Run Database Migrations
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: country/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./country
+        run: npm ci --legacy-peer-deps
 
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
+          psql --version
+          echo "PostgreSQL client installed"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get RDS endpoint from AWS
+        id: rds
+        run: |
+          DB_IDENTIFIER="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-db"
+
+          echo "Looking for RDS instance: ${DB_IDENTIFIER}"
+          RDS_ENDPOINT=$(aws rds describe-db-instances \
+            --db-instance-identifier ${DB_IDENTIFIER} \
+            --query 'DBInstances[0].Endpoint.Address' \
+            --output text)
+
+          DB_NAME=$(aws rds describe-db-instances \
+            --db-instance-identifier ${DB_IDENTIFIER} \
+            --query 'DBInstances[0].DBName' \
+            --output text)
+
+          echo "rds_endpoint=${RDS_ENDPOINT}" >> $GITHUB_OUTPUT
+          echo "db_name=${DB_NAME}" >> $GITHUB_OUTPUT
+          echo "Found RDS endpoint: ${RDS_ENDPOINT}"
+
+      - name: Build DATABASE_URL
+        id: db_url
+        run: |
+          DB_USERNAME="${{ secrets.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          RDS_ENDPOINT="${{ steps.rds.outputs.rds_endpoint }}"
+          DB_NAME="${{ steps.rds.outputs.db_name }}"
+
+          DATABASE_URL="postgresql://${DB_USERNAME}:${DB_PASSWORD}@${RDS_ENDPOINT}/${DB_NAME}"
+          echo "::add-mask::${DATABASE_URL}"
+          echo "database_url=${DATABASE_URL}" >> $GITHUB_OUTPUT
+          echo "Database URL configured"
+
+      - name: Check migration status
+        working-directory: ./country
+        run: |
+          chmod +x runMigrations.sh
+          echo "Checking current migration status..."
+          npm run db:status || echo "No migrations applied yet"
+        env:
+          DATABASE_URL: ${{ steps.db_url.outputs.database_url }}
+          NODE_ENV: production
 
       - name: Run migrations
+        if: github.event.inputs.migration_action != 'status'
+        working-directory: ./country
         run: |
-          cd country
-          chmod +x runMigrations.sh
+          echo "Running database migrations..."
           ./runMigrations.sh
+          echo "Migrations completed"
         env:
-          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          DATABASE_URL: ${{ steps.db_url.outputs.database_url }}
           NODE_ENV: production
+
+      - name: Verify migrations
+        working-directory: ./country
+        run: |
+          echo "Verifying migrations..."
+          npm run db:status
+          echo "Verification complete"
+        env:
+          DATABASE_URL: ${{ steps.db_url.outputs.database_url }}
+          NODE_ENV: production
+
+      - name: Create migration summary
+        run: |
+          echo "## Database Migration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **RDS Endpoint**: ${{ steps.rds.outputs.rds_endpoint }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Database**: ${{ steps.rds.outputs.db_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ github.event.inputs.migration_action || 'migrate' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Success" >> $GITHUB_STEP_SUMMARY

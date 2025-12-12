@@ -43,7 +43,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       name: 'country-service',
     },
     api: {
-      restCountriesUrl: parsedEnv.REST_COUNTRIES_API_URL || 'https://restcountries.com/v3.1',
+      restCountriesUrl: parsedEnv.REST_COUNTRIES_API_URL ?? '',
       populationApiUrl: parsedEnv.POPULATION_API_URL ?? '',
     },
     isTestEnv,

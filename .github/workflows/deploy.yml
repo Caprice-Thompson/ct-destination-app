@@ -3,11 +3,20 @@ name: Deploy Lambda Function
 on:
   push:
     branches: [main]
+    paths:
+      - "country/**"
+      - "!country/test/**"
+      - "!country/coverage/**"
   workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
 
 jobs:
   deploy:
-    name: Deploy to AWS Lambda
+    name: Deploy Lambda Functions
     runs-on: ubuntu-latest
     environment: production
 
@@ -25,28 +34,59 @@ jobs:
       - name: Install dependencies and Build
         working-directory: ./country
         run: |
-          npm install
+          npm ci --legacy-peer-deps
           npm run build
           echo "Build completed successfully"
 
       - name: Package Lambda function
         working-directory: ./country
         run: |
-          mkdir -p dist
-          cp -r src dist/
-          cp -r node_modules dist/
-          cp package.json dist/
           cd dist
-          zip -r ../lambda-function.zip .
+          zip -r ../lambda-package.zip .
+          cd ..
+          echo "Lambda package created: $(du -h lambda-package.zip | cut -f1)"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to AWS Lambda
+      - name: Update Lambda - List Country Information
         working-directory: ./country
         run: |
-          aws lambda update-function-code --function-name=listCountryInformationHandler --s3-bucket destination-lambda-deploy-storage --s3-key lambda-function.zip
+          FUNCTION_NAME="list-country-information"
+
+          echo "Updating function: ${FUNCTION_NAME}"
+          aws lambda update-function-code \
+            --function-name ${FUNCTION_NAME} \
+            --zip-file fileb://lambda-package.zip \
+            --publish
+
+          echo "${FUNCTION_NAME} updated successfully"
+
+      - name: Wait for Lambda updates to complete
+        run: |
+          echo "Waiting for Lambda functions to be ready..."
+          sleep 10
+
+      - name: Get function ARN
+        id: function
+        run: |
+          FUNCTION_NAME="list-country-information"
+
+          FUNCTION_ARN=$(aws lambda get-function --function-name ${FUNCTION_NAME} --query 'Configuration.FunctionArn' --output text)
+
+          echo "function_arn=${FUNCTION_ARN}" >> $GITHUB_OUTPUT
+
+      - name: Create deployment summary
+        run: |
+          echo "## Lambda Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployed Functions" >> $GITHUB_STEP_SUMMARY
+          echo "- **List Country Information**: \`list-country-information\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **ARN**: ${{ steps.function.outputs.function_arn }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Region" >> $GITHUB_STEP_SUMMARY
+          echo "- **AWS Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY

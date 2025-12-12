@@ -29,7 +29,7 @@ export class PopulationApiRepository implements PopulationApiRepositoryInterface
     this.baseUrl = baseUrl;
   }
 
-  async getTopCityPopulations(countryName: string): Promise<CityPopulation | null> {
+  async getTopCityPopulations(countryName: string): Promise<CityPopulation[]> {
     const params = new URLSearchParams({
       order_by: 'population DESC',
       limit: '4',
@@ -46,11 +46,13 @@ export class PopulationApiRepository implements PopulationApiRepositoryInterface
 
       const data: PopulationAPIResponse = await response.json();
 
-      return new CityPopulation({
-        cityName: data.results[0].name,
-        countryCode: data.results[0].cou_name_en,
-        population: data.results[0].population,
-      });
+      return data.results.map(
+        (result) =>
+          new CityPopulation({
+            cityName: result.name,
+            population: result.population,
+          }),
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.debug('Error fetching top city populations from Population API', {

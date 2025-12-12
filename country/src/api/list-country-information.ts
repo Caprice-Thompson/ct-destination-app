@@ -23,7 +23,7 @@ export const listCountryInformationHandler = async (event: APIGatewayEvent): Pro
 
     logger.info('Successfully retrieved country information', {
       countryName: query.countryName,
-      hasPopulation: !!response.capitalPopulation,
+      hasPopulation: !!response.cityPopulation,
       hasDish: !!response.nationalDish,
     });
 

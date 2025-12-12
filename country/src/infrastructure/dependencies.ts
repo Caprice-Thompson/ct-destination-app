@@ -1,5 +1,4 @@
 import { ListCountryInformation } from '@application/list-country-information';
-import { IngestCountryData } from '@application/ingest-country-data';
 import type {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
@@ -18,7 +17,6 @@ export interface Dependencies {
   populationApiRepository: PopulationApiRepositoryInterface;
   countryDataRepository: CountryDatabaseRepositoryInterface;
   listCountryInformationUseCase: ListCountryInformation;
-  ingestCountryDataUseCase: IngestCountryData;
 }
 
 export async function makeDependencies(): Promise<Dependencies> {
@@ -27,11 +25,10 @@ export async function makeDependencies(): Promise<Dependencies> {
   const countryApiRepository = makeCountryApiRepository(config);
   const populationApiRepository = makePopulationApiRepository(config);
   const countryDataRepository = makeCountryDataRepository(dbClient);
-  const listCountryInformationUseCase = makeListCountryInformationUseCase(countryApiRepository, countryDataRepository);
-  const ingestCountryDataUseCase = makeIngestCountryDataUseCase(
+  const listCountryInformationUseCase = makeListCountryInformationUseCase(
     countryApiRepository,
-    populationApiRepository,
     countryDataRepository,
+    populationApiRepository,
   );
 
   return {
@@ -41,7 +38,6 @@ export async function makeDependencies(): Promise<Dependencies> {
     populationApiRepository,
     countryDataRepository,
     listCountryInformationUseCase,
-    ingestCountryDataUseCase,
   };
 }
 
@@ -74,14 +70,7 @@ function makeCountryDataRepository(dbClient: DbClient): CountryDatabaseRepositor
 function makeListCountryInformationUseCase(
   countryApiRepository: CountryApiRepositoryInterface,
   countryDataRepository: CountryDatabaseRepositoryInterface,
-): ListCountryInformation {
-  return new ListCountryInformation(countryApiRepository, countryDataRepository);
-}
-
-function makeIngestCountryDataUseCase(
-  countryApiRepository: CountryApiRepositoryInterface,
   populationApiRepository: PopulationApiRepositoryInterface,
-  countryDataRepository: CountryDatabaseRepositoryInterface,
-): IngestCountryData {
-  return new IngestCountryData(countryApiRepository, populationApiRepository, countryDataRepository);
+): ListCountryInformation {
+  return new ListCountryInformation(countryApiRepository, countryDataRepository, populationApiRepository);
 }

@@ -2,6 +2,7 @@ import { ListCountryInformation } from '@application/list-country-information';
 import {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
+  PopulationApiRepositoryInterface,
 } from '@application/interfaces/repositories';
 import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
 import { CityPopulation } from '@domain/entities/city-population';
@@ -10,6 +11,7 @@ import { NationalDish } from '@domain/entities/national-dish';
 describe('ListCountryInformationUseCase', () => {
   let mockApiRepository: jest.Mocked<CountryApiRepositoryInterface>;
   let mockDataRepository: jest.Mocked<CountryDatabaseRepositoryInterface>;
+  let mockPopulationRepository: jest.Mocked<PopulationApiRepositoryInterface>;
   let useCase: ListCountryInformation;
 
   beforeEach(() => {
@@ -18,13 +20,15 @@ describe('ListCountryInformationUseCase', () => {
     };
 
     mockDataRepository = {
-      getTopCityPopulations: jest.fn(),
       getNationalDish: jest.fn(),
-      saveCityPopulation: jest.fn(),
       saveNationalDish: jest.fn(),
     };
 
-    useCase = new ListCountryInformation(mockApiRepository, mockDataRepository);
+    mockPopulationRepository = {
+      getTopCityPopulations: jest.fn(),
+    };
+
+    useCase = new ListCountryInformation(mockApiRepository, mockDataRepository, mockPopulationRepository);
   });
 
   describe('Successful Execution', () => {
@@ -40,20 +44,25 @@ describe('ListCountryInformationUseCase', () => {
         maps: new MapDetails('https://google.com', 'https://osm.org'),
       });
 
-      const mockPopulation = new CityPopulation({ cityName: 'Madrid', countryCode: 'ES', population: 3223334 });
+      const mockPopulation = [
+        new CityPopulation({ cityName: 'Madrid', population: 3223334 }),
+        new CityPopulation({ cityName: 'Barcelona', population: 1620343 }),
+      ];
       const mockDish = new NationalDish('ES', 'Paella', null, 'A rice dish');
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockResolvedValue(mockPopulation);
       mockDataRepository.getNationalDish.mockResolvedValue(mockDish);
+      mockPopulationRepository.getTopCityPopulations.mockResolvedValue(mockPopulation);
 
       const result = await useCase.listCountryInfo('Spain');
       expect(result.countryDetails).toEqual(mockCountry.toJSON());
-      expect(result.capitalPopulation).toEqual(mockPopulation);
+      expect(result.cityPopulation).toEqual([
+        { cityName: 'Madrid', population: 3223334 },
+        { cityName: 'Barcelona', population: 1620343 },
+      ]);
       expect(result.nationalDish).toEqual(mockDish.toJSON());
 
       expect(mockApiRepository.getCountryFacts).toHaveBeenCalledWith('Spain');
-      expect(mockDataRepository.getTopCityPopulations).toHaveBeenCalledWith('Spain');
       expect(mockDataRepository.getNationalDish).toHaveBeenCalledWith('Spain');
     });
 
@@ -70,13 +79,13 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
+      mockPopulationRepository.getTopCityPopulations.mockResolvedValue([]);
 
       const result = await useCase.listCountryInfo('Test Country');
 
       expect(result.countryDetails).toEqual(mockCountry.toJSON());
-      expect(result.capitalPopulation).toBeUndefined();
+      expect(result.cityPopulation).toBeUndefined();
       expect(result.nationalDish).toBeUndefined();
     });
 
@@ -93,14 +102,13 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
+      mockPopulationRepository.getTopCityPopulations.mockResolvedValue([]);
 
       const startTime = Date.now();
       await useCase.listCountryInfo('France');
       const duration = Date.now() - startTime;
 
-      expect(mockDataRepository.getTopCityPopulations).toHaveBeenCalled();
       expect(mockDataRepository.getNationalDish).toHaveBeenCalled();
 
       expect(duration).toBeLessThan(100);
@@ -115,7 +123,6 @@ describe('ListCountryInformationUseCase', () => {
         'Country not found: NonExistentCountry',
       );
 
-      expect(mockDataRepository.getTopCityPopulations).not.toHaveBeenCalled();
       expect(mockDataRepository.getNationalDish).not.toHaveBeenCalled();
     });
 
@@ -138,7 +145,7 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockRejectedValue(new Error('Database error'));
+      mockPopulationRepository.getTopCityPopulations.mockRejectedValue(new Error('Database error'));
       mockDataRepository.getNationalDish.mockResolvedValue(null);
 
       await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('Database error');
@@ -157,7 +164,6 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockRejectedValue(new Error('Database error'));
 
       await expect(useCase.listCountryInfo('Spain')).rejects.toThrow('Database error');
@@ -178,8 +184,8 @@ describe('ListCountryInformationUseCase', () => {
       });
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
-      mockDataRepository.getTopCityPopulations.mockResolvedValue(null);
       mockDataRepository.getNationalDish.mockResolvedValue(null);
+      mockPopulationRepository.getTopCityPopulations.mockResolvedValue([]);
 
       const result = await useCase.listCountryInfo('Switzerland');
 

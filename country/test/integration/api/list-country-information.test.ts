@@ -1,7 +1,6 @@
 import { listCountryInformationHandler, resetDependencies } from '@infrastructure/../api/list-country-information';
 import { makeDependencies } from '@infrastructure/dependencies';
 import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
-import { CityPopulation } from '@domain/entities/city-population';
 import { NationalDish } from '@domain/entities/national-dish';
 import { APIGatewayEvent } from 'src';
 
@@ -52,13 +51,13 @@ describe('listCountryInformationHandler', () => {
         maps: new MapDetails('https://google.com', 'https://osm.org'),
       });
 
-      const mockPopulation = new CityPopulation({ cityName: 'Madrid', countryCode: 'ES', population: 3223334 });
+      const mockPopulation = [{ cityName: 'Madrid', population: 3223334 }];
       const mockDish = new NationalDish('ES', 'Paella', 'A rice dish');
 
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry.toJSON(),
-        capitalPopulation: mockPopulation,
+        cityPopulation: mockPopulation,
         nationalDish: mockDish,
       });
 
@@ -73,7 +72,7 @@ describe('listCountryInformationHandler', () => {
       const body = JSON.parse(response.body);
       expect(body.countryDetails.countryCode).toBe('ES');
       expect(body.countryDetails.countryName).toBe('Spain');
-      expect(body.capitalPopulation.population).toBe(3223334);
+      expect(body.cityPopulation[0].population).toBe(3223334);
       expect(body.nationalDish.dishName).toBe('Paella');
     });
 
@@ -92,8 +91,8 @@ describe('listCountryInformationHandler', () => {
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
-        capitalPopulation: null,
-        nationalDish: null,
+        cityPopulation: undefined,
+        nationalDish: undefined,
       });
 
       const event: APIGatewayEvent = {
@@ -105,8 +104,8 @@ describe('listCountryInformationHandler', () => {
 
       const body = JSON.parse(response.body);
       expect(body.countryDetails.countryCode).toBe('XX');
-      expect(body.capitalPopulation).toBeNull();
-      expect(body.nationalDish).toBeNull();
+      expect(body.cityPopulation).toBeUndefined();
+      expect(body.nationalDish).toBeUndefined();
     });
   });
 
@@ -281,8 +280,8 @@ describe('listCountryInformationHandler', () => {
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
-        capitalPopulation: null,
-        nationalDish: null,
+        cityPopulation: undefined,
+        nationalDish: undefined,
       });
 
       const event: APIGatewayEvent = {
@@ -312,8 +311,8 @@ describe('listCountryInformationHandler', () => {
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
-        capitalPopulation: null,
-        nationalDish: null,
+        cityPopulation: undefined,
+        nationalDish: undefined,
       });
 
       const event: APIGatewayEvent = {
@@ -341,8 +340,8 @@ describe('listCountryInformationHandler', () => {
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
         countryDetails: mockCountry,
-        capitalPopulation: null,
-        nationalDish: null,
+        cityPopulation: undefined,
+        nationalDish: undefined,
       });
 
       const event: APIGatewayEvent = {

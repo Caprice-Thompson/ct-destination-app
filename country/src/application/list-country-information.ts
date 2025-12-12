@@ -1,4 +1,8 @@
-import { CountryApiRepositoryInterface, CountryDatabaseRepositoryInterface } from './interfaces/repositories';
+import {
+  CountryApiRepositoryInterface,
+  CountryDatabaseRepositoryInterface,
+  PopulationApiRepositoryInterface,
+} from './interfaces/repositories';
 
 export interface CountryInformationResult {
   countryDetails: {
@@ -20,11 +24,11 @@ export interface CountryInformationResult {
       openStreetMaps: string;
     };
   };
-  capitalPopulation?: {
+  cityPopulation?: {
     cityName: string;
-    countryCode: string;
     population: number;
-  };
+  }[];
+
   nationalDish?: {
     countryCode: string;
     dishName: string;
@@ -37,6 +41,7 @@ export class ListCountryInformation {
   constructor(
     private readonly countryApiRepository: CountryApiRepositoryInterface,
     private readonly countryDatabaseRepository: CountryDatabaseRepositoryInterface,
+    private readonly populationApiRepository: PopulationApiRepositoryInterface,
   ) {}
 
   async listCountryInfo(countryName: string): Promise<CountryInformationResult> {
@@ -46,9 +51,9 @@ export class ListCountryInformation {
       throw new Error(`Country not found: ${countryName}`);
     }
 
-    const [capitalPopulation, nationalDish] = await Promise.all([
-      this.countryDatabaseRepository.getTopCityPopulations(countryName),
+    const [nationalDish, cityPopulations] = await Promise.all([
       this.countryDatabaseRepository.getNationalDish(countryName),
+      this.populationApiRepository.getTopCityPopulations(countryName),
     ]);
 
     return {
@@ -71,13 +76,13 @@ export class ListCountryInformation {
           openStreetMaps: countryFacts.mapLinks?.openStreetMaps ?? '',
         },
       },
-      capitalPopulation: capitalPopulation
-        ? {
-            cityName: capitalPopulation.cityName,
-            countryCode: capitalPopulation.countryCode,
-            population: capitalPopulation.population,
-          }
-        : undefined,
+      cityPopulation:
+        cityPopulations && cityPopulations.length > 0
+          ? cityPopulations.map((cp) => ({
+              cityName: cp.cityName,
+              population: cp.population,
+            }))
+          : undefined,
       nationalDish: nationalDish
         ? {
             countryCode: nationalDish.countryCode,
