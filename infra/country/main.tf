@@ -11,6 +11,15 @@ terraform {
       version = "~> 2.4"
     }
   }
+
+  # Remote backend for state management
+  backend "s3" {
+    bucket         = "destination-app-production-terraform-state"
+    key            = "country/terraform.tfstate"
+    region         = "eu-west-2"
+    dynamodb_table = "destination-app-production-terraform-locks"
+    encrypt        = true
+  }
 }
 
 provider "aws" {

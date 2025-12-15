@@ -1,0 +1,84 @@
+name: Setup Terraform Backend
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
+
+jobs:
+  setup-backend:
+    name: Setup Terraform Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.6.0"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create tfvars
+        working-directory: ./infra/backend
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region   = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment  = "${{ env.ENVIRONMENT }}"
+          EOF
+
+      - name: Initialize Terraform
+        working-directory: ./infra/backend
+        run: tofu init
+
+      - name: Plan Infrastructure
+        working-directory: ./infra/backend
+        run: tofu plan
+
+      - name: Apply Infrastructure
+        if: github.event.inputs.action == 'apply'
+        working-directory: ./infra/backend
+        run: |
+          tofu apply -auto-approve
+          
+          echo "## Terraform Backend Setup Complete! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Created Resources:" >> $GITHUB_STEP_SUMMARY
+          echo "- **S3 Bucket**: \`$(tofu output -raw s3_bucket_name)\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **DynamoDB Table**: \`$(tofu output -raw dynamodb_table_name)\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Backend Configuration:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`hcl" >> $GITHUB_STEP_SUMMARY
+          tofu output -raw backend_config >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Your CI/CD pipelines will now use remote state storage!" >> $GITHUB_STEP_SUMMARY
+
+      - name: Destroy Infrastructure
+        if: github.event.inputs.action == 'destroy'
+        working-directory: ./infra/backend
+        run: |
+          echo "⚠️  WARNING: This will destroy the Terraform backend!"
+          echo "Make sure all other infrastructure is already destroyed."
+          tofu destroy -auto-approve
+
