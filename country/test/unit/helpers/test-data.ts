@@ -1,6 +1,4 @@
 import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
-import { CityPopulation } from '@domain/entities/city-population';
-import { NationalDish } from '@domain/entities/national-dish';
 
 /**
  * Test data factory functions for creating domain entities
@@ -29,23 +27,6 @@ export const createTestCountry = (
     maps: new MapDetails('https://goo.gl/maps/spain', 'https://osm.org/spain'),
     ...overrides,
   });
-};
-
-export const createTestCityPopulation = (
-  cityName = 'Madrid',
-  countryCode = 'ES',
-  population = 3223334,
-): CityPopulation => {
-  return new CityPopulation({ cityName, countryCode, population });
-};
-
-export const createTestNationalDish = (
-  countryCode = 'ES',
-  dishName = 'Paella',
-  imageUrl: string | null = null,
-  description = 'A traditional Spanish rice dish',
-): NationalDish => {
-  return new NationalDish(countryCode, dishName, imageUrl, description);
 };
 
 export const mockRestCountriesApiResponse = (countryName: string) => {
