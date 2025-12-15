@@ -138,10 +138,10 @@ jobs:
         id: deploy
         working-directory: ./infra/country
         run: |
-          terraform init
-          terraform apply -auto-approve
+          tofu init
+          tofu apply -auto-approve
 
-          API_URL=$(terraform output -raw country_information_api_gateway_url 2>/dev/null || echo "pending")
+          API_URL=$(tofu output -raw country_information_api_gateway_url 2>/dev/null || echo "pending")
 
           echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
 
