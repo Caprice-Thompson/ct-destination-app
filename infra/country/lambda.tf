@@ -142,7 +142,8 @@ resource "aws_lambda_function" "list_country_information" {
 }
 
 resource "aws_ssm_parameter" "list_country_information_lambda" {
-  name  = "/${var.service_name}/main/LIST_COUNTRY_INFORMATION_LAMBDA"
-  type  = "String"
-  value = aws_lambda_function.list_country_information.function_name
+  name      = "/${var.service_name}/main/LIST_COUNTRY_INFORMATION_LAMBDA"
+  type      = "String"
+  value     = aws_lambda_function.list_country_information.function_name
+  overwrite = true
 }
