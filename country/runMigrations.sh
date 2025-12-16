@@ -65,15 +65,6 @@ validate_sql_file() {
     if [[ ! "$file" =~ \.sql$ ]]; then
         error "Not a SQL file: $file"
     fi
-# Function to validate SQL file
-validate_sql_file() {
-    local file=$1
-    if [[ ! -f "$file" ]]; then
-        error "File not found: $file"
-    fi
-    if [[ ! "$file" =~ \.sql$ ]]; then
-        error "Not a SQL file: $file"
-    fi
 }
 
 # Function to create migrations table if it doesn't exist
