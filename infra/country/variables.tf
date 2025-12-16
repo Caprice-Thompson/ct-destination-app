@@ -40,7 +40,7 @@ variable "db_password" {
 variable "db_name" {
   description = "Database name"
   type        = string
-  default     = "county"
+  default     = "county-db"
 }
 
 variable "node_env" {

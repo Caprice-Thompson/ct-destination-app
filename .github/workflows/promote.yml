@@ -141,10 +141,6 @@ jobs:
           tofu init
           tofu apply -auto-approve
 
-          API_URL=$(tofu output -raw country_information_api_gateway_url 2>/dev/null || echo "pending")
-
-          echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
-
   migrate:
     name: Run DB Migrations
     runs-on: ubuntu-latest
