@@ -107,35 +107,10 @@ EOF
     fi
 }
 
-# Function to ensure database exists
-ensure_database_exists() {
-    log "Checking if database '$DB_NAME' exists..."
-    
-    # Try to connect to the target database
-    if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT 1" > /dev/null 2>&1; then
-        log "Database '$DB_NAME' exists"
-        return 0
-    fi
-    
-    log "Database '$DB_NAME' does not exist. Creating it..."
-    
-    # Connect to default 'postgres' database to create our database
-    PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -c "CREATE DATABASE $DB_NAME;" > /dev/null 2>&1
-    
-    if [ $? -eq 0 ]; then
-        log "Successfully created database '$DB_NAME'"
-    else
-        error "Failed to create database '$DB_NAME'"
-    fi
-}
-
 # Main execution
 main() {
     log "Starting database migrations..."
     log "Database: $DB_NAME @ $DB_HOST:$DB_PORT"
-    
-    # Ensure database exists (create if needed)
-    ensure_database_exists
     
     # Validate database connection
     log "Testing database connection..."
