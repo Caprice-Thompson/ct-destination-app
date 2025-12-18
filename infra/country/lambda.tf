@@ -23,8 +23,17 @@ data "aws_ssm_parameter" "population_api_url" {
 # Build Lambda deployment packages
 data "archive_file" "list_country_information" {
   type        = "zip"
-  source_dir  = "${path.module}/../../country/dist"
   output_path = "${path.module}/.terraform/lambda-packages/list-country-information.zip"
+
+  source {
+    content  = file("${path.module}/../../country/dist/list-country-information.js")
+    filename = "list-country-information.js"
+  }
+
+  source {
+    content  = file("${path.module}/../../country/dist/list-country-information.js.map")
+    filename = "list-country-information.js.map"
+  }
 }
 
 # IAM Role for Lambda function
@@ -108,7 +117,7 @@ resource "aws_lambda_function" "list_country_information" {
   filename         = data.archive_file.list_country_information.output_path
   function_name    = "list-country-information"
   role             = aws_iam_role.list_country_information_lambda_role.arn
-  handler          = "index.listCountryInformationHandler"
+  handler          = "list-country-information.listCountryInformationHandler"
   source_code_hash = data.archive_file.list_country_information.output_base64sha256
   runtime          = "nodejs20.x"
   timeout          = var.lambda_timeout

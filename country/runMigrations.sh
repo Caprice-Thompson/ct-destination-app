@@ -15,7 +15,7 @@ if [ "$ENVIRONMENT" = "production" ]; then
     # Fetch RDS credentials from AWS SSM Parameter Store
     DB_USER=$(aws ssm get-parameter --name "/county/main/db/db_username" --query "Parameter.Value" --output text)
     DB_PASSWORD=$(aws ssm get-parameter --name "/county/main/db/db_password" --with-decryption --query "Parameter.Value" --output text)
-    DB_HOST=$(aws ssm get-parameter --name "/county/main/db/RDS_ENDPOINT" --query "Parameter.Value" --output text)
+    DB_HOST=${DB_HOST:-$(aws ssm get-parameter --name "/county/main/db/RDS_ENDPOINT" --query "Parameter.Value" --output text)}
     DB_NAME=${DB_NAME:-"country"}
     DB_PORT=${DB_PORT:-5432}
     

@@ -107,8 +107,8 @@ jobs:
           ./runMigrations.sh
           echo "Migrations completed"
         env:
-          DATABASE_URL: ${{ steps.db_url.outputs.database_url }}
-          NODE_ENV: production
+          ENVIRONMENT: production
+          AWS_REGION: ${{ env.AWS_REGION }}
 
       - name: Verify migrations
         working-directory: ./country
