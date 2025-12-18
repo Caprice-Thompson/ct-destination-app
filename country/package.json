@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "esbuild src/api/*.ts --minify --bundle --target=es2020 --platform=node --sourcemap --outdir=dist --external:pg-native --external:@sentry/profiling-node",
     "db:start": "cd .. && docker-compose up -d postgres",
     "db:stop": "cd .. && docker-compose stop postgres",
     "db:restart": "cd .. && docker-compose restart postgres",
@@ -18,6 +18,7 @@
     "test:coverage": "jest --coverage"
   },
   "devDependencies": {
+    "esbuild": "^0.24.0",
     "@eslint/js": "^9.37.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^24.10.1",
