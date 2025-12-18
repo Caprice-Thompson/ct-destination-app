@@ -59,7 +59,7 @@ jobs:
       - name: Get RDS endpoint from AWS
         id: rds
         run: |
-          DB_IDENTIFIER="${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-db"
+          DB_IDENTIFIER=$(aws ssm get-parameter --name "/county/main/db/db_identifier" --query "Parameter.Value" --output text)
 
           echo "Looking for RDS instance: ${DB_IDENTIFIER}"
           RDS_ENDPOINT=$(aws rds describe-db-instances \

@@ -12,3 +12,15 @@ resource "aws_ssm_parameter" "api_gateway_url" {
     Environment = var.environment
   }
 }
+
+resource "aws_ssm_parameter" "db_identifier" {
+  name      = "/county/main/db/db_identifier"
+  type      = "String"
+  value     = var.db_identifier
+  overwrite = true
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-db-identifier"
+    Environment = var.environment
+  }
+}
