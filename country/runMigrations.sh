@@ -3,29 +3,53 @@
 # Exit if any command fails
 set -e
 
-# Load environment variables from .env.local if it exists
-if [ -f .env.local ]; then
-    export $(grep -v '^#' .env.local | xargs)
-fi
-
 # Configuration
 MIGRATIONS_PATH="./src/infrastructure/repositories/db/migrations"
 MIGRATIONS_TABLE="schema_migrations"
 EXCLUDE_PATH="prisma_migrations"
 
-# Parse DATABASE_URL to extract connection parameters
-if [ -z "$DATABASE_URL" ]; then
-    echo "ERROR: DATABASE_URL is not set"
-    exit 1
+# Check if running in production
+if [ "$ENVIRONMENT" = "production" ]; then
+    echo "Running in production mode - fetching credentials from AWS SSM Parameter Store"
+    
+    # Fetch RDS credentials from AWS SSM Parameter Store
+    DB_USER=$(aws ssm get-parameter --name "/county/main/db/db_username" --query "Parameter.Value" --output text)
+    DB_PASSWORD=$(aws ssm get-parameter --name "/county/main/db/db_password" --with-decryption --query "Parameter.Value" --output text)
+    DB_HOST=$(aws ssm get-parameter --name "/county/main/db/RDS_ENDPOINT" --query "Parameter.Value" --output text)
+    DB_NAME=${DB_NAME:-"country"}
+    DB_PORT=${DB_PORT:-5432}
+    
+    # Construct DATABASE_URL with SSL mode for production
+    DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+else
+    echo "Running in local mode - loading credentials from .env files"
+    
+    # Load environment variables from .env.local if it exists
+    if [ -f .env.local ]; then
+        export $(grep -v '^#' .env.local | xargs)
+    fi
+    
+    # Load environment variables from .env if it exists
+    if [ -f .env ]; then
+        export $(grep -v '^#' .env | xargs)
+    fi
+    
+    # Parse DATABASE_URL to extract connection parameters
+    if [ -z "$DATABASE_URL" ]; then
+        echo "ERROR: DATABASE_URL is not set"
+        exit 1
+    fi
 fi
 
-# Extract connection details from DATABASE_URL
-# Format: postgresql://user:password@host:port/database
-DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
-DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
-DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
-DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
+# Extract connection details from DATABASE_URL (for local mode)
+if [ "$ENVIRONMENT" != "production" ]; then
+    # Format: postgresql://user:password@host:port/database
+    DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+    DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+    DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
+    DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+    DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
+fi
 
 # Colors for output
 RED='\033[0;31m'

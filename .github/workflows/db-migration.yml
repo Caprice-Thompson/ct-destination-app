@@ -82,7 +82,7 @@ jobs:
           DB_USERNAME="${{ secrets.DB_USERNAME }}"
           DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
           RDS_ENDPOINT="${{ steps.rds.outputs.rds_endpoint }}"
-          DB_NAME="${{ steps.rds.outputs.db_name }}"
+          DB_NAME="${{ secrets.DB_NAME }}"
 
           DATABASE_URL="postgresql://${DB_USERNAME}:${DB_PASSWORD}@${RDS_ENDPOINT}/${DB_NAME}"
           echo "::add-mask::${DATABASE_URL}"

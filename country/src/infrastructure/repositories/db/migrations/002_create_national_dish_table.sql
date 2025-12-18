@@ -8,10 +8,10 @@ CREATE TABLE IF NOT EXISTS national_dish (
     image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(country)
+    UNIQUE(country_name)
 );
 
-CREATE INDEX IF NOT EXISTS idx_national_dish_country ON national_dish(country);
+CREATE INDEX IF NOT EXISTS idx_national_dish_country_name ON national_dish(country_name);
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
