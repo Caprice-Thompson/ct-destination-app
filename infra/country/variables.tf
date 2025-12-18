@@ -43,6 +43,12 @@ variable "db_name" {
   default     = "county"
 }
 
+variable "db_identifier" {
+  description = "db identifier name"
+  type        = string
+  default     = "country-db"
+}
+
 variable "node_env" {
   description = "Node environment"
   type        = string
