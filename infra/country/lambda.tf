@@ -24,16 +24,8 @@ data "aws_ssm_parameter" "population_api_url" {
 data "archive_file" "list_country_information" {
   type        = "zip"
   output_path = "${path.module}/.terraform/lambda-packages/list-country-information.zip"
-
-  source {
-    content  = file("${path.module}/../../country/dist/list-country-information.js")
-    filename = "list-country-information.js"
-  }
-
-  source {
-    content  = file("${path.module}/../../country/dist/list-country-information.js.map")
-    filename = "list-country-information.js.map"
-  }
+  source_dir  = "${path.module}/../../country/dist"
+  excludes    = ["*.test.js", "*.spec.js"]
 }
 
 # IAM Role for Lambda function
