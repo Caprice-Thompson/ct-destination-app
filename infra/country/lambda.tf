@@ -24,16 +24,8 @@ data "aws_ssm_parameter" "population_api_url" {
 data "archive_file" "list_country_information" {
   type        = "zip"
   output_path = "${path.module}/.terraform/lambda-packages/list-country-information.zip"
-
-  source {
-    content  = file("${path.module}/../../country/dist/list-country-information.js")
-    filename = "list-country-information.js"
-  }
-
-  source {
-    content  = file("${path.module}/../../country/dist/list-country-information.js.map")
-    filename = "list-country-information.js.map"
-  }
+  source_dir  = "${path.module}/../../country/dist"
+  excludes    = ["*.test.js", "*.spec.js"]
 }
 
 # IAM Role for Lambda function
@@ -115,7 +107,7 @@ resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
 # List Country Information Lambda Function
 resource "aws_lambda_function" "list_country_information" {
   filename         = data.archive_file.list_country_information.output_path
-  function_name    = "list-country-information"
+  function_name    = "${var.environment}-list-country-information"
   role             = aws_iam_role.list_country_information_lambda_role.arn
   handler          = "list-country-information.listCountryInformationHandler"
   source_code_hash = data.archive_file.list_country_information.output_base64sha256
