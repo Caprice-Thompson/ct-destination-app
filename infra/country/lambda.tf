@@ -94,7 +94,9 @@ resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
           "ssm:GetParameters"
         ]
         Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/county/main/*"
+          "arn:aws:ssm:${var.aws_region}:*:parameter/county/main/*",
+          data.aws_ssm_parameter.db_username.arn,
+          data.aws_ssm_parameter.db_password.arn
         ]
       },
       {
@@ -130,7 +132,11 @@ resource "aws_lambda_function" "list_country_information" {
 
   environment {
     variables = {
-      DATABASE_URL           = "postgresql://${data.aws_ssm_parameter.db_username.value}:${data.aws_ssm_parameter.db_password.value}@${data.aws_ssm_parameter.rds_endpoint.value}:5432/${var.db_name}"
+      DB_HOST                = data.aws_ssm_parameter.rds_endpoint.value
+      DB_PORT                = "5432"
+      DB_NAME                = var.db_name
+      DB_USERNAME_PARAM      = data.aws_ssm_parameter.db_username.name
+      DB_PASSWORD_PARAM      = data.aws_ssm_parameter.db_password.name
       NODE_ENV               = var.node_env
       LOG_LEVEL              = "info"
       REST_COUNTRIES_API_URL = data.aws_ssm_parameter.rest_countries_api_url.value

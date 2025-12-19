@@ -44,14 +44,16 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
         }
         throw new Error(`API request failed with status ${response.status}`);
       }
-
+      logger.info('Fetching Country facts for country name', { countryName });
       const data: RestCountriesApiResponse[] = await response.json();
+      logger.info('Country facts fetched successfully', { data });
 
       if (!data || data.length === 0) {
         return null;
       }
 
       const countryData = data[0];
+      logger.info('Mapping Country data to CountryFacts entity', { countryData });
 
       return this.mapToCountryDetail(countryData);
     } catch (error) {
