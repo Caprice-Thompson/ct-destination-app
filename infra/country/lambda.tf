@@ -115,7 +115,7 @@ resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
 # List Country Information Lambda Function
 resource "aws_lambda_function" "list_country_information" {
   filename         = data.archive_file.list_country_information.output_path
-  function_name    = "list-country-information"
+  function_name    = "${var.environment}-list-country-information"
   role             = aws_iam_role.list_country_information_lambda_role.arn
   handler          = "list-country-information.listCountryInformationHandler"
   source_code_hash = data.archive_file.list_country_information.output_base64sha256
