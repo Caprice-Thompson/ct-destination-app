@@ -42,7 +42,11 @@ export const rdsClient = async ({
     application_name: applicationName,
     query_timeout: queryTimeout,
     connectionTimeoutMillis: connectionTimeout,
-    ssl: useSSl,
+    ssl: useSSl
+      ? {
+          rejectUnauthorized: false,
+        }
+      : false,
   });
 
   await client.connect();
