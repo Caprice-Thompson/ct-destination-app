@@ -89,7 +89,7 @@ output "dynamodb_table_name" {
 
 output "backend_config" {
   description = "Backend configuration to add to your main Terraform files"
-  value = <<-EOF
+  value       = <<-EOF
     backend "s3" {
       bucket         = "${aws_s3_bucket.terraform_state.id}"
       key            = "country/terraform.tfstate"
