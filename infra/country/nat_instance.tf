@@ -28,11 +28,28 @@ data "aws_ssm_parameter" "public_subnet_id" {
   name = "/county/main/infrastructure/public_subnet_id"
 }
 
-# SSM Parameter for Private Route Table ID
+# SSM Parameter for Private Subnet ID (to associate with new route table)
 # This should be created manually or by your base infrastructure:
-# aws ssm put-parameter --name "/county/main/infrastructure/private_route_table_id" --value "rtb-xxxxx" --type String
-data "aws_ssm_parameter" "private_route_table_id" {
-  name = "/county/main/infrastructure/private_route_table_id"
+# aws ssm put-parameter --name "/county/main/infrastructure/private_subnet_id" --value "subnet-xxxxx" --type String
+data "aws_ssm_parameter" "private_subnet_id" {
+  name = "/county/main/infrastructure/private_subnet_id"
+}
+
+# Create a new route table for private subnets that will use NAT
+resource "aws_route_table" "private_nat" {
+  vpc_id = data.aws_vpc.existing.id
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-private-nat-rt"
+    Environment = var.environment
+    Purpose     = "Private subnets routing through NAT instance"
+  }
+}
+
+# Associate the private subnet with the new route table
+resource "aws_route_table_association" "private_nat" {
+  subnet_id      = data.aws_ssm_parameter.private_subnet_id.value
+  route_table_id = aws_route_table.private_nat.id
 }
 
 # Security Group for NAT Instance
@@ -221,7 +238,7 @@ resource "aws_instance" "nat_instance" {
 # Update Private Route Table to use NAT Instance
 # This routes all internet-bound traffic from private subnets through the NAT instance
 resource "aws_route" "private_to_nat" {
-  route_table_id         = data.aws_ssm_parameter.private_route_table_id.value
+  route_table_id         = aws_route_table.private_nat.id
   destination_cidr_block = "0.0.0.0/0"
   network_interface_id   = aws_instance.nat_instance.primary_network_interface_id
 
@@ -266,4 +283,9 @@ output "nat_instance_public_ip" {
 output "nat_instance_private_ip" {
   description = "Private IP of the NAT instance"
   value       = aws_instance.nat_instance.private_ip
+}
+
+output "nat_route_table_id" {
+  description = "ID of the route table created for private subnet NAT routing"
+  value       = aws_route_table.private_nat.id
 }
