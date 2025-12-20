@@ -1,4 +1,8 @@
 # Data sources for existing SSM parameters
+data "aws_ssm_parameter" "private_subnet_id" {
+  name = "/county/main/infrastructure/private_subnet_id"
+}
+
 data "aws_ssm_parameter" "db_username" {
   name = "/county/main/db/db_username"
 }
@@ -117,7 +121,7 @@ resource "aws_lambda_function" "list_country_information" {
   memory_size      = var.lambda_memory
 
   vpc_config {
-    subnet_ids         = data.aws_subnets.existing.ids
+    subnet_ids         = [data.aws_ssm_parameter.private_subnet_id.value]
     security_group_ids = [aws_security_group.lambda.id]
   }
 

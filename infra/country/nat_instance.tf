@@ -31,9 +31,7 @@ data "aws_ssm_parameter" "public_subnet_id" {
 # SSM Parameter for Private Subnet ID (to associate with new route table)
 # This should be created manually or by your base infrastructure:
 # aws ssm put-parameter --name "/county/main/infrastructure/private_subnet_id" --value "subnet-xxxxx" --type String
-data "aws_ssm_parameter" "private_subnet_id" {
-  name = "/county/main/infrastructure/private_subnet_id"
-}
+# Note: This data source is defined in lambda.tf to avoid duplication
 
 # Create a new route table for private subnets that will use NAT
 resource "aws_route_table" "private_nat" {
@@ -75,16 +73,6 @@ resource "aws_security_group" "nat_instance" {
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda.id]
   }
-
-  # Allow SSH from bastion (optional, for troubleshooting)
-  # Uncomment if you need SSH access
-  # ingress {
-  #   description     = "SSH from Bastion"
-  #   from_port       = 22
-  #   to_port         = 22
-  #   protocol        = "tcp"
-  #   security_groups = [aws_security_group.bastion.id]
-  # }
 
   # Allow all outbound traffic to internet
   egress {
@@ -161,68 +149,45 @@ resource "aws_iam_instance_profile" "nat_instance" {
   }
 }
 
-# NAT Instance (t3.micro is Free Tier eligible for 750 hours/month)
+# NAT Instance Configuration
 resource "aws_instance" "nat_instance" {
   ami                         = data.aws_ami.amazon_linux_2023.id
-  instance_type               = "t3.micro" # Free Tier eligible
+  instance_type               = "t3.micro"
   subnet_id                   = data.aws_ssm_parameter.public_subnet_id.value
   vpc_security_group_ids      = [aws_security_group.nat_instance.id]
   iam_instance_profile        = aws_iam_instance_profile.nat_instance.name
-  source_dest_check           = false # CRITICAL: Must be disabled for NAT to work
+  source_dest_check           = false # MANDATORY
   associate_public_ip_address = true
 
-  # User data script to configure NAT functionality
   user_data = <<-EOF
     #!/bin/bash
     set -e
-    
-    # Update system
-    dnf update -y
-    
-    # Enable IP forwarding permanently
-    echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
-    sysctl -p
-    
-    # Install iptables-services for persistent rules
+
+    # 1. Enable IP Forwarding in the kernel
+    echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/95-nat.conf
+    sysctl -p /etc/sysctl.d/95-nat.conf
+
+    # 2. Install iptables-services for rule persistence
     dnf install -y iptables-services
     systemctl enable iptables
     systemctl start iptables
+
+    # 3. Detect the Nitro interface (usually ens5)
+    PRIMARY_IFACE=$(ip -o -4 route show to default | awk '{print $5}')
+
+    # 4. Flush and Set NAT Rules
+    iptables -t nat -F
+    iptables -t nat -A POSTROUTING -o $PRIMARY_IFACE -j MASQUERADE
     
-    # Get the primary network interface (usually ens5 for modern instances)
-    PRIMARY_INTERFACE=$(ip -o -4 route show to default | awk '{print $5}')
-    
-    # Configure NAT using iptables masquerade
-    iptables -t nat -A POSTROUTING -o $PRIMARY_INTERFACE -j MASQUERADE
-    
-    # Allow forwarding from private subnets
-    iptables -A FORWARD -i $PRIMARY_INTERFACE -o $PRIMARY_INTERFACE -m state --state RELATED,ESTABLISHED -j ACCEPT
-    iptables -A FORWARD -i $PRIMARY_INTERFACE -o $PRIMARY_INTERFACE -j ACCEPT
-    
-    # Save iptables rules
+    # Allow forwarding for established connections and new internal requests
+    iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -i $PRIMARY_IFACE -j ACCEPT 
+
+    # 5. Save rules so they persist across reboots
     service iptables save
-    
-    # Enable iptables service to start on boot
-    systemctl enable iptables
-    
-    # Log completion
-    echo "NAT instance configuration completed at $(date)" >> /var/log/nat-setup.log
   EOF
 
-  # Enable detailed monitoring (free for 750 hours/month in Free Tier)
-  monitoring = true
-
-  # Root volume configuration (Free Tier includes 30 GB EBS)
-  root_block_device {
-    volume_size           = 8 # Keep it small to stay in Free Tier
-    volume_type           = "gp3"
-    delete_on_termination = true
-    encrypted             = true
-
-    tags = {
-      Name        = "${var.project_name}-${var.environment}-nat-instance-root"
-      Environment = var.environment
-    }
-  }
+  user_data_replace_on_change = true
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-nat-instance"
@@ -230,9 +195,6 @@ resource "aws_instance" "nat_instance" {
     Purpose     = "NAT"
     CostSaving  = "Free-Tier-Alternative"
   }
-
-  # Ensure instance is recreated if user_data changes
-  user_data_replace_on_change = true
 }
 
 # Update Private Route Table to use NAT Instance
