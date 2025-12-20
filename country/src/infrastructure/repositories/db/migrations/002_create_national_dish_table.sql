@@ -1,8 +1,8 @@
 -- Create national_dish table
 CREATE TABLE IF NOT EXISTS national_dish (
     id SERIAL PRIMARY KEY,
-    country_name VARCHAR(100) NOT NULL,
-    country_code VARCHAR(2) NOT NULL,
+    country_name VARCHAR(100) UNIQUE,
+    country_code VARCHAR(4),
     dish_name VARCHAR(200) NOT NULL,
     description TEXT,
     image_url TEXT,

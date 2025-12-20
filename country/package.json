@@ -6,6 +6,7 @@
     "db:restart": "cd .. && docker-compose restart postgres",
     "db:logs": "cd .. && docker-compose logs -f postgres",
     "db:migrate": "bash runMigrations.sh",
+    "db:migrate:data": "cd migrate && bash run.sh",
     "db:status": "psql $DATABASE_URL -c \"SELECT version, name, applied_at FROM schema_migrations ORDER BY applied_at DESC;\"",
     "db:shell": "psql $DATABASE_URL",
     "lint": "eslint . --fix",
