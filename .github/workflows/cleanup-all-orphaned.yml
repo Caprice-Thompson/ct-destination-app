@@ -1,0 +1,138 @@
+name: Cleanup All Orphaned Workspaces
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy_all:
+        description: 'Type "destroy-all-orphaned" to confirm destroying ALL ephemeral workspaces'
+        required: true
+        type: string
+
+jobs:
+  cleanup-all:
+    name: Destroy All Orphaned Workspaces
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy_all }}" != "destroy-all-orphaned" ]; then
+            echo "ERROR: Confirmation failed. You must type 'destroy-all-orphaned' to proceed."
+            exit 1
+          fi
+          echo "Confirmation validated"
+      
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.0
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+      
+      - name: Initialize Terraform
+        working-directory: ./infra/country
+        run: tofu init
+      
+      - name: List all workspaces
+        id: list_workspaces
+        working-directory: ./infra/country
+        run: |
+          echo "All workspaces:"
+          tofu workspace list
+          
+          # Get ephemeral workspaces (exclude default and production)
+          WORKSPACES=$(tofu workspace list | grep -v "default" | grep -v "production" | sed 's/[* ]//g' | grep -v "^$" || true)
+          
+          if [ -z "$WORKSPACES" ]; then
+            echo "no_workspaces=true" >> $GITHUB_OUTPUT
+            echo "No ephemeral workspaces found to clean up"
+          else
+            echo "no_workspaces=false" >> $GITHUB_OUTPUT
+            echo "$WORKSPACES" > /tmp/workspaces.txt
+            echo "Found workspaces to destroy:"
+            cat /tmp/workspaces.txt
+          fi
+      
+      - name: Destroy all ephemeral workspaces
+        if: steps.list_workspaces.outputs.no_workspaces == 'false'
+        working-directory: ./infra/country
+        run: |
+          WORKSPACES=$(cat /tmp/workspaces.txt)
+          DESTROYED_COUNT=0
+          FAILED_COUNT=0
+          
+          echo "## Destroying Ephemeral Workspaces" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          for WORKSPACE in $WORKSPACES; do
+            echo "=================================================="
+            echo "Processing workspace: $WORKSPACE"
+            echo "=================================================="
+            
+            # Select workspace
+            if ! tofu workspace select "$WORKSPACE" 2>/dev/null; then
+              echo "WARNING: Failed to select workspace $WORKSPACE, skipping..."
+              echo "- WARNING: **$WORKSPACE** - Failed to select" >> $GITHUB_STEP_SUMMARY
+              FAILED_COUNT=$((FAILED_COUNT + 1))
+              continue
+            fi
+            
+            # Show resources
+            echo "Resources in workspace $WORKSPACE:"
+            tofu state list 2>/dev/null || echo "No resources found"
+            
+            # Destroy
+            echo "Destroying resources in workspace: $WORKSPACE"
+            if tofu destroy -auto-approve; then
+              echo "Successfully destroyed resources in workspace: $WORKSPACE"
+              
+              # Switch back to default
+              tofu workspace select default
+              
+              # Delete workspace
+              if tofu workspace delete "$WORKSPACE"; then
+                echo "Successfully deleted workspace: $WORKSPACE"
+                echo "- SUCCESS: **$WORKSPACE** - Destroyed and deleted" >> $GITHUB_STEP_SUMMARY
+                DESTROYED_COUNT=$((DESTROYED_COUNT + 1))
+              else
+                echo "ERROR: Failed to delete workspace: $WORKSPACE"
+                echo "- WARNING: **$WORKSPACE** - Resources destroyed but workspace deletion failed" >> $GITHUB_STEP_SUMMARY
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+              fi
+            else
+              echo "ERROR: Failed to destroy resources in workspace: $WORKSPACE"
+              echo "- ERROR: **$WORKSPACE** - Destroy failed" >> $GITHUB_STEP_SUMMARY
+              FAILED_COUNT=$((FAILED_COUNT + 1))
+              tofu workspace select default
+            fi
+            
+            echo ""
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Successfully destroyed: $DESTROYED_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed: $FAILED_COUNT" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $FAILED_COUNT -gt 0 ]; then
+            exit 1
+          fi
+      
+      - name: No workspaces to clean
+        if: steps.list_workspaces.outputs.no_workspaces == 'true'
+        run: |
+          echo "## No Orphaned Workspaces" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No ephemeral workspaces found to clean up." >> $GITHUB_STEP_SUMMARY
+

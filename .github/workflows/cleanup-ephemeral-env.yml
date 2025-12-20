@@ -82,11 +82,11 @@ jobs:
       - name: Cleanup notification
         if: success()
         run: |
-          echo "✅ Successfully destroyed ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
+          echo "Successfully destroyed ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
       
       - name: Cleanup failed notification
         if: failure()
         run: |
-          echo "❌ Failed to destroy ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
+          echo "ERROR: Failed to destroy ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
           echo "Manual cleanup may be required"
 
