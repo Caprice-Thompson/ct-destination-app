@@ -1,25 +1,5 @@
 # internet access for Lambda functions in private subnets
-
-# Get the latest Amazon Linux 2023 AMI for eu-west-2 (x86_64 for t3.micro)
-data "aws_ami" "amazon_linux_2023" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-2023.*-x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-}
+# Note: Amazon Linux 2023 AMI data source is defined in bastion.tf
 
 # SSM Parameter for Public Subnet ID (for NAT instance placement)
 # This should be created manually or by your base infrastructure:
