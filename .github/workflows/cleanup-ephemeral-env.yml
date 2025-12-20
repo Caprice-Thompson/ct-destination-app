@@ -1,0 +1,92 @@
+name: Cleanup Ephemeral Environment
+
+on:
+  pull_request:
+    types: [closed]
+  delete:
+    branches:
+      - '**'
+
+jobs:
+  cleanup:
+    name: Destroy Ephemeral Infrastructure
+    runs-on: ubuntu-latest
+    # Only run if PR was merged or branch was deleted
+    if: github.event.pull_request.merged == true || github.event_name == 'delete'
+    
+    permissions:
+      contents: read
+      id-token: write  # For OIDC authentication with AWS
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main  # Checkout main to get the latest Terraform code
+      
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.0
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+      
+      - name: Get branch name
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          else
+            BRANCH_NAME="${{ github.event.ref }}"
+            BRANCH_NAME="${BRANCH_NAME#refs/heads/}"
+          fi
+          # Sanitize branch name for workspace (alphanumeric, hyphens, underscores only)
+          WORKSPACE_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9_-]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "workspace=$WORKSPACE_NAME" >> $GITHUB_OUTPUT
+          echo "Destroying workspace: $WORKSPACE_NAME"
+      
+      - name: Initialize Terraform
+        working-directory: ./infra/country
+        run: tofu init
+      
+      - name: Select workspace
+        working-directory: ./infra/country
+        run: |
+          # Check if workspace exists
+          if tofu workspace list | grep -q "${{ steps.branch.outputs.workspace }}"; then
+            tofu workspace select ${{ steps.branch.outputs.workspace }}
+            echo "Workspace ${{ steps.branch.outputs.workspace }} selected"
+          else
+            echo "Workspace ${{ steps.branch.outputs.workspace }} does not exist, skipping cleanup"
+            exit 0
+          fi
+      
+      - name: Destroy infrastructure
+        working-directory: ./infra/country
+        run: |
+          echo "Destroying all resources in workspace: ${{ steps.branch.outputs.workspace }}"
+          tofu destroy -auto-approve
+      
+      - name: Delete workspace
+        working-directory: ./infra/country
+        run: |
+          # Switch back to default workspace before deleting
+          tofu workspace select default
+          tofu workspace delete ${{ steps.branch.outputs.workspace }}
+          echo "Workspace ${{ steps.branch.outputs.workspace }} deleted"
+      
+      - name: Cleanup notification
+        if: success()
+        run: |
+          echo "✅ Successfully destroyed ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
+      
+      - name: Cleanup failed notification
+        if: failure()
+        run: |
+          echo "❌ Failed to destroy ephemeral environment for branch: ${{ steps.branch.outputs.workspace }}"
+          echo "Manual cleanup may be required"
+
