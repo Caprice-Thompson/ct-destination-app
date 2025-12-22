@@ -36,7 +36,7 @@ export class PopulationApiRepository implements PopulationApiRepositoryInterface
       refine: 'timezone:"Europe"',
       where: `cou_name_en='${countryName.replace(/'/g, "\\'")}'`,
     });
-    const url = `${this.baseUrl}/population?${params.toString()}`;
+    const url = `${this.baseUrl}?${params.toString()}`;
     try {
       const response = await fetch(url);
 
