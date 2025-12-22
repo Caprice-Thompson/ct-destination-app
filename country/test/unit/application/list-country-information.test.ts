@@ -120,7 +120,7 @@ describe('ListCountryInformationUseCase', () => {
       mockApiRepository.getCountryFacts.mockResolvedValue(null);
 
       await expect(useCase.listCountryInfo('NonExistentCountry')).rejects.toThrow(
-        'Country not found: NonExistentCountry',
+        'Country Facts not found: NonExistentCountry',
       );
 
       expect(mockDataRepository.getNationalDish).not.toHaveBeenCalled();

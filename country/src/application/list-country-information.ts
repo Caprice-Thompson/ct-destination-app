@@ -1,3 +1,4 @@
+import logger from '@infrastructure/logger';
 import {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
@@ -45,10 +46,11 @@ export class ListCountryInformation {
   ) {}
 
   async listCountryInfo(countryName: string): Promise<CountryInformationResult> {
+    logger.info('Fetching Country facts for country name:', { countryName });
     const countryFacts = await this.countryApiRepository.getCountryFacts(countryName);
 
     if (!countryFacts) {
-      throw new Error(`Country not found: ${countryName}`);
+      throw new Error(`Country Facts not found: ${countryName}`);
     }
 
     const [nationalDish, cityPopulations] = await Promise.all([
