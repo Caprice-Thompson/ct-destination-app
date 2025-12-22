@@ -16,7 +16,7 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
       }>({
         query: `
           SELECT country_name, dish_name, image_url, description
-          FROM national_dishes
+          FROM national_dish
           WHERE country_name = $1
         `,
         bindVariables: [countryName],
@@ -41,7 +41,7 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
     try {
       await this.dbClient.update({
         query: `
-          INSERT INTO national_dishes (country_name, dish_name, image_url, description)
+          INSERT INTO national_dish (country_name, dish_name, image_url, description)
           VALUES ($1, $2, $3, $4)
           ON CONFLICT (country_name)
           DO UPDATE SET 

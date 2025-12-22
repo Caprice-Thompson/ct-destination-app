@@ -39,14 +39,14 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
       const response = await fetch(`${this.baseUrl}/${encodeURIComponent(countryName)}`);
 
       const data: RestCountriesApiResponse[] = await response.json();
-      logger.info('Country facts fetched successfully', { data });
+      logger.info('Country facts fetched successfully');
 
       if (!data || data.length === 0) {
         return null;
       }
 
       const countryData = data[0];
-      logger.info('Mapping Country data to CountryFacts entity', { countryData });
+      logger.info('Mapping Country data to CountryFacts entity');
 
       return this.mapToCountryDetail(countryData);
     } catch (error) {
