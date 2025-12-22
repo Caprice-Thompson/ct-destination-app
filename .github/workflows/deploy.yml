@@ -56,7 +56,7 @@ jobs:
       - name: Update Lambda - List Country Information
         working-directory: ./country
         run: |
-          FUNCTION_NAME="list-country-information"
+          FUNCTION_NAME="production-list-country-information"
 
           echo "Updating function: ${FUNCTION_NAME}"
           aws lambda update-function-code \
