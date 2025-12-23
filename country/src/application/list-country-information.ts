@@ -32,6 +32,7 @@ export interface CountryInformationResult {
 
   nationalDish?: {
     countryCode: string;
+    countryName: string;
     dishName: string;
     imageUrl: string | null;
     description?: string;
@@ -88,6 +89,7 @@ export class ListCountryInformation {
       nationalDish: nationalDish
         ? {
             countryCode: nationalDish.countryCode,
+            countryName: nationalDish.countryName,
             dishName: nationalDish.dishName,
             imageUrl: nationalDish.imageUrl,
             description: nationalDish.description,

@@ -52,7 +52,7 @@ describe('listCountryInformationHandler', () => {
       });
 
       const mockPopulation = [{ cityName: 'Madrid', population: 3223334 }];
-      const mockDish = new NationalDish('ES', 'Paella', 'A rice dish');
+      const mockDish = new NationalDish('ES', 'Spain', 'Paella', 'A rice dish');
 
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({

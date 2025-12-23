@@ -48,7 +48,7 @@ describe('ListCountryInformationUseCase', () => {
         new CityPopulation({ cityName: 'Madrid', population: 3223334 }),
         new CityPopulation({ cityName: 'Barcelona', population: 1620343 }),
       ];
-      const mockDish = new NationalDish('ES', 'Paella', null, 'A rice dish');
+      const mockDish = new NationalDish('ES', 'Spain', 'Paella', null, 'A rice dish');
 
       mockApiRepository.getCountryFacts.mockResolvedValue(mockCountry);
       mockDataRepository.getNationalDish.mockResolvedValue(mockDish);
