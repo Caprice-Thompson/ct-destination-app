@@ -10,12 +10,13 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
     try {
       const result = await this.dbClient.querySingleRowOptional<{
         country_name: string;
+        country_code: string;
         dish_name: string;
         image_url: string | null;
         description: string | null;
       }>({
         query: `
-          SELECT country_name, dish_name, image_url, description
+          SELECT country_name, country_code, dish_name, image_url, description
           FROM national_dish
           WHERE country_name = $1
         `,
@@ -26,7 +27,13 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
         return null;
       }
 
-      return new NationalDish(result.country_name, result.dish_name, result.image_url, result.description ?? undefined);
+      return new NationalDish(
+        result.country_code,
+        result.country_name,
+        result.dish_name,
+        result.image_url,
+        result.description ?? undefined,
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.debug('Error fetching national dish', {
@@ -41,7 +48,7 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
     try {
       await this.dbClient.update({
         query: `
-          INSERT INTO national_dish (country_name, dish_name, image_url, description)
+          INSERT INTO national_dish (country_name, country_code, dish_name, image_url, description)
           VALUES ($1, $2, $3, $4)
           ON CONFLICT (country_name)
           DO UPDATE SET 
@@ -52,6 +59,7 @@ export class CountryDatabaseBRepository implements CountryDatabaseRepositoryInte
         `,
         bindVariables: [
           nationalDish.countryCode,
+          nationalDish.countryName,
           nationalDish.dishName,
           nationalDish.imageUrl,
           nationalDish.description ?? null,
