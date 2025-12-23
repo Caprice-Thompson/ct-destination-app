@@ -15,6 +15,11 @@ data "aws_ami" "amazon_linux_2023" {
   }
 }
 
+# Get public subnet for bastion placement
+data "aws_ssm_parameter" "bastion_public_subnet_id" {
+  name = "/county/main/infrastructure/public_subnet_id"
+}
+
 # IAM Role for Bastion (Session Manager access)
 resource "aws_iam_role" "bastion" {
   name = "${var.project_name}-${var.environment}-bastion-role"
@@ -98,11 +103,12 @@ resource "aws_security_group_rule" "rds_allow_bastion" {
 
 # EC2 Instance - Bastion Host
 resource "aws_instance" "bastion" {
-  ami                    = data.aws_ami.amazon_linux_2023.id
-  instance_type          = "t3.micro" # Free tier eligible
-  subnet_id              = tolist(data.aws_subnets.existing.ids)[0]
-  vpc_security_group_ids = [aws_security_group.bastion.id]
-  iam_instance_profile   = aws_iam_instance_profile.bastion.name
+  ami                         = data.aws_ami.amazon_linux_2023.id
+  instance_type               = "t3.micro" # Free tier eligible
+  subnet_id                   = data.aws_ssm_parameter.bastion_public_subnet_id.value
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
+  iam_instance_profile        = aws_iam_instance_profile.bastion.name
+  associate_public_ip_address = true # Required for Session Manager in public subnet
 
   # Enable detailed monitoring (optional, free for first instance)
   monitoring = false
