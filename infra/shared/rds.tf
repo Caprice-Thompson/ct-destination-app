@@ -78,12 +78,12 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.main.name
 
-  multi_az               = false # Set to true for production
-  publicly_accessible    = false
-  skip_final_snapshot    = true # Set to false for production
+  multi_az                = false # Set to true for production
+  publicly_accessible     = false
+  skip_final_snapshot     = true # Set to false for production
   backup_retention_period = 7
-  backup_window          = "03:00-04:00"
-  maintenance_window     = "mon:04:00-mon:05:00"
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "mon:04:00-mon:05:00"
 
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
