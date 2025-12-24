@@ -3,14 +3,14 @@
 
 # SSM Parameter for Public Subnet ID (for NAT instance placement)
 # This should be created manually or by your base infrastructure:
-# aws ssm put-parameter --name "/county/main/infrastructure/public_subnet_id" --value "subnet-xxxxx" --type String
+# aws ssm put-parameter --name "/main/infrastructure/public_subnet_id" --value "subnet-xxxxx" --type String
 data "aws_ssm_parameter" "public_subnet_id" {
-  name = "/county/main/infrastructure/public_subnet_id"
+  name = "/main/infrastructure/public_subnet_id"
 }
 
 # SSM Parameter for Private Subnet ID (to associate with new route table)
 # This should be created manually or by your base infrastructure:
-# aws ssm put-parameter --name "/county/main/infrastructure/private_subnet_id" --value "subnet-xxxxx" --type String
+# aws ssm put-parameter --name "/main/infrastructure/private_subnet_id" --value "subnet-xxxxx" --type String
 # Note: This data source is defined in lambda.tf to avoid duplication
 
 # Create a new route table for private subnets that will use NAT

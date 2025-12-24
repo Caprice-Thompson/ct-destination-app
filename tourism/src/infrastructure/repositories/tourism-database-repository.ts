@@ -35,7 +35,9 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
         countryName,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      throw new Error(`Failed to fetch tourism information: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch tourism information: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -49,4 +51,3 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
     );
   }
 }
-

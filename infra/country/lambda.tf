@@ -1,6 +1,6 @@
 # Data sources for existing SSM parameters
 data "aws_ssm_parameter" "private_subnet_id" {
-  name = "/main/infrastructure/private_subnet_id"
+  name = "/main/infrastructure/PRIVATE_SUBNET_ID"
 }
 
 data "aws_ssm_parameter" "db_username" {
@@ -13,15 +13,15 @@ data "aws_ssm_parameter" "db_password" {
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/main/db/rds_endpoint"
+  name = "/country/main/db/rds_endpoint"
 }
 
 data "aws_ssm_parameter" "rest_countries_api_url" {
-  name = "/main/api/rest_countries_url"
+  name = "/country/main/api/rest_countries_url"
 }
 
 data "aws_ssm_parameter" "population_api_url" {
-  name = "/main/api/population_url"
+  name = "/country//main/api/population_url"
 }
 
 # Build Lambda deployment packages

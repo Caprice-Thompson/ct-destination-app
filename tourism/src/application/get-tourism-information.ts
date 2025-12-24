@@ -1,7 +1,6 @@
 import logger from '@infrastructure/logger';
 import { TourismInformationRepositoryInterface } from './interfaces/tourism-repo';
 
-
 export interface TourismInformationResult {
   unescoSites: {
     countryCode: string;
@@ -17,7 +16,7 @@ export class GetTourismInformation {
 
   async getTourismInfo(countryName: string): Promise<TourismInformationResult> {
     logger.info(`Fetching tourism information for country: ${countryName}`);
-    
+
     const unescoSites = await this.tourismRepository.getTourismInformation(countryName);
 
     if (!unescoSites || unescoSites.length === 0) {
@@ -38,4 +37,3 @@ export class GetTourismInformation {
     };
   }
 }
-

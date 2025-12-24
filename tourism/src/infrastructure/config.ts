@@ -45,7 +45,6 @@ export async function makeConfig(): Promise<ApplicationConfig> {
   if (parsedEnv.DATABASE_URL) {
     connectionString = parsedEnv.DATABASE_URL;
   } else if (parsedEnv.DB_HOST && parsedEnv.DB_USERNAME_PARAM && parsedEnv.DB_PASSWORD_PARAM) {
-
     const username = await getSSMParameter(parsedEnv.DB_USERNAME_PARAM);
     const password = await getSSMParameter(parsedEnv.DB_PASSWORD_PARAM, true);
     const host = parsedEnv.DB_HOST;
