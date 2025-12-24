@@ -1,19 +1,19 @@
 # Data sources for existing SSM parameters (shared infrastructure)
 data "aws_ssm_parameter" "private_subnet_id" {
-  name = "/main/infrastructure/private_subnet_id"
+  name = "/main/infrastructure/PRIVATE_SUBNET_ID"
 }
 
 data "aws_ssm_parameter" "db_username" {
-  name = "/main/db/username"
+  name = "/main/db/USERNAME"
 }
 
 data "aws_ssm_parameter" "db_password" {
-  name            = "/main/db/password"
+  name            = "/main/db/PASSWORD"
   with_decryption = true
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/main/db/rds_endpoint"
+  name = "/country/db/RDS_ENDPOINT"
 }
 
 # Build Lambda deployment package

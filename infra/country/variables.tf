@@ -27,14 +27,14 @@ variable "service_name" {
 variable "db_username" {
   description = "Database master username"
   type        = string
-  default     = "/main/db/username"
+  default     = "/main/db/USERNAME"
 }
 
 variable "db_password" {
   description = "Database master password"
   type        = string
   sensitive   = true
-  default     = "/main/db/password"
+  default     = "/main/db/PASSWORD"
 }
 
 variable "db_name" {

@@ -35,11 +35,11 @@ data "aws_availability_zones" "available" {
 
 # Retrieve VPC and Security Group IDs from SSM Parameter Store (shared infrastructure)
 data "aws_ssm_parameter" "vpc_id" {
-  name = "/main/infrastructure/vpc_id"
+  name = "/main/infrastructure/VPC_ID"
 }
 
 data "aws_ssm_parameter" "rds_security_group_id" {
-  name = "/main/infrastructure/rds_security_group_id"
+  name = "/main/infrastructure/RDS_SECURITY_GROUP_ID"
 }
 
 # Use existing VPC where RDS is deployed

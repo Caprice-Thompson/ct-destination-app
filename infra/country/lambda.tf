@@ -4,24 +4,24 @@ data "aws_ssm_parameter" "private_subnet_id" {
 }
 
 data "aws_ssm_parameter" "db_username" {
-  name = "/main/db/username"
+  name = "/main/db/USERNAME"
 }
 
 data "aws_ssm_parameter" "db_password" {
-  name            = "/main/db/password"
+  name            = "/main/db/PASSWORD"
   with_decryption = true
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/country/main/db/rds_endpoint"
+  name = "/country/main/db/RDS_ENDPOINT"
 }
 
 data "aws_ssm_parameter" "rest_countries_api_url" {
-  name = "/country/main/api/rest_countries_url"
+  name = "/country/api/REST_COUNTRIES_API_URL"
 }
 
 data "aws_ssm_parameter" "population_api_url" {
-  name = "/country//main/api/population_url"
+  name = "/country/api/POPULATION_API_URL"
 }
 
 # Build Lambda deployment packages
