@@ -1,31 +1,17 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { pathsToModuleNameMapper } from 'ts-jest';
+import type { Config } from 'jest';
 
-const tsconfigPath = path.resolve('./', 'tsconfig.json');
-const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
-export default {
+const config: Config = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
   clearMocks: true,
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
-  extensionsToTreatAsEsm: ['.ts'],
-  projects: [
-    {
-      displayName: 'unit-tests',
-      testMatch: ['<rootDir>/test/unit/**/*.test.ts'],
-      moduleNameMapper: pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: '<rootDir>' }),
-      transform: {
-        '^.+\\.ts?$': ['ts-jest'],
-      },
-    },
-    {
-      displayName: 'integration-tests',
-      testMatch: ['<rootDir>/test/integration/**/*.test.ts'],
-      moduleNameMapper: pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: '<rootDir>' }),
-      transform: {
-        '^.+\\.ts?$': ['ts-jest'],
-      },
-    },
-  ],
+  testMatch: ['<rootDir>/test/**/*.test.ts'],
+  moduleNameMapper: {
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+  },
 };
+
+export default config;

@@ -17,7 +17,7 @@ data "aws_ami" "amazon_linux_2023" {
 
 # Get public subnet for bastion placement
 data "aws_ssm_parameter" "bastion_public_subnet_id" {
-  name = "/county/main/infrastructure/public_subnet_id"
+  name = "/main/infrastructure/public_subnet_id"
 }
 
 # IAM Role for Bastion (Session Manager access)

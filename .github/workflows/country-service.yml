@@ -1,0 +1,267 @@
+name: Country Service CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'country/**'
+      - 'infra/country/**'
+      - '.github/workflows/country-service.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'country/**'
+      - 'infra/country/**'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - deploy-code-only
+          - run-migrations
+          - destroy
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
+  SERVICE_NAME: 'country'
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      code_changed: ${{ steps.filter.outputs.code }}
+      infra_changed: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'country/src/**'
+              - 'country/package*.json'
+              - 'country/tsconfig*.json'
+            infra:
+              - 'infra/country/**'
+
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: country/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./country
+        run: npm ci --legacy-peer-deps
+      
+      - name: Run linter
+        working-directory: ./country
+        run: npm run lint:check
+      
+      - name: Run type check
+        working-directory: ./country
+        run: npm run type-check
+      
+      - name: Run tests
+        working-directory: ./country
+        run: npm test
+      
+      - name: Build Lambda package
+        working-directory: ./country
+        run: npm run build
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: country-lambda-package
+          path: country/dist/
+          retention-days: 7
+
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test]
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' &&
+      (needs.detect-changes.outputs.infra_changed == 'true' || github.event.inputs.action == 'deploy')
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: country-lambda-package
+          path: country/dist/
+      
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.6.0'
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Create tfvars
+        working-directory: ./infra/country
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region   = "${{ env.AWS_REGION }}"
+          environment  = "${{ env.ENVIRONMENT }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          node_env     = "${{ secrets.NODE_ENV || 'production' }}"
+          EOF
+      
+      - name: Initialize OpenTofu
+        working-directory: ./infra/country
+        run: tofu init
+      
+      - name: Plan changes
+        working-directory: ./infra/country
+        run: tofu plan -out=tfplan
+      
+      - name: Apply changes
+        working-directory: ./infra/country
+        run: tofu apply -auto-approve tfplan
+
+  deploy-code-only:
+    name: Deploy Lambda Code
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test]
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' &&
+      needs.detect-changes.outputs.code_changed == 'true' &&
+      needs.detect-changes.outputs.infra_changed == 'false' ||
+      github.event.inputs.action == 'deploy-code-only'
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: country-lambda-package
+          path: country/dist/
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Package Lambda
+        working-directory: ./country/dist
+        run: zip -r ../lambda-package.zip .
+      
+      - name: Update Lambda function
+        working-directory: ./country
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.ENVIRONMENT }}-list-country-information \
+            --zip-file fileb://lambda-package.zip \
+            --publish
+
+  run-migrations:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'run-migrations'
+    environment: production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Get RDS credentials
+        id: rds
+        run: |
+          RDS_ENDPOINT=$(aws ssm get-parameter --name "/main/db/rds_endpoint" --query "Parameter.Value" --output text | cut -d':' -f1)
+          DB_USERNAME=$(aws ssm get-parameter --name "/main/db/username" --query "Parameter.Value" --output text)
+          DB_PASSWORD=$(aws ssm get-parameter --name "/main/db/password" --with-decryption --query "Parameter.Value" --output text)
+          
+          echo "::add-mask::$DB_PASSWORD"
+          echo "endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "username=$DB_USERNAME" >> $GITHUB_OUTPUT
+          echo "password=$DB_PASSWORD" >> $GITHUB_OUTPUT
+      
+      - name: Run migrations
+        working-directory: ./country
+        env:
+          DATABASE_URL: postgresql://${{ steps.rds.outputs.username }}:${{ steps.rds.outputs.password }}@${{ steps.rds.outputs.endpoint }}/country
+        run: ./runMigrations.sh
+
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'destroy'
+    environment: destroy-production
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: '1.6.0'
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Create tfvars
+        working-directory: ./infra/country
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region   = "${{ env.AWS_REGION }}"
+          environment  = "${{ env.ENVIRONMENT }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          node_env     = "${{ secrets.NODE_ENV || 'production' }}"
+          EOF
+      
+      - name: Initialize OpenTofu
+        working-directory: ./infra/country
+        run: tofu init
+      
+      - name: Destroy infrastructure
+        working-directory: ./infra/country
+        run: tofu destroy -auto-approve
+

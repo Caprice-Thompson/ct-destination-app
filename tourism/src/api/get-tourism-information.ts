@@ -1,9 +1,15 @@
 import { validateGetTourismInformationRequest } from '@application/validator';
+import { makeDependencies, type Dependencies } from '@infrastructure/dependencies';
+import { logger } from '@infrastructure/logger';
 import { APIGatewayEvent, APIGatewayProxyResult, ErrorResponse } from '../types';
 
 let dependencies: Dependencies | null = null;
 
-export const listCountryInformationHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+export const resetDependencies = () => {
+    dependencies = null;
+};
+
+export const getTourismInformationHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
     try {
         const query = await validateGetTourismInformationRequest(event.queryStringParameters);
 
@@ -13,9 +19,12 @@ export const listCountryInformationHandler = async (event: APIGatewayEvent): Pro
 
         const useCase = dependencies.getTourismInformationUseCase;
 
-        const response = await useCase.getTourismInformation(query.countryName);
+        const response = await useCase.getTourismInfo(query.countryName);
 
-        logger.info(`Successfully retrieved tourism information for country: ${query.countryName}`);
+        logger.info('Successfully retrieved tourism information', {
+            countryName: query.countryName,
+            sitesCount: response.unescoSites.length,
+        });
 
         return {
             statusCode: 200,
@@ -25,7 +34,7 @@ export const listCountryInformationHandler = async (event: APIGatewayEvent): Pro
             body: JSON.stringify(response),
         };
     } catch (error) {
-        logger.error('Error in listCountryInformationHandler', {
+        logger.error('Error in getTourismInformationHandler', {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
         });

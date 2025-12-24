@@ -1,27 +1,27 @@
 # Data sources for existing SSM parameters
 data "aws_ssm_parameter" "private_subnet_id" {
-  name = "/county/main/infrastructure/private_subnet_id"
+  name = "/main/infrastructure/private_subnet_id"
 }
 
 data "aws_ssm_parameter" "db_username" {
-  name = "/county/main/db/db_username"
+  name = "/main/db/username"
 }
 
 data "aws_ssm_parameter" "db_password" {
-  name            = "/county/main/db/db_password"
+  name            = "/main/db/password"
   with_decryption = true
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/county/main/db/RDS_ENDPOINT"
+  name = "/main/db/rds_endpoint"
 }
 
 data "aws_ssm_parameter" "rest_countries_api_url" {
-  name = "/county/main/REST_COUNTRIES_API_URL"
+  name = "/main/api/rest_countries_url"
 }
 
 data "aws_ssm_parameter" "population_api_url" {
-  name = "/county/main/POPULATION_API_URL"
+  name = "/main/api/population_url"
 }
 
 # Build Lambda deployment packages
@@ -89,7 +89,7 @@ resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
           "ssm:GetParameters"
         ]
         Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/county/main/*",
+          "arn:aws:ssm:${var.aws_region}:*:parameter/main/*",
           data.aws_ssm_parameter.db_username.arn,
           data.aws_ssm_parameter.db_password.arn
         ]

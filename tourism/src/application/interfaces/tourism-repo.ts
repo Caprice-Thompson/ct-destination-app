@@ -1,5 +1,5 @@
-import { UNESCOSites } from "@domain/entities/unesco-sites";
+import { UNESCOSites } from '@domain/entities/unesco-sites';
 
-export interface ToursimInformationRepositoryInterface {
+export interface TourismInformationRepositoryInterface {
   getTourismInformation(countryName: string): Promise<UNESCOSites[]>;
 }
