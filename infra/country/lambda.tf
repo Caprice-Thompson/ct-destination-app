@@ -13,7 +13,7 @@ data "aws_ssm_parameter" "db_password" {
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/country/main/db/RDS_ENDPOINT"
+  name = "/country/db/RDS_ENDPOINT"
 }
 
 data "aws_ssm_parameter" "rest_countries_api_url" {

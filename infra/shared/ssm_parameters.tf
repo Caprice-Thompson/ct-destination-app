@@ -39,7 +39,7 @@ resource "aws_ssm_parameter" "private_subnet_id" {
 
 # RDS Parameters
 resource "aws_ssm_parameter" "rds_endpoint" {
-  name      = "/country/main/db/RDS_ENDPOINT"
+  name      = "/country/db/RDS_ENDPOINT"
   type      = "String"
   value     = aws_db_instance.main.endpoint
   overwrite = true
@@ -82,27 +82,6 @@ resource "aws_ssm_parameter" "db_password" {
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-db-password"
-    Environment = var.environment
-  }
-}
-
-# API URLs
-resource "aws_ssm_parameter" "rest_countries_api_url" {
-  name = "/country/api/REST_COUNTRIES_API_URL"
-  type = "String"
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-rest-countries-api"
-    Environment = var.environment
-  }
-}
-
-resource "aws_ssm_parameter" "population_api_url" {
-  name = "/country/api/POPULATION_API_URL"
-  type = "String"
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-population-api"
     Environment = var.environment
   }
 }
