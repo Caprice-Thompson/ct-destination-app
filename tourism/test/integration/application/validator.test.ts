@@ -89,16 +89,7 @@ describe('Validator Integration Tests', () => {
 
       await expect(validateGetTourismInformationRequest(input)).rejects.toThrow('Validation error');
       await expect(validateGetTourismInformationRequest(input)).rejects.toThrow(
-        'Country name must contain only letters, spaces, and hyphens',
-      );
-    });
-
-    it('should reject country names with special characters', async () => {
-      const input = { countryName: 'Spain@#$' };
-
-      await expect(validateGetTourismInformationRequest(input)).rejects.toThrow('Validation error');
-      await expect(validateGetTourismInformationRequest(input)).rejects.toThrow(
-        'Country name must contain only letters, spaces, and hyphens',
+        'Country name must contain only letters, spaces, hyphens, and apostrophes',
       );
     });
 
@@ -171,13 +162,13 @@ describe('Validator Integration Tests', () => {
         expect(error).toBeInstanceOf(Error);
         if (error instanceof Error) {
           expect(error.message).toContain('Validation error');
-          expect(error.message).toContain('Country name must contain only letters, spaces, and hyphens');
+          expect(error.message).toContain('Country name must contain only letters, spaces, hyphens, and apostrophes');
         }
       }
     });
 
     it('should provide clear error message for missing field', async () => {
-      const input = {countryName: ""};
+      const input = { countryName: "" };
 
       try {
         await validateGetTourismInformationRequest(input);

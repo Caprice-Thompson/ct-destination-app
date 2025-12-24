@@ -6,7 +6,7 @@ const getTourismInformationSchema = z.object({
     .string()
     .min(1, 'Country name is required')
     .max(100, 'Country name is too long')
-    .regex(/^[a-zA-Z\s-]+$/, 'Country name must contain only letters, spaces, and hyphens'),
+    .regex(/^[\p{L}\s'-]+$/u, 'Country name must contain only letters, spaces, hyphens, and apostrophes'),
 });
 
 export async function validateGetTourismInformationRequest(query: unknown): Promise<GetTourismInformationQuery> {
