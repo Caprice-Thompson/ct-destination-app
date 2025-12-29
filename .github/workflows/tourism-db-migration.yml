@@ -1,0 +1,89 @@
+name: Tourism Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_action:
+        description: "Migration action"
+        required: true
+        default: "migrate"
+        type: choice
+        options:
+          - migrate
+          - status
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
+  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
+
+jobs:
+  migrate:
+    name: Run Tourism Database Migrations
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: tourism/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./tourism
+        run: npm ci --legacy-peer-deps
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build migration Lambda package
+        working-directory: ./tourism
+        run: |
+          npm run build:migration
+          npm run package:migration
+          ls -lh migration-lambda.zip
+
+      - name: Run migrations via Lambda
+        if: github.event.inputs.migration_action != 'status'
+        run: |
+          echo "Invoking tourism migration Lambda..."
+          aws lambda invoke \
+            --function-name ${{ env.ENVIRONMENT }}-tourism-run-migrations \
+            --region ${{ env.AWS_REGION }} \
+            --log-type Tail \
+            --query 'LogResult' \
+            --output text \
+            response.json | base64 --decode
+
+          echo "Lambda response:"
+          cat response.json
+
+          if ! jq -e '.success == true' response.json > /dev/null; then
+            echo "Migration failed"
+            exit 1
+          fi
+
+          echo "Migrations completed successfully"
+
+      - name: Create migration summary
+        run: |
+          echo "## Tourism Database Migration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Function**: ${{ env.ENVIRONMENT }}-tourism-run-migrations" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ github.event.inputs.migration_action || 'migrate' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Success" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Response" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat response.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

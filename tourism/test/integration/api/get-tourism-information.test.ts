@@ -312,4 +312,3 @@ describe('getTourismInformationHandler Integration Tests', () => {
     });
   });
 });
-

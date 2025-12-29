@@ -168,7 +168,7 @@ describe('Validator Integration Tests', () => {
     });
 
     it('should provide clear error message for missing field', async () => {
-      const input = { countryName: "" };
+      const input = { countryName: '' };
 
       try {
         await validateGetTourismInformationRequest(input);
@@ -200,7 +200,6 @@ describe('Validator Integration Tests', () => {
   });
 
   describe('Edge Cases', () => {
-
     it('should handle extra fields gracefully', async () => {
       const input = { countryName: 'Spain', extraField: 'ignored' };
       const result = await validateGetTourismInformationRequest(input);
@@ -210,4 +209,3 @@ describe('Validator Integration Tests', () => {
     });
   });
 });
-

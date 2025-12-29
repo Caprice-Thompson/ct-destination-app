@@ -182,8 +182,9 @@ describe('GetTourismInformation Use Case Integration Tests', () => {
 
   describe('Large Datasets', () => {
     it('should handle countries with many UNESCO sites', async () => {
-      const mockSites = Array.from({ length: 50 }, (_, i) =>
-        new UNESCOSites('IT', 'Italy', `Region ${i}`, `Site ${i}`, `Description ${i}`),
+      const mockSites = Array.from(
+        { length: 50 },
+        (_, i) => new UNESCOSites('IT', 'Italy', `Region ${i}`, `Site ${i}`, `Description ${i}`),
       );
 
       mockRepository.getTourismInformation.mockResolvedValue(mockSites);
@@ -252,4 +253,3 @@ describe('GetTourismInformation Use Case Integration Tests', () => {
     });
   });
 });
-
