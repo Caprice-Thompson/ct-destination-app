@@ -102,7 +102,7 @@ resource "aws_lambda_function" "run_migrations" {
   function_name    = "${var.environment}-run-migrations"
   role             = aws_iam_role.migration_lambda_role.arn
   handler          = "index.handler"
-  source_code_hash = fileexists("${path.module}/../../country/migration-lambda.zip") ? filebase64sha256("${path.module}/../../country/migration-lambda.zip") : null
+  source_code_hash = filebase64sha256("${path.module}/../../country/migration-lambda.zip")
   runtime          = "nodejs20.x"
   timeout          = 300
   memory_size      = 512
