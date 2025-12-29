@@ -100,11 +100,11 @@ resource "aws_cloudwatch_log_group" "tourism_migration_lambda_logs" {
 
 # Migration Lambda Function
 resource "aws_lambda_function" "tourism_run_migrations" {
-  filename         = "${path.module}/../../tourism/migration-lambda.zip"
+  filename         = abspath("${path.module}/../../tourism/migration-lambda.zip")
   function_name    = "${var.environment}-tourism-run-migrations"
   role             = aws_iam_role.tourism_migration_lambda_role.arn
   handler          = "index.handler"
-  source_code_hash = fileexists("${path.module}/../../tourism/migration-lambda.zip") ? filebase64sha256("${path.module}/../../tourism/migration-lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../tourism/migration-lambda.zip") ? filebase64sha256(abspath("${path.module}/../../tourism/migration-lambda.zip")) : null
   runtime          = "nodejs20.x"
   timeout          = 300
   memory_size      = 512
