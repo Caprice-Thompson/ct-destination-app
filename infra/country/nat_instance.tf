@@ -1,5 +1,19 @@
 # internet access for Lambda functions in private subnets
-# Note: Amazon Linux 2023 AMI data source is defined in bastion.tf
+
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
 
 # SSM Parameter for Public Subnet ID (for NAT instance placement)
 # This should be created manually or by your base infrastructure:
