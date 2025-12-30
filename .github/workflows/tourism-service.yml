@@ -92,11 +92,22 @@ jobs:
         working-directory: ./tourism
         run: npm run build
       
+      - name: Build migration Lambda
+        working-directory: ./tourism
+        run: npm run build:migration
+      
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: tourism-lambda-package
           path: tourism/dist/
+          retention-days: 7
+      
+      - name: Upload migration Lambda artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tourism-migration-lambda
+          path: tourism/migration-lambda/
           retention-days: 7
 
   deploy-infrastructure:
@@ -117,6 +128,12 @@ jobs:
         with:
           name: tourism-lambda-package
           path: tourism/dist/
+      
+      - name: Download migration Lambda artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tourism-migration-lambda
+          path: tourism/migration-lambda/
       
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1

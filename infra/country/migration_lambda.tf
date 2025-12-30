@@ -96,13 +96,20 @@ resource "aws_cloudwatch_log_group" "migration_lambda_logs" {
   }
 }
 
+data "archive_file" "migration_lambda" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../country/migration-lambda"
+  output_path = "${path.module}/.terraform/lambda-packages/migration-lambda.zip"
+  excludes    = ["*.map"] # Exclude source maps to reduce size
+}
+
 # Migration Lambda Function
 resource "aws_lambda_function" "run_migrations" {
-  filename         = abspath("${path.module}/../../country/migration-lambda.zip")
+  filename         = data.archive_file.migration_lambda.output_path
   function_name    = "${var.environment}-run-migrations"
   role             = aws_iam_role.migration_lambda_role.arn
   handler          = "index.handler"
-  source_code_hash = fileexists("${path.module}/../../country/migration-lambda.zip") ? filebase64sha256(abspath("${path.module}/../../country/migration-lambda.zip")) : null
+  source_code_hash = data.archive_file.migration_lambda.output_base64sha256
   runtime          = "nodejs20.x"
   timeout          = 300
   memory_size      = 512
