@@ -66,7 +66,8 @@ jobs:
         run: |
           npm ci --legacy-peer-deps
           npm run build
-          echo "✅ Lambda package built"
+          npm run build:migration
+          echo "Lambda package built"
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
@@ -100,20 +101,20 @@ jobs:
           # Create or select workspace for this branch
           tofu workspace select ${{ steps.branch.outputs.name }} || tofu workspace new ${{ steps.branch.outputs.name }}
           
-          echo "✅ OpenTofu initialized with workspace: ${{ steps.branch.outputs.name }}"
+          echo "OpenTofu initialized with workspace: ${{ steps.branch.outputs.name }}"
 
       - name: Plan infrastructure
         working-directory: ./infra/country
         run: |
           tofu plan -out=tfplan
-          echo "✅ Plan created"
+          echo "Plan created"
 
       - name: Apply infrastructure
         id: deploy
         working-directory: ./infra/country
         run: |
           tofu apply -auto-approve tfplan
-          echo "✅ Infrastructure deployed"
+          echo "Infrastructure deployed"
           
           # Get outputs
           API_URL=$(tofu output -raw country_information_api_gateway_url 2>/dev/null || echo "pending")
@@ -128,10 +129,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Environment Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: \`${{ steps.branch.outputs.original }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment Name**: \`${{ steps.branch.outputs.name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Lambda Function**: \`${{ steps.deploy.outputs.lambda_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **API Gateway URL**: ${{ steps.deploy.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Test Your API" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY

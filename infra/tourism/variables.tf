@@ -21,32 +21,26 @@ variable "project_name" {
 variable "service_name" {
   description = "Service domain name"
   type        = string
-  default     = "country"
+  default     = "tourism"
 }
 
 variable "db_username" {
-  description = "Database master username"
+  description = "Database master username (SSM parameter path)"
   type        = string
-  default     = "/main/db/USERNAME"
+  default     = "/main/db/username"
 }
 
 variable "db_password" {
-  description = "Database master password"
+  description = "Database master password (SSM parameter path)"
   type        = string
   sensitive   = true
-  default     = "/main/db/PASSWORD"
+  default     = "/main/db/password"
 }
 
 variable "db_name" {
-  description = "Database name"
+  description = "Database name for tourism service"
   type        = string
-  default     = "country"
-}
-
-variable "db_identifier" {
-  description = "db identifier name"
-  type        = string
-  default     = "country-db"
+  default     = "tourism"
 }
 
 variable "node_env" {
@@ -70,7 +64,7 @@ variable "lambda_memory" {
 variable "lambda_runtime" {
   description = "Lambda runtime version"
   type        = string
-  default     = "nodejs22.x"
+  default     = "nodejs20.x"
 }
 
 variable "log_retention_days" {
@@ -81,3 +75,4 @@ variable "log_retention_days" {
 
 # VPC and Security Group IDs are retrieved from SSM Parameter Store
 # No hardcoded defaults - must exist in SSM
+

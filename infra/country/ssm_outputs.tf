@@ -14,7 +14,7 @@ resource "aws_ssm_parameter" "api_gateway_url" {
 }
 
 resource "aws_ssm_parameter" "db_identifier" {
-  name      = "/county/main/db/db_identifier"
+  name      = "/main/db/DB_IDENTIFIER"
   type      = "String"
   value     = var.db_identifier
   overwrite = true
