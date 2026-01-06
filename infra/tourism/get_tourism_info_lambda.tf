@@ -12,6 +12,10 @@ data "aws_ssm_parameter" "db_password" {
   with_decryption = true
 }
 
+data "aws_ssm_parameter" "rds_endpoint" {
+  name = "/country/db/RDS_ENDPOINT"
+}
+
 # Build Lambda deployment package
 data "archive_file" "get_tourism_information" {
   type        = "zip"
