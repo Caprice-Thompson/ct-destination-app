@@ -86,11 +86,22 @@ jobs:
         working-directory: ./country
         run: npm run build
 
+      - name: Build migration Lambda
+        working-directory: ./country
+        run: npm run build:migration
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: lambda-dist
           path: country/dist/
+          retention-days: 1
+
+      - name: Upload migration Lambda artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-lambda
+          path: country/migration-lambda/
           retention-days: 1
 
   infrastructure:
@@ -111,6 +122,13 @@ jobs:
         with:
           name: lambda-dist
           path: country/dist/
+          if-no-artifact-found: error
+
+      - name: Download migration Lambda artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: migration-lambda
+          path: country/migration-lambda/
           if-no-artifact-found: error
 
       - name: Setup OpenTofu
