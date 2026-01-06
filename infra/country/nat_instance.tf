@@ -1,16 +1,30 @@
 # internet access for Lambda functions in private subnets
-# Note: Amazon Linux 2023 AMI data source is defined in bastion.tf
+
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
 
 # SSM Parameter for Public Subnet ID (for NAT instance placement)
 # This should be created manually or by your base infrastructure:
-# aws ssm put-parameter --name "/county/main/infrastructure/public_subnet_id" --value "subnet-xxxxx" --type String
+# aws ssm put-parameter --name "/main/infrastructure/PUBLIC_SUBNET_ID" --value "subnet-xxxxx" --type String
 data "aws_ssm_parameter" "public_subnet_id" {
-  name = "/county/main/infrastructure/public_subnet_id"
+  name = "/main/infrastructure/PUBLIC_SUBNET_ID"
 }
 
 # SSM Parameter for Private Subnet ID (to associate with new route table)
 # This should be created manually or by your base infrastructure:
-# aws ssm put-parameter --name "/county/main/infrastructure/private_subnet_id" --value "subnet-xxxxx" --type String
+# aws ssm put-parameter --name "/main/infrastructure/PRIVATE_SUBNET_ID" --value "subnet-xxxxx" --type String
 # Note: This data source is defined in lambda.tf to avoid duplication
 
 # Create a new route table for private subnets that will use NAT
@@ -24,11 +38,10 @@ resource "aws_route_table" "private_nat" {
   }
 }
 
-# Associate the private subnet with the new route table
-resource "aws_route_table_association" "private_nat" {
-  subnet_id      = data.aws_ssm_parameter.private_subnet_id.value
-  route_table_id = aws_route_table.private_nat.id
-}
+# Note: Route table association is skipped for ephemeral environments
+# The private subnet is already associated with a route table from shared infrastructure.
+# To use NAT instance routing, manually replace the association:
+# aws ec2 replace-route-table-association --association-id <existing-assoc-id> --route-table-id <new-rt-id>
 
 # Security Group for NAT Instance
 resource "aws_security_group" "nat_instance" {

@@ -12,10 +12,13 @@ EXCLUDE_PATH="prisma_migrations"
 if [ "$ENVIRONMENT" = "production" ]; then
     echo "Running in production mode - fetching credentials from AWS SSM Parameter Store"
     
+    # Set AWS region (default to eu-west-2 if not set)
+    AWS_REGION=${AWS_REGION:-"eu-west-2"}
+    
     # Fetch RDS credentials from AWS SSM Parameter Store
-    DB_USER=$(aws ssm get-parameter --name "/county/main/db/db_username" --query "Parameter.Value" --output text)
-    DB_PASSWORD=$(aws ssm get-parameter --name "/county/main/db/db_password" --with-decryption --query "Parameter.Value" --output text)
-    DB_HOST=${DB_HOST:-$(aws ssm get-parameter --name "/county/main/db/RDS_ENDPOINT" --query "Parameter.Value" --output text)}
+    DB_USER=$(aws ssm get-parameter --name "/main/db/USERNAME" --region "$AWS_REGION" --query "Parameter.Value" --output text)
+    DB_PASSWORD=$(aws ssm get-parameter --name "/main/db/PASSWORD" --with-decryption --region "$AWS_REGION" --query "Parameter.Value" --output text)
+    DB_HOST=${DB_HOST:-$(aws ssm get-parameter --name "/country/db/RDS_ENDPOINT" --region "$AWS_REGION" --query "Parameter.Value" --output text)}
     DB_NAME=${DB_NAME:-"country"}
     DB_PORT=${DB_PORT:-5432}
     
