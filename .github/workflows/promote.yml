@@ -192,9 +192,9 @@ jobs:
       - name: Get database connection info from SSM
         id: rds
         run: |
-          DB_USERNAME=$(aws ssm get-parameter --name "/county/main/db/db_username" --query 'Parameter.Value' --output text)
-          DB_PASSWORD=$(aws ssm get-parameter --name "/county/main/db/db_password" --with-decryption --query 'Parameter.Value' --output text)
-          RDS_ENDPOINT=$(aws ssm get-parameter --name "/county/main/db/RDS_ENDPOINT" --query 'Parameter.Value' --output text)
+          DB_USERNAME=$(aws ssm get-parameter --name "/main/db/USERNAME" --query 'Parameter.Value' --output text)
+          DB_PASSWORD=$(aws ssm get-parameter --name "/main/db/PASSWORD" --with-decryption --query 'Parameter.Value' --output text)
+          RDS_ENDPOINT=$(aws ssm get-parameter --name "/country/db/RDS_ENDPOINT" --query 'Parameter.Value' --output text)
           echo "rds_endpoint=${RDS_ENDPOINT}" >> $GITHUB_OUTPUT
           echo "db_username=${DB_USERNAME}" >> $GITHUB_OUTPUT
           echo "db_password=${DB_PASSWORD}" >> $GITHUB_OUTPUT
@@ -205,7 +205,7 @@ jobs:
           chmod +x runMigrations.sh
           ./runMigrations.sh
         env:
-          DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/county
+          DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/country
 
 
   # test-deployment:

@@ -231,6 +231,17 @@ The service provides appropriate HTTP status codes:
 - `404`: Country not found
 - `500`: Internal server error
 
+## Testing in AWS
+ Event Json
+
+ `
+ {
+  "queryStringParameters": {
+    "countryName": "Spain"
+  }
+}
+`
+
 ## Future Enhancements
 
 - [ ] Add caching layer (Redis) for API responses

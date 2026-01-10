@@ -228,9 +228,9 @@ jobs:
       - name: Get RDS credentials
         id: rds
         run: |
-          RDS_ENDPOINT=$(aws ssm get-parameter --name "/main/db/rds_endpoint" --query "Parameter.Value" --output text | cut -d':' -f1)
-          DB_USERNAME=$(aws ssm get-parameter --name "/main/db/username" --query "Parameter.Value" --output text)
-          DB_PASSWORD=$(aws ssm get-parameter --name "/main/db/password" --with-decryption --query "Parameter.Value" --output text)
+          RDS_ENDPOINT=$(aws ssm get-parameter --name "/country/db/RDS_ENDPOINT" --query "Parameter.Value" --output text | cut -d':' -f1)
+          DB_USERNAME=$(aws ssm get-parameter --name "/main/db/USERNAME" --query "Parameter.Value" --output text)
+          DB_PASSWORD=$(aws ssm get-parameter --name "/main/db/PASSWORD" --with-decryption --query "Parameter.Value" --output text)
           
           echo "::add-mask::$DB_PASSWORD"
           echo "endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT

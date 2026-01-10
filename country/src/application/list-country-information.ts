@@ -31,7 +31,7 @@ export interface CountryInformationResult {
   }[];
 
   nationalDish?: {
-    countryCode: string;
+    countryCode?: string | null;
     countryName: string;
     dishName: string;
     imageUrl: string | null;

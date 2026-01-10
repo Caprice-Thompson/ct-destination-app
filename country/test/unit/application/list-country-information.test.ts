@@ -21,7 +21,6 @@ describe('ListCountryInformationUseCase', () => {
 
     mockDataRepository = {
       getNationalDish: jest.fn(),
-      saveNationalDish: jest.fn(),
     };
 
     mockPopulationRepository = {
