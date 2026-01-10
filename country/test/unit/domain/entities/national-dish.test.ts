@@ -3,7 +3,7 @@ import { NationalDish } from '@domain/entities/national-dish';
 describe('NationalDish Entity', () => {
   describe('Constructor', () => {
     it('should create a national dish with all fields', () => {
-      const dish = new NationalDish('ES', 'Spain', 'Paella', 'www.pizza.svg', 'A traditional Spanish rice dish');
+      const dish = new NationalDish('Spain', 'Paella', 'www.pizza.svg', 'ES', 'A traditional Spanish rice dish');
       expect(dish.countryCode).toBe('ES');
       expect(dish.countryName).toBe('Spain');
       expect(dish.dishName).toBe('Paella');
@@ -12,7 +12,7 @@ describe('NationalDish Entity', () => {
     });
 
     it('should create a national dish without description', () => {
-      const dish = new NationalDish('ES', 'Spain', 'Paella', null, undefined);
+      const dish = new NationalDish('Spain', 'Paella', null, 'ES', undefined);
 
       expect(dish.countryCode).toBe('ES');
       expect(dish.countryName).toBe('Spain');
@@ -21,7 +21,7 @@ describe('NationalDish Entity', () => {
     });
 
     it('should handle empty string description', () => {
-      const dish = new NationalDish('IT', 'Italy', 'Pizza', 'www.pizza.svg', '');
+      const dish = new NationalDish('Italy', 'Pizza', 'www.pizza.svg', 'IT', '');
 
       expect(dish.countryCode).toBe('IT');
       expect(dish.countryName).toBe('Italy');
@@ -32,10 +32,10 @@ describe('NationalDish Entity', () => {
   describe('toJSON', () => {
     it('should serialise to JSON with description', () => {
       const dish = new NationalDish(
-        'GB',
         'United Kingdom',
         'Fish and Chips',
         'www.fishandchips.svg',
+        'GB',
         'Battered fish with chips',
       );
       const json = dish.toJSON();
@@ -50,7 +50,7 @@ describe('NationalDish Entity', () => {
     });
 
     it('should serialise to JSON without description', () => {
-      const dish = new NationalDish('DE', 'Germany', 'Sauerbraten', 'www.sauerbraten.svg', 'A German meat dish');
+      const dish = new NationalDish('Germany', 'Sauerbraten', 'www.sauerbraten.svg', 'DE', 'A German meat dish');
       const json = dish.toJSON();
 
       expect(json).toEqual({
@@ -63,7 +63,7 @@ describe('NationalDish Entity', () => {
     });
 
     it('should handle special characters in dish name', () => {
-      const dish = new NationalDish('FR', 'France', 'Crème brûlée', 'www.cremebrulee.svg', 'A French dessert');
+      const dish = new NationalDish('France', 'Crème brûlée', 'www.cremebrulee.svg', 'FR', 'A French dessert');
       const json = dish.toJSON();
 
       expect(json).toEqual({

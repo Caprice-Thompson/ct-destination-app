@@ -52,7 +52,7 @@ describe('listCountryInformationHandler', () => {
       });
 
       const mockPopulation = [{ cityName: 'Madrid', population: 3223334 }];
-      const mockDish = new NationalDish('ES', 'Spain', 'Paella', 'A rice dish');
+      const mockDish = new NationalDish('Spain', 'Paella', 'www.pizza.svg', 'ES', 'A traditional Spanish rice dish');
 
       const dependencies = await makeDependencies();
       (dependencies.listCountryInformationUseCase.listCountryInfo as jest.Mock).mockResolvedValue({
@@ -73,7 +73,10 @@ describe('listCountryInformationHandler', () => {
       expect(body.countryDetails.countryCode).toBe('ES');
       expect(body.countryDetails.countryName).toBe('Spain');
       expect(body.cityPopulation[0].population).toBe(3223334);
+      expect(body.nationalDish.countryName).toBe('Spain');
       expect(body.nationalDish.dishName).toBe('Paella');
+      expect(body.nationalDish.imageUrl).toBe('www.pizza.svg');
+      expect(body.nationalDish.description).toBe('A traditional Spanish rice dish');
     });
 
     it('should handle missing optional data (population and dish)', async () => {
