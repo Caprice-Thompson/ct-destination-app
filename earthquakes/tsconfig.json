@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "resolveJsonModule": true,
+      "types": ["node", "jest"],
+      "paths": {
+        "@application/*": ["application/*"],
+        "@domain/*": ["domain/*"],
+        "@infrastructure/*": ["infrastructure/*"],
+        "@api/*": ["api/*"]
+      }
+    }
+  }
+  
