@@ -6,7 +6,7 @@ export interface ApplicationConfig {
     accessKeyId: string;
     region: string;
     secretAccessKey: string;
-    sessionToken: string;
+    sessionToken?: string;
   };
   service: {
     name: string;
@@ -16,6 +16,7 @@ export interface ApplicationConfig {
   };
   urls: {
     earthquakesApi: string;
+    restCountriesApiUrl: string;
   };
 }
 
@@ -27,6 +28,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     AWS_SESSION_TOKEN: z.string().optional(),
     DYNAMODB_EARTHQUAKES_TABLE: z.string(),
     EARTHQUAKES_API_URL: z.string(),
+    REST_COUNTRIES_API_URL: z.string(),
     SERVICE_NAME: z.string(),
   });
 
@@ -37,7 +39,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       accessKeyId: parsedEnv.AWS_ACCESS_KEY_ID,
       region: parsedEnv.AWS_REGION,
       secretAccessKey: parsedEnv.AWS_SECRET_ACCESS_KEY,
-      sessionToken: parsedEnv.AWS_SESSION_TOKEN,
+      sessionToken: parsedEnv.AWS_SESSION_TOKEN ?? '',
     },
     service: {
       name: parsedEnv.SERVICE_NAME,
@@ -47,6 +49,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     },
     urls: {
       earthquakesApi: parsedEnv.EARTHQUAKES_API_URL,
+      restCountriesApiUrl: parsedEnv.REST_COUNTRIES_API_URL,
     },
   };
 }

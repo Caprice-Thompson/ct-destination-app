@@ -1,7 +1,20 @@
-export interface EarthquakeRepository {
-    getMostRecentEarthquakes(dateRange: { from: string; to: string }): Promise<Earthquake[]>;
+import { Earthquake } from '@domain/entities/earthquake';
+import { Coordinates } from '@domain/entities/coordinates';
+
+export interface EarthquakeQueryParams {
+    latitude: number;
+    longitude: number;
+    startTime: string;
+    endTime: string;
+    maxRadiusKm?: number;
+    minMagnitude?: number;
+    limit?: number;
 }
 
-export interface CoordinatesRepository {
-    getCoordinates(latitude: number, longitude: number): Promise<Coordinates>;
+export interface EarthquakeRepositoryInterface {
+    getMostRecentEarthquakes(params: EarthquakeQueryParams): Promise<Earthquake[]>;
+}
+
+export interface CoordinatesRepositoryInterface {
+    getCoordinatesByCountryName(countryName: string): Promise<Coordinates>;
 }
