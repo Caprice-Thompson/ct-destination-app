@@ -22,11 +22,11 @@ export interface ApplicationConfig {
 
 export async function makeConfig(): Promise<ApplicationConfig> {
   const schema = z.object({
-    AWS_REGION: z.string(),
-    AWS_ACCESS_KEY_ID: z.string(),
-    AWS_SECRET_ACCESS_KEY: z.string(),
+    AWS_REGION: z.string().default('eu-west-2'),
+    AWS_ACCESS_KEY_ID: z.string().default(''),
+    AWS_SECRET_ACCESS_KEY: z.string().default(''),
     AWS_SESSION_TOKEN: z.string().optional(),
-    DYNAMODB_EARTHQUAKES_TABLE: z.string(),
+    DYNAMODB_EARTHQUAKES_TABLE: z.string().default(''),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
     SERVICE_NAME: z.string(),
