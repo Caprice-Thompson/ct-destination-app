@@ -1,9 +1,10 @@
-import { CoordinatesRepository } from '@infrastructure/repositories/coordinates-repository';
-import { Coordinates } from '@domain/entities/coordinates';
+import { CoordinatesRepository } from "@infrastructure/repositories/coordinates-repository";
+import { Coordinates } from "@domain/entities/coordinates";
+import type { Logger } from "@application/interfaces/logger";
 
-describe('CoordinatesRepository', () => {
+describe("CoordinatesRepository", () => {
   let repository: CoordinatesRepository;
-  let mockLogger: any;
+  let mockLogger: Logger;
 
   beforeEach(() => {
     mockLogger = {
@@ -13,7 +14,10 @@ describe('CoordinatesRepository', () => {
       error: jest.fn(),
     };
 
-    repository = new CoordinatesRepository('https://api.example.com', mockLogger);
+    repository = new CoordinatesRepository(
+      "https://api.example.com",
+      mockLogger,
+    );
 
     global.fetch = jest.fn();
   });
@@ -22,13 +26,13 @@ describe('CoordinatesRepository', () => {
     jest.clearAllMocks();
   });
 
-  describe('getCoordinatesByCountryName', () => {
-    it('should fetch and return coordinates successfully', async () => {
+  describe("getCoordinatesByCountryName", () => {
+    it("should fetch and return coordinates successfully", async () => {
       const mockResponse = [
         {
           name: {
-            common: 'Spain',
-            official: 'Kingdom of Spain',
+            common: "Spain",
+            official: "Kingdom of Spain",
           },
           latlng: [40, -3],
         },
@@ -39,30 +43,30 @@ describe('CoordinatesRepository', () => {
         json: async () => mockResponse,
       });
 
-      const result = await repository.getCoordinatesByCountryName('Spain');
+      const result = await repository.getCoordinatesByCountryName("Spain");
 
       expect(result).toBeInstanceOf(Coordinates);
       expect(result.latitude).toBe(40);
       expect(result.longitude).toBe(-3);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Fetching coordinates from REST Countries API',
-        expect.objectContaining({ countryName: 'Spain' })
+        "Fetching coordinates from REST Countries API",
+        expect.objectContaining({ countryName: "Spain" }),
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        'Coordinates fetched successfully',
+        "Coordinates fetched successfully",
         expect.objectContaining({
-          countryName: 'Spain',
+          countryName: "Spain",
           latitude: 40,
           longitude: -3,
-        })
+        }),
       );
     });
 
-    it('should encode country name in URL', async () => {
+    it("should encode country name in URL", async () => {
       const mockResponse = [
         {
-          name: { common: 'United Kingdom', official: 'United Kingdom' },
+          name: { common: "United Kingdom", official: "United Kingdom" },
           latlng: [54, -2],
         },
       ];
@@ -72,37 +76,39 @@ describe('CoordinatesRepository', () => {
         json: async () => mockResponse,
       });
 
-      await repository.getCoordinatesByCountryName('United Kingdom');
+      await repository.getCoordinatesByCountryName("United Kingdom");
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('United%20Kingdom')
+        expect.stringContaining("United%20Kingdom"),
       );
     });
 
-    it('should throw error when API returns non-ok status', async () => {
+    it("should throw error when API returns non-ok status", async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
-        statusText: 'Not Found',
+        statusText: "Not Found",
       });
 
       await expect(
-        repository.getCoordinatesByCountryName('InvalidCountry')
-      ).rejects.toThrow('Failed to fetch coordinates for country "InvalidCountry"');
+        repository.getCoordinatesByCountryName("InvalidCountry"),
+      ).rejects.toThrow(
+        'Failed to fetch coordinates for country "InvalidCountry"',
+      );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Error fetching coordinates from REST Countries API',
+        "Error fetching coordinates from REST Countries API",
         expect.objectContaining({
-          error: expect.stringContaining('404'),
-          countryName: 'InvalidCountry',
-        })
+          error: expect.stringContaining("404"),
+          countryName: "InvalidCountry",
+        }),
       );
     });
 
-    it('should throw error when no coordinates available', async () => {
+    it("should throw error when no coordinates available", async () => {
       const mockResponse = [
         {
-          name: { common: 'Test', official: 'Test' },
+          name: { common: "Test", official: "Test" },
         },
       ];
 
@@ -112,24 +118,26 @@ describe('CoordinatesRepository', () => {
       });
 
       await expect(
-        repository.getCoordinatesByCountryName('Test')
-      ).rejects.toThrow('No coordinates available for country: Test');
+        repository.getCoordinatesByCountryName("Test"),
+      ).rejects.toThrow("No coordinates available for country: Test");
     });
 
-    it('should throw error when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+    it("should throw error when fetch fails", async () => {
+      (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
 
       await expect(
-        repository.getCoordinatesByCountryName('Spain')
-      ).rejects.toThrow('Failed to fetch coordinates for country "Spain": Network error');
+        repository.getCoordinatesByCountryName("Spain"),
+      ).rejects.toThrow(
+        'Failed to fetch coordinates for country "Spain": Network error',
+      );
 
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
-    it('should handle decimal coordinates', async () => {
+    it("should handle decimal coordinates", async () => {
       const mockResponse = [
         {
-          name: { common: 'Japan', official: 'Japan' },
+          name: { common: "Japan", official: "Japan" },
           latlng: [36.204824, 138.252924],
         },
       ];
@@ -139,16 +147,16 @@ describe('CoordinatesRepository', () => {
         json: async () => mockResponse,
       });
 
-      const result = await repository.getCoordinatesByCountryName('Japan');
+      const result = await repository.getCoordinatesByCountryName("Japan");
 
       expect(result.latitude).toBe(36.204824);
       expect(result.longitude).toBe(138.252924);
     });
 
-    it('should handle negative coordinates', async () => {
+    it("should handle negative coordinates", async () => {
       const mockResponse = [
         {
-          name: { common: 'Chile', official: 'Chile' },
+          name: { common: "Chile", official: "Chile" },
           latlng: [-30, -71],
         },
       ];
@@ -158,11 +166,10 @@ describe('CoordinatesRepository', () => {
         json: async () => mockResponse,
       });
 
-      const result = await repository.getCoordinatesByCountryName('Chile');
+      const result = await repository.getCoordinatesByCountryName("Chile");
 
       expect(result.latitude).toBe(-30);
       expect(result.longitude).toBe(-71);
     });
   });
 });
-

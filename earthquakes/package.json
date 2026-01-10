@@ -8,6 +8,7 @@
     "test:coverage": "jest --coverage",
     "build": "esbuild src/api/get-most-recent-earthquakes.ts --bundle --platform=node --target=node20 --outfile=dist/get-most-recent-earthquakes.js --sourcemap --external:@aws-sdk/* --external:pg-native",
     "lint:check": "eslint .",
+    "lint": "eslint . --fix",
     "type-check": "tsc --noEmit"
   },
   "keywords": [],
@@ -16,6 +17,7 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.966.0",
+    "jiti": "^2.6.1",
     "pg": "^8.16.3",
     "winston": "^3.19.0",
     "zod": "^4.3.5"

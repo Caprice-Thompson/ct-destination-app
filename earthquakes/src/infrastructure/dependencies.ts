@@ -15,8 +15,14 @@ export type Dependencies = {
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
   const logger = makeLogger(config);
-  const earthquakeRepository = new EarthquakeRepository(config.urls.earthquakesApi, logger);
-  const coordinatesRepository = new CoordinatesRepository(config.urls.restCountriesApiUrl, logger);
+  const earthquakeRepository = new EarthquakeRepository(
+    config.urls.earthquakesApi,
+    logger,
+  );
+  const coordinatesRepository = new CoordinatesRepository(
+    config.urls.restCountriesApiUrl,
+    logger,
+  );
 
   return {
     config,
