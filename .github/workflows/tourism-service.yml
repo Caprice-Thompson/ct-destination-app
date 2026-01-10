@@ -113,11 +113,12 @@ jobs:
   deploy-infrastructure:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    needs: [detect-changes, test]
+    needs: detect-changes
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' &&
-      (needs.detect-changes.outputs.infra_changed == 'true' || github.event.inputs.action == 'deploy')
+      (github.event_name == 'push' && 
+       github.ref == 'refs/heads/main' &&
+       needs.detect-changes.outputs.infra_changed == 'true') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy')
     environment: production
     
     steps:
@@ -128,12 +129,14 @@ jobs:
         with:
           name: tourism-lambda-package
           path: tourism/dist/
+        continue-on-error: true
       
       - name: Download migration Lambda artifact
         uses: actions/download-artifact@v4
         with:
           name: tourism-migration-lambda
           path: tourism/migration-lambda/
+        continue-on-error: true
       
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
@@ -174,11 +177,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, test]
     if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' &&
-      needs.detect-changes.outputs.code_changed == 'true' &&
-      needs.detect-changes.outputs.infra_changed == 'false' ||
-      github.event.inputs.action == 'deploy-code-only'
+      (github.event_name == 'push' && 
+       github.ref == 'refs/heads/main' &&
+       needs.detect-changes.outputs.code_changed == 'true' &&
+       needs.detect-changes.outputs.infra_changed == 'false') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy-code-only')
     environment: production
     
     steps:

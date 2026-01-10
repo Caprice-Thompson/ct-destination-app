@@ -1,12 +1,12 @@
-name: Promote Deployment Pipeline
+name: Tourism Promote Deployment Pipeline
 
 on:
   push:
     branches: [main]
     paths:
-      - 'country/**'
-      - 'infra/country/**'
-      - '.github/workflows/promote.yml'
+      - 'tourism/**'
+      - 'infra/tourism/**'
+      - '.github/workflows/tourism-promote.yml'
   workflow_dispatch:
     inputs:
       skip_tests:
@@ -40,28 +40,28 @@ jobs:
         with:
           node-version: "20.x"
           cache: "npm"
-          cache-dependency-path: country/package-lock.json
+          cache-dependency-path: tourism/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./country
-        run: npm ci --legacy-peer-deps
+        working-directory: ./tourism
+        run: npm ci
 
       - name: Run type check
-        working-directory: ./country
+        working-directory: ./tourism
         run: npm run type-check
 
       - name: Run linter
-        working-directory: ./country
+        working-directory: ./tourism
         run: npm run lint:check
 
       - name: Run tests
-        working-directory: ./country
+        working-directory: ./tourism
         run: npm test -- --coverage --ci
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
-          files: ./country/coverage/lcov.info
+          files: ./tourism/coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
@@ -80,32 +80,32 @@ jobs:
         with:
           node-version: "20.x"
           cache: "npm"
-          cache-dependency-path: country/package-lock.json
+          cache-dependency-path: tourism/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./country
-        run: npm ci --legacy-peer-deps
+        working-directory: ./tourism
+        run: npm ci
 
       - name: Build
-        working-directory: ./country
+        working-directory: ./tourism
         run: npm run build
 
       - name: Build migration Lambda
-        working-directory: ./country
+        working-directory: ./tourism
         run: npm run build:migration
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lambda-dist
-          path: country/dist/
+          name: tourism-lambda-dist
+          path: tourism/dist/
           retention-days: 1
 
       - name: Upload migration Lambda artifact
         uses: actions/upload-artifact@v4
         with:
-          name: migration-lambda
-          path: country/migration-lambda/
+          name: tourism-migration-lambda
+          path: tourism/migration-lambda/
           retention-days: 1
 
   infrastructure:
@@ -127,15 +127,15 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: lambda-dist
-          path: country/dist/
+          name: tourism-lambda-dist
+          path: tourism/dist/
         continue-on-error: true
 
       - name: Download migration Lambda artifact
         uses: actions/download-artifact@v4
         with:
-          name: migration-lambda
-          path: country/migration-lambda/
+          name: tourism-migration-lambda
+          path: tourism/migration-lambda/
         continue-on-error: true
 
       - name: Setup OpenTofu
@@ -151,7 +151,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Create tfvars
-        working-directory: ./infra/country
+        working-directory: ./infra/tourism
         run: |
           cat > terraform.tfvars <<EOF
           aws_region   = "${{ env.AWS_REGION }}"
@@ -162,7 +162,7 @@ jobs:
 
       - name: Initialise and apply
         id: deploy
-        working-directory: ./infra/country
+        working-directory: ./infra/tourism
         run: |
           tofu init
           tofu apply -auto-approve
@@ -183,8 +183,8 @@ jobs:
           node-version: "20.x"
 
       - name: Install dependencies
-        working-directory: ./country
-        run: npm ci --legacy-peer-deps
+        working-directory: ./tourism
+        run: npm ci
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -207,55 +207,13 @@ jobs:
           echo "db_password=${DB_PASSWORD}" >> $GITHUB_OUTPUT
 
       - name: Run migrations script
-        working-directory: ./country
+        working-directory: ./tourism
         run: |
-          chmod +x runMigrations.sh
-          ./runMigrations.sh
-        env:
-          DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/country
-
-
-  # test-deployment:
-  #   name: Test Deployment
-  #   runs-on: ubuntu-latest
-  #   needs: [infrastructure, migrate]
-
-  #   steps:
-  #     - name: Test API endpoint
-  #       run: |
-  #         API_URL="${{ needs.infrastructure.outputs.api_url }}"
-
-  #         echo "Testing API: ${API_URL}"
-
-  #         # Test with France
-  #         RESPONSE=$(curl -s -w "\n%{http_code}" "${API_URL}?countryName=France")
-  #         HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-  #         BODY=$(echo "$RESPONSE" | sed '$d')
-
-  #         echo "HTTP Status: ${HTTP_CODE}"
-  #         echo "Response: ${BODY}"
-
-  #         if [ "${HTTP_CODE}" = "200" ]; then
-  #           echo "API test passed"
-  #         else
-  #           echo "API test failed with status ${HTTP_CODE}"
-  #           exit 1
-  #         fi
-
-  #     - name: Trigger Lambda manually
-  #       run: |
-  #         echo "Testing Lambda invocation..."
-  #         aws lambda invoke \
-  #           --function-name list-country-information \
-  #           --payload '{"queryStringParameters":{"countryName":"Germany"}}' \
-  #           response.json
-
-  #         cat response.json
-  #         echo "Lambda test passed"
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_REGION: ${{ env.AWS_REGION }}
+          export PGPASSWORD="${{ steps.rds.outputs.db_password }}"
+          psql -h ${{ steps.rds.outputs.rds_endpoint }} \
+               -U ${{ steps.rds.outputs.db_username }} \
+               -d tourism \
+               -f src/infrastructure/repositories/db/migrations/001_create_unesco_sites_table.sql
 
   summary:
     name: Deployment Summary
@@ -266,7 +224,7 @@ jobs:
     steps:
       - name: Create summary
         run: |
-          echo "# Complete Deployment Pipeline" >> $GITHUB_STEP_SUMMARY
+          echo "# Tourism Complete Deployment Pipeline" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Results" >> $GITHUB_STEP_SUMMARY
           echo "- Tests: ${{ needs.test.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
@@ -284,3 +242,4 @@ jobs:
           echo "- [API Gateway Console](https://console.aws.amazon.com/apigateway/home?region=${{ env.AWS_REGION }})" >> $GITHUB_STEP_SUMMARY
           echo "- [RDS Console](https://console.aws.amazon.com/rds/home?region=${{ env.AWS_REGION }})" >> $GITHUB_STEP_SUMMARY
           echo "- [CloudWatch Logs](https://console.aws.amazon.com/cloudwatch/home?region=${{ env.AWS_REGION }}#logsV2:log-groups)" >> $GITHUB_STEP_SUMMARY
+
