@@ -53,7 +53,7 @@ variable "log_retention_days" {
 }
 
 variable "earthquakes_api_url" {
-  description = "USGS Earthquakes API URL"
+  description = "Earthquakes API URL"
   type        = string
 }
 
