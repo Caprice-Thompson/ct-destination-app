@@ -4,12 +4,14 @@ import { makeLogger } from "./logger";
 import type { Logger } from "@application/interfaces/logger";
 import { CoordinatesRepository } from "./repositories/coordinates-repository";
 import { EarthquakeRepository } from "./repositories/earthquake-repository";
+import { DynamoDBEarthquakeRepository } from "./repositories/historical-earthquakes-repository";
 
 export type Dependencies = {
   config: ApplicationConfig;
   logger: Logger;
   earthquakeRepository: EarthquakeRepository;
   coordinatesRepository: CoordinatesRepository;
+  historicalEarthquakeRepository: DynamoDBEarthquakeRepository;
 };
 
 export async function makeDependencies(): Promise<Dependencies> {
@@ -23,11 +25,13 @@ export async function makeDependencies(): Promise<Dependencies> {
     config.urls.restCountriesApiUrl,
     logger,
   );
+const historicalEarthquakeRepository = new DynamoDBEarthquakeRepository();
 
   return {
     config,
     logger,
     earthquakeRepository,
     coordinatesRepository,
+    historicalEarthquakeRepository,
   };
 }

@@ -1,5 +1,6 @@
 import { makeDependencies } from "@infrastructure/dependencies";
 import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
+import { getMonthlyEarthquakeStatisticsQuery, GetMonthlyEarthquakeStatisticsQuery } from "@application/monthly-statistics-query";
 
 /**
  * Lambda handler for calculating eq stats for a country
