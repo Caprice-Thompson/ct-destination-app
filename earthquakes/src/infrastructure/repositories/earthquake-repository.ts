@@ -46,19 +46,19 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     try {
       const url = this.buildUrl(params);
 
-      this.logger.debug("Fetching earthquakes from USGS API", { url });
+      this.logger.debug("Fetching earthquakes from EQ API", { url });
 
       const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(
-          `USGS API returned status ${response.status}: ${response.statusText}`,
+          `EQ API returned status ${response.status}: ${response.statusText}`,
         );
       }
 
       const data = (await response.json()) as EqGeoJSONResponse;
 
-      this.logger.info("Earthquakes fetched successfully from USGS API", {
+      this.logger.info("Earthquakes fetched successfully from EQ API", {
         count: data.features.length,
         status: data.metadata.status,
       });
@@ -67,7 +67,7 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      this.logger.error("Error fetching earthquakes from USGS API", {
+      this.logger.error("Error fetching earthquakes from EQ API", {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         params,
@@ -85,17 +85,10 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
       longitude: params.longitude.toString(),
       starttime: params.startTime,
       endtime: params.endTime,
-      maxradiuskm: (params.maxRadiusKm ?? 300).toString(),
+      limit: (params.limit ?? 10).toString(),
+      maxradiuskm: (params.maxRadiusKm ?? 2).toString(),
       orderby: "time-asc",
     });
-
-    if (params.minMagnitude !== undefined) {
-      queryParams.append("minmagnitude", params.minMagnitude.toString());
-    }
-
-    if (params.limit !== undefined) {
-      queryParams.append("limit", params.limit.toString());
-    }
 
     return `${this.baseUrl}?${queryParams.toString()}`;
   }

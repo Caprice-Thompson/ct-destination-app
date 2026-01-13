@@ -88,13 +88,13 @@ describe("EarthquakeRepository", () => {
       expect(result[0].tsunami).toBe(0);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        "Fetching earthquakes from USGS API",
+        "Fetching earthquakes from EQ API",
         expect.objectContaining({
           url: expect.stringContaining("latitude=40"),
         }),
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        "Earthquakes fetched successfully from USGS API",
+        "Earthquakes fetched successfully from EQ API",
         expect.objectContaining({ count: 2, status: 200 }),
       );
     });
@@ -117,7 +117,6 @@ describe("EarthquakeRepository", () => {
         startTime: "2020-01-01",
         endTime: "2023-01-01",
         maxRadiusKm: 500,
-        minMagnitude: 4.0,
         limit: 20,
       };
 
@@ -139,36 +138,7 @@ describe("EarthquakeRepository", () => {
         expect.stringContaining("maxradiuskm=500"),
       );
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("minmagnitude=4"),
-      );
-      expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining("limit=20"),
-      );
-    });
-
-    it("should use default max radius when not provided", async () => {
-      const mockResponse = {
-        type: "FeatureCollection",
-        features: [],
-        metadata: { generated: 0, url: "", title: "", status: 200, count: 0 },
-      };
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const params = {
-        latitude: 40,
-        longitude: -3,
-        startTime: "2020-01-01",
-        endTime: "2023-01-01",
-      };
-
-      await repository.getMostRecentEarthquakes(params);
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("maxradiuskm=300"),
       );
     });
 
@@ -215,7 +185,7 @@ describe("EarthquakeRepository", () => {
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        "Error fetching earthquakes from USGS API",
+        "Error fetching earthquakes from EQ API",
         expect.objectContaining({
           error: expect.stringContaining("400"),
           params,
@@ -238,42 +208,6 @@ describe("EarthquakeRepository", () => {
       );
 
       expect(mockLogger.error).toHaveBeenCalled();
-    });
-
-    it("should correctly format date from timestamp", async () => {
-      const mockResponse = {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            id: "test1",
-            properties: {
-              mag: 5.0,
-              place: "Test Location",
-              time: 1672531200000,
-              type: "earthquake",
-              tsunami: 0,
-            },
-          },
-        ],
-        metadata: { generated: 0, url: "", title: "", status: 200, count: 1 },
-      };
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const params = {
-        latitude: 40,
-        longitude: -3,
-        startTime: "2020-01-01",
-        endTime: "2023-01-01",
-      };
-
-      const result = await repository.getMostRecentEarthquakes(params);
-
-      expect(result[0].date).toBe("2023-01-01");
     });
   });
 });

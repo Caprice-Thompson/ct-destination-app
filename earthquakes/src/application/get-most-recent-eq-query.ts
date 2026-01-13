@@ -1,23 +1,20 @@
 import { Dependencies } from "@infrastructure/dependencies";
 import { Earthquake } from "@domain/entities/earthquake";
 import { validateMostRecentEqRequest } from "./validator";
+import {
+  formattedEndDate,
+  formattedStartDate,
+  limit,
+  maxRadiusKm,
+} from "./utils/constants";
 
 export type GetMostRecentEarthquakesQuery = Readonly<{
   countryName: string;
-  startTime: string;
-  endTime: string;
-  maxRadiusKm?: number;
-  minMagnitude?: number;
-  limit?: number;
 }>;
 
 export type EarthquakesResponse = {
   earthquakes: Earthquake[];
   countryName: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
 };
 
 /**
@@ -53,27 +50,23 @@ export async function getMostRecentEarthquakesQuery(
     longitude: coordinates.longitude,
   });
 
-  const earthquakes = await earthquakeRepository.getMostRecentEarthquakes({
-    latitude: coordinates.latitude,
-    longitude: coordinates.longitude,
-    startTime: validatedQuery.startTime,
-    endTime: validatedQuery.endTime,
-    maxRadiusKm: validatedQuery.maxRadiusKm,
-    minMagnitude: validatedQuery.minMagnitude,
-    limit: validatedQuery.limit,
-  });
+  const mostRecentEarthquakes =
+    await earthquakeRepository.getMostRecentEarthquakes({
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      startTime: formattedStartDate,
+      endTime: formattedEndDate,
+      maxRadiusKm: maxRadiusKm,
+      limit: limit,
+    });
 
   logger.info("Get most recent earthquakes query completed successfully", {
     countryName: validatedQuery.countryName,
-    earthquakesCount: earthquakes.length,
+    earthquakesCount: mostRecentEarthquakes.length,
   });
 
   return {
-    earthquakes,
+    earthquakes: mostRecentEarthquakes,
     countryName: validatedQuery.countryName,
-    coordinates: {
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
-    },
   };
 }

@@ -74,8 +74,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -89,42 +87,6 @@ describe("handler", () => {
       expect(body.earthquakes[0].name).toBe("2 km NW of Santafé, Spain");
       expect(body.earthquakes[0].magnitude).toBe(4.3);
       expect(body.countryName).toBe("Spain");
-      expect(body.coordinates.latitude).toBe(40);
-      expect(body.coordinates.longitude).toBe(-3);
-    });
-
-    it("should handle optional parameters", async () => {
-      const mockCoordinates = new Coordinates({ latitude: 35, longitude: 139 });
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockResolvedValue(
-        mockCoordinates,
-      );
-      mockDependencies.earthquakeRepository.getMostRecentEarthquakes.mockResolvedValue(
-        [],
-      );
-
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Japan",
-          startTime: "2022-01-01",
-          endTime: "2023-01-01",
-          maxRadiusKm: "500",
-          minMagnitude: "5.0",
-          limit: "20",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.statusCode).toBe(200);
-      expect(
-        mockDependencies.earthquakeRepository.getMostRecentEarthquakes,
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({
-          maxRadiusKm: 500,
-          minMagnitude: 5.0,
-          limit: 20,
-        }),
-      );
     });
 
     it("should return empty array when no earthquakes found", async () => {
@@ -139,8 +101,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -171,8 +131,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -182,68 +140,6 @@ describe("handler", () => {
       const body = JSON.parse(response.body);
       expect(body.error).toBe("Validation error");
       expect(mockDependencies.logger.warn).toHaveBeenCalled();
-    });
-
-    it("should return 400 for invalid date format", async () => {
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Spain",
-          startTime: "2020/01/01",
-          endTime: "2023-01-01",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.statusCode).toBe(400);
-      const body = JSON.parse(response.body);
-      expect(body.error).toBe("Validation error");
-    });
-
-    it("should return 400 when start time is after end time", async () => {
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Spain",
-          startTime: "2023-01-01",
-          endTime: "2020-01-01",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.statusCode).toBe(400);
-      const body = JSON.parse(response.body);
-      expect(body.error).toBe("Validation error");
-      expect(body.message).toContain("Start time must be before end time");
-    });
-
-    it("should return 400 for invalid country name with numbers", async () => {
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Spain123",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.statusCode).toBe(400);
-    });
-
-    it("should return 400 for out of range magnitude", async () => {
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
-          minMagnitude: "15",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.statusCode).toBe(400);
     });
   });
 
@@ -256,8 +152,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "InvalidCountry",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -283,8 +177,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -303,8 +195,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 
@@ -327,8 +217,6 @@ describe("handler", () => {
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
-          startTime: "2020-01-01",
-          endTime: "2023-01-01",
         },
       };
 

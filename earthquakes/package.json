@@ -9,6 +9,7 @@
     "build": "esbuild src/api/get-most-recent-earthquakes.ts --bundle --platform=node --target=node20 --outfile=dist/get-most-recent-earthquakes.js --sourcemap --external:@aws-sdk/* --external:pg-native",
     "lint:check": "eslint .",
     "lint": "eslint . --fix",
+    "format": "prettier --write .",
     "type-check": "tsc --noEmit"
   },
   "keywords": [],

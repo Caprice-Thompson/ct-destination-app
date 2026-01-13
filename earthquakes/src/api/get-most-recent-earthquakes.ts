@@ -10,11 +10,6 @@ import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
  *
  * Query Parameters:
  * - countryName: string (required) - Name of the country
- * - startTime: string (required) - Start date in ISO format (YYYY-MM-DD)
- * - endTime: string (required) - End date in ISO format (YYYY-MM-DD)
- * - maxRadiusKm: number (optional) - Maximum radius in kilometers (default: 300)
- * - minMagnitude: number (optional) - Minimum earthquake magnitude
- * - limit: number (optional) - Maximum number of results
  */
 export const handler = async (
   event: APIGatewayEvent,
@@ -31,22 +26,13 @@ export const handler = async (
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           error: "Missing query parameters",
-          message: "Required parameters: countryName, startTime, endTime",
+          message: "Required parameters: countryName",
         }),
       };
     }
 
     const query: GetMostRecentEarthquakesQuery = {
-      countryName: params.countryName || "",
-      startTime: params.startTime || "",
-      endTime: params.endTime || "",
-      maxRadiusKm: params.maxRadiusKm
-        ? parseFloat(params.maxRadiusKm)
-        : undefined,
-      minMagnitude: params.minMagnitude
-        ? parseFloat(params.minMagnitude)
-        : undefined,
-      limit: params.limit ? parseInt(params.limit, 10) : undefined,
+      countryName: params.countryName,
     };
 
     const result = await getMostRecentEarthquakesQuery(query, dependencies);
@@ -62,12 +48,8 @@ export const handler = async (
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    const isValidationError =
-      errorMessage.includes("required") ||
-      errorMessage.includes("must be") ||
-      errorMessage.includes("Valid");
 
-    if (isValidationError) {
+    if (errorMessage.includes("Validation error")) {
       logger.warn("Validation error in getMostRecentEarthquakesHandler", {
         error: errorMessage,
       });
