@@ -33,12 +33,10 @@ data "aws_availability_zones" "available" {
 
 data "aws_ssm_parameter" "earthquakes_api_url" {
   name = "/earthquakes/api/EARTHQUAKES_API_URL"
-  depends_on = [aws_ssm_parameter.earthquakes_api_url]
 }
 
 data "aws_ssm_parameter" "rest_countries_api_url" {
   name = "/earthquakes/api/REST_COUNTRIES_API_URL"
-  depends_on = [aws_ssm_parameter.rest_countries_api_url]
 }
 
 resource "aws_lambda_permission" "api_gateway" {
