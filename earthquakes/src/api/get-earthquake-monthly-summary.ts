@@ -1,6 +1,9 @@
 import { makeDependencies } from "@infrastructure/dependencies";
 import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
-import { getMonthlyEarthquakeStatisticsQuery, GetMonthlyEarthquakeStatisticsQuery } from "@application/monthly-statistics-query";
+import {
+  getMonthlyEarthquakeStatisticsQuery,
+  GetMonthlyEarthquakeStatisticsQuery,
+} from "@application/monthly-statistics-query";
 
 /**
  * Lambda handler for calculating eq stats for a country
@@ -31,10 +34,10 @@ export const handler = async (
 
     const query: GetMonthlyEarthquakeStatisticsQuery = {
       countryName: params.countryName,
-      month: params.month
+      month: params.month,
     };
 
-    const result = await getMonthlyEarthquakeStatisticsQuery(query, dependencies);
+    const result = await getMonthlyEarthquakeStatisticsQuery(query);
 
     return {
       statusCode: 200,
