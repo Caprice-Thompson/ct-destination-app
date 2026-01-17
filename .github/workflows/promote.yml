@@ -300,6 +300,8 @@ jobs:
           aws_region   = "${{ env.AWS_REGION }}"
           environment  = "${{ env.ENVIRONMENT }}"
           project_name = "${{ env.PROJECT_NAME }}"
+          db_username  = "${{ secrets.DB_USERNAME }}"
+          db_password  = "${{ secrets.DB_PASSWORD }}"
           EOF
 
       - name: Deploy shared infrastructure
