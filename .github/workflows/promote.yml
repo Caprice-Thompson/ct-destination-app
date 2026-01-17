@@ -315,10 +315,10 @@ jobs:
     if: |
       github.event.inputs.skip_infrastructure != 'true' && 
       always() && 
-      (needs.build-country.result == 'success' || needs.build-country.result == 'skipped') &&
-      (needs.build-earthquakes.result == 'success' || needs.build-earthquakes.result == 'skipped') &&
-      (needs.build-tourism.result == 'success' || needs.build-tourism.result == 'skipped')
+      (needs.infrastructure-shared.result == 'success' || needs.infrastructure-shared.result == 'skipped')
     environment: production
+    outputs:
+      api_url: ${{ steps.deploy.outputs.api_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -334,39 +334,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Create tfvars
-        working-directory: ./infra/shared
-        run: |
-          cat > terraform.tfvars <<EOF
-          aws_region   = "${{ env.AWS_REGION }}"
-          environment  = "${{ env.ENVIRONMENT }}"
-          project_name = "${{ env.PROJECT_NAME }}"
-          db_username  = "${{ secrets.DB_USERNAME }}"
-          db_password  = "${{ secrets.DB_PASSWORD }}"
-          EOF
-
-      - name: Deploy shared infrastructure
-        working-directory: ./infra/shared
-        run: |
-          tofu init
-          tofu apply -auto-approve
-
-  infrastructure-country:
-    name: Deploy Country Infrastructure
-    runs-on: ubuntu-latest
-    needs: infrastructure-shared
-    if: |
-      github.event.inputs.skip_infrastructure != 'true' && 
-      always() && 
-      (needs.infrastructure-shared.result == 'success' || needs.infrastructure-shared.result == 'skipped')
-    environment: production
-    outputs:
-      api_url: ${{ steps.deploy.outputs.api_url }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Download Lambda artifact
         uses: actions/download-artifact@v4
@@ -382,26 +349,17 @@ jobs:
           path: country/migration-lambda/
         continue-on-error: true
 
-      - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: "1.6.0"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
       - name: Create tfvars
         working-directory: ./infra/country
         run: |
           cat > terraform.tfvars <<EOF
-          aws_region   = "${{ env.AWS_REGION }}"
-          environment  = "${{ env.ENVIRONMENT }}"
-          project_name = "${{ env.PROJECT_NAME }}"
-          node_env     = "${{ secrets.NODE_ENV || 'production' }}"
+          aws_region              = "${{ env.AWS_REGION }}"
+          environment             = "${{ env.ENVIRONMENT }}"
+          project_name            = "${{ env.PROJECT_NAME }}"
+          node_env                = "${{ secrets.NODE_ENV || 'production' }}"
+          rest_countries_api_url  = "https://restcountries.com/v3.1/name"
+          db_username             = "/main/db/USERNAME"
+          db_password             = "/main/db/PASSWORD"
           EOF
 
       - name: Deploy country infrastructure
@@ -410,6 +368,7 @@ jobs:
         run: |
           tofu init
           tofu apply -auto-approve
+          echo "api_url=$(tofu output -raw country_information_api_url)" >> $GITHUB_OUTPUT
 
   infrastructure-earthquakes:
     name: Deploy Earthquakes Infrastructure
@@ -462,6 +421,7 @@ jobs:
         run: |
           tofu init
           tofu apply -auto-approve
+          echo "api_url=$(tofu output -raw api_gateway_url)" >> $GITHUB_OUTPUT
 
   infrastructure-tourism:
     name: Deploy Tourism Infrastructure
@@ -513,6 +473,8 @@ jobs:
           environment  = "${{ env.ENVIRONMENT }}"
           project_name = "${{ env.PROJECT_NAME }}"
           node_env     = "${{ secrets.NODE_ENV || 'production' }}"
+          db_username  = "/main/db/USERNAME"
+          db_password  = "/main/db/PASSWORD"
           EOF
 
       - name: Deploy tourism infrastructure
@@ -521,6 +483,7 @@ jobs:
         run: |
           tofu init
           tofu apply -auto-approve
+          echo "api_url=$(tofu output -raw api_gateway_url)" >> $GITHUB_OUTPUT
 
   migrate-country:
     name: Run Country DB Migrations
@@ -567,6 +530,8 @@ jobs:
           chmod +x runMigrations.sh
           ./runMigrations.sh
         env:
+          ENVIRONMENT: production
+          AWS_REGION: ${{ env.AWS_REGION }}
           DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/country
 
   migrate-tourism:
