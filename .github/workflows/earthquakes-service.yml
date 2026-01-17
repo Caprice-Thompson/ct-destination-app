@@ -35,32 +35,9 @@ env:
   SERVICE_NAME: 'earthquakes'
 
 jobs:
-  detect-changes:
-    name: Detect Changes
-    runs-on: ubuntu-latest
-    outputs:
-      code_changed: ${{ steps.filter.outputs.code }}
-      infra_changed: ${{ steps.filter.outputs.infra }}
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            code:
-              - 'earthquakes/src/**'
-              - 'earthquakes/package*.json'
-              - 'earthquakes/tsconfig*.json'
-            infra:
-              - 'infra/earthquakes/**'
-
   test:
     name: Test & Build
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.code_changed == 'true' || github.event_name == 'workflow_dispatch'
-    
+    runs-on: ubuntu-latest    
     steps:
       - uses: actions/checkout@v4
       
@@ -101,11 +78,11 @@ jobs:
   deploy-infrastructure:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    needs: [detect-changes, test]
+    needs: [test]
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/main' &&
-      (needs.detect-changes.outputs.infra_changed == 'true' || github.event.inputs.action == 'deploy')
+      github.event.inputs.action == 'deploy'
     environment: production
     
     steps:
@@ -139,6 +116,7 @@ jobs:
           node_env                = "${{ secrets.NODE_ENV || 'production' }}"
           earthquakes_api_url     = "${{ secrets.EARTHQUAKES_API_URL }}"
           rest_countries_api_url  = "${{ secrets.REST_COUNTRIES_API_URL }}"
+          dynamodb_earthquakes_table = "${{ secrets.DYNAMODB_EARTHQUAKES_TABLE }}"
           EOF
       
       - name: Initialize OpenTofu
@@ -156,12 +134,10 @@ jobs:
   deploy-code-only:
     name: Deploy Lambda Code
     runs-on: ubuntu-latest
-    needs: [detect-changes, test]
+    needs: [test]
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/main' &&
-      needs.detect-changes.outputs.code_changed == 'true' &&
-      needs.detect-changes.outputs.infra_changed == 'false' ||
       github.event.inputs.action == 'deploy-code-only'
     environment: production
     
@@ -224,6 +200,7 @@ jobs:
           node_env                = "${{ secrets.NODE_ENV || 'production' }}"
           earthquakes_api_url     = "${{ secrets.EARTHQUAKES_API_URL }}"
           rest_countries_api_url  = "${{ secrets.REST_COUNTRIES_API_URL }}"
+          dynamodb_earthquakes_table = "${{ secrets.DYNAMODB_EARTHQUAKES_TABLE }}"
           EOF
       
       - name: Initialize OpenTofu
