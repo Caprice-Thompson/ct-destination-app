@@ -13,7 +13,7 @@ data "aws_ssm_parameter" "db_password" {
 }
 
 data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/country/db/RDS_ENDPOINT"
+  name = "/tourism/db/RDS_ENDPOINT"
 }
 
 # Build Lambda deployment package

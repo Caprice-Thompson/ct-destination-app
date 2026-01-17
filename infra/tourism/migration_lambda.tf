@@ -15,7 +15,7 @@ data "aws_ssm_parameter" "db_password_tourism_migration" {
 }
 
 data "aws_ssm_parameter" "rds_endpoint_tourism_migration" {
-  name = "/country/db/RDS_ENDPOINT"
+  name = "/tourism/db/RDS_ENDPOINT"
 }
 
 # IAM Role for Migration Lambda
@@ -68,7 +68,7 @@ resource "aws_iam_role_policy" "tourism_migration_lambda_policy" {
         ]
         Resource = [
           "arn:aws:ssm:${var.aws_region}:*:parameter/main/*",
-          "arn:aws:ssm:${var.aws_region}:*:parameter/country/*"
+          "arn:aws:ssm:${var.aws_region}:*:parameter/tourism/*"
         ]
       },
       {

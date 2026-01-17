@@ -32,6 +32,30 @@ export const handler = async (): Promise<MigrationResult> => {
     const dbPort = process.env.DB_PORT || '5432';
     const dbName = process.env.DB_NAME || 'country';
 
+    const postgresClient = new Client({
+      host: dbHost,
+      port: parseInt(dbPort),
+      database: 'postgres',
+      user: dbUsername,
+      password: dbPassword,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    await postgresClient.connect();
+    logger.info('Connected to postgres database');
+
+    const dbCheckResult = await postgresClient.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [dbName]);
+
+    if (dbCheckResult.rows.length === 0) {
+      logger.info(`Database ${dbName} does not exist, creating...`);
+      await postgresClient.query(`CREATE DATABASE ${dbName}`);
+      logger.info(`Database ${dbName} created successfully`);
+    }
+
+    await postgresClient.end();
+
     const client = new Client({
       host: dbHost,
       port: parseInt(dbPort),
@@ -44,7 +68,7 @@ export const handler = async (): Promise<MigrationResult> => {
     });
 
     await client.connect();
-    logger.info('Connected to database');
+    logger.info(`Connected to ${dbName} database`);
 
     // Create migrations table if not exists
     await client.query(`

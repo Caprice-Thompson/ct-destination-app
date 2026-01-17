@@ -60,3 +60,8 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
+variable "db_backup_retention_days" {
+  description = "Number of days to retain automated backups (1-35). Free tier allows max 1 day."
+  type        = number
+  default     = 1
+}
