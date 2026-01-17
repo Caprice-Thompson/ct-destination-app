@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "historical_earthquakes" {
-  name         = "${var.service}-historical_earthquakes"
+  name         = "${var.service_name}-historical_earthquakes"
   billing_mode = "PROVISIONED"
   read_capacity  = 1
   write_capacity = 1
@@ -14,11 +14,6 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   attribute {
     name = "time"
     type = "N"
-  }
-
-  attribute {
-    name = "magnitude"
-    type = "S"
   }
 
   attribute {
@@ -43,7 +38,7 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   tags = {
-    Name        = "${var.service}-historical_earthquakes"
-    Service     = var.service
+    Name        = "${var.service_name}-historical_earthquakes"
+    Service     = var.service_name
   }
 }

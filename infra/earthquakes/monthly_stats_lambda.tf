@@ -79,7 +79,7 @@ resource "aws_lambda_function" "eq_monthly_stats" {
   environment {
     variables = {
       SERVICE_NAME               = var.service_name
-      DYNAMODB_EARTHQUAKES_TABLE = data.aws_ssm_parameter.historical_earthquakes_dynamodb_table.value
+      DYNAMODB_EARTHQUAKES_TABLE = resource.aws_ssm_parameter.historical_earthquakes_dynamodb_table.value
       NODE_ENV                   = var.node_env
       LOG_LEVEL                  = "info"
     }
