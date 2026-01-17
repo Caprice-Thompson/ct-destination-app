@@ -39,13 +39,37 @@ resource "aws_ssm_parameter" "private_subnet_id" {
 
 # RDS Parameters
 resource "aws_ssm_parameter" "rds_endpoint" {
-  name      = "/country/db/RDS_ENDPOINT"
+  name      = "/main/db/RDS_ENDPOINT"
   type      = "String"
   value     = aws_db_instance.main.endpoint
   overwrite = true
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-rds-endpoint"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "country_rds_endpoint" {
+  name      = "/country/db/RDS_ENDPOINT"
+  type      = "String"
+  value     = aws_db_instance.main.endpoint
+  overwrite = true
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-country-rds-endpoint"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "tourism_rds_endpoint" {
+  name      = "/tourism/db/RDS_ENDPOINT"
+  type      = "String"
+  value     = aws_db_instance.main.endpoint
+  overwrite = true
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-tourism-rds-endpoint"
     Environment = var.environment
   }
 }
