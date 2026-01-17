@@ -13,7 +13,7 @@ export interface APIGatewayProxyResult {
 
 export type EarthquakeStatistics = {
   totalEarthquakes: number;
-  averageMagnitude: number;
-  maxMagnitude: number;
-  minMagnitude: number;
+  monthlyEarthquakePercentage: number;
+  avgTsunamiCount: number;
+  avgMagnitude: number;
 };

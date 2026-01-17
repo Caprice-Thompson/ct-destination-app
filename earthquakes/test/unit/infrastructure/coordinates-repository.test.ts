@@ -1,23 +1,28 @@
 import { CoordinatesRepository } from "@infrastructure/repositories/coordinates-repository";
 import { Coordinates } from "@domain/entities/coordinates";
-import type { Logger } from "@application/interfaces/logger";
+import { Dependencies } from "@infrastructure/dependencies";
 
 describe("CoordinatesRepository", () => {
   let repository: CoordinatesRepository;
-  let mockLogger: Logger;
+  let mockDependencies: Dependencies;
 
   beforeEach(() => {
-    mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
+    mockDependencies = {
+      config: {
+        urls: {
+          earthquakesApi: "https://api.example.com",
+          restCountriesApiUrl: "https://api.example.com",
+        },
+      },
+      logger: {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      },
+    } as unknown as Dependencies;
 
-    repository = new CoordinatesRepository(
-      "https://api.example.com",
-      mockLogger,
-    );
+    repository = new CoordinatesRepository(mockDependencies);
 
     global.fetch = jest.fn();
   });
@@ -49,11 +54,11 @@ describe("CoordinatesRepository", () => {
       expect(result.latitude).toBe(40);
       expect(result.longitude).toBe(-3);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.debug).toHaveBeenCalledWith(
         "Fetching coordinates from REST Countries API",
         expect.objectContaining({ countryName: "Spain" }),
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.info).toHaveBeenCalledWith(
         "Coordinates fetched successfully",
         expect.objectContaining({
           countryName: "Spain",
@@ -96,7 +101,7 @@ describe("CoordinatesRepository", () => {
         'Failed to fetch coordinates for country "InvalidCountry"',
       );
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.error).toHaveBeenCalledWith(
         "Error fetching coordinates from REST Countries API",
         expect.objectContaining({
           error: expect.stringContaining("404"),
@@ -131,7 +136,13 @@ describe("CoordinatesRepository", () => {
         'Failed to fetch coordinates for country "Spain": Network error',
       );
 
-      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockDependencies.logger.error).toHaveBeenCalledWith(
+        "Error fetching coordinates from REST Countries API",
+        expect.objectContaining({
+          error: expect.stringContaining("Network error"),
+          countryName: "Spain",
+        }),
+      );
     });
 
     it("should handle decimal coordinates", async () => {

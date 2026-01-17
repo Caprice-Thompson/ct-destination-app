@@ -1,4 +1,5 @@
-import { EarthquakeStatistics } from "@domain/earthquake";
+import { EarthquakeStatistics } from "types";
+import { validateMonthlyEarthquakeStatisticsRequest } from "./validator";
 import { Dependencies } from "@infrastructure/dependencies";
 
 export type GetMonthlyEarthquakeStatisticsQuery = {
@@ -8,18 +9,25 @@ export type GetMonthlyEarthquakeStatisticsQuery = {
 
 export async function getMonthlyEarthquakeStatisticsQuery(
   query: GetMonthlyEarthquakeStatisticsQuery,
-  dependencies: Dependencies
+  dependencies: Dependencies,
 ): Promise<EarthquakeStatistics> {
-  const { earthquakeDomain } = dependencies;
+  const { earthquakeRepository, logger } = dependencies;
 
-  const monthNumber = parseInt(query.month, 10);
+  logger.info("Starting get monthly earthquake statistics query", { query });
 
-  if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
-    throw new Error("Validation error: Month must be a number between 1 and 12");
-  }
+  const validatedQuery =
+    await validateMonthlyEarthquakeStatisticsRequest(query);
 
-  return await earthquakeDomain.getHistoricalEarthquakeStatistics(
-    query.countryName,
-    monthNumber
-  );
+  const statistics =
+    await earthquakeRepository.getHistoricalEarthquakeStatistics(
+      validatedQuery.countryName,
+      parseInt(validatedQuery.month, 10),
+    );
+
+  return {
+    totalEarthquakes: statistics.totalEarthquakes,
+    monthlyEarthquakePercentage: statistics.monthlyEarthquakePercentage,
+    avgTsunamiCount: statistics.avgTsunamiCount,
+    avgMagnitude: statistics.avgMagnitude,
+  };
 }

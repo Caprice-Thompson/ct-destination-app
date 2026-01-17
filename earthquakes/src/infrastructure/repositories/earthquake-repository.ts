@@ -1,10 +1,9 @@
 import {
   EarthquakeRepositoryInterface,
   EarthquakeQueryParams,
-  HistoricalEarthquakeRepository,
 } from "@application/interfaces/repositories";
 import { Earthquake } from "@domain/entities/earthquake";
-import type { Logger } from "@application/interfaces/logger";
+import { Dependencies } from "@infrastructure/dependencies";
 
 interface EqFeatureProperties {
   mag: number;
@@ -39,14 +38,18 @@ export type EarthquakeStatistics = {
   avgMagnitude: number;
 };
 export class EarthquakeRepository implements EarthquakeRepositoryInterface {
-  private readonly baseUrl: string;
-  private readonly logger: Logger;
-  private readonly earthquakeRepo: EarthquakeRepository;
-  private readonly historicalRepo?: HistoricalEarthquakeRepository;
+  private readonly dependencies: Pick<
+    Dependencies,
+    "config" | "logger" | "historicalEarthquakeRepository"
+  >;
 
-  constructor(baseUrl: string, logger: Logger) {
-    this.baseUrl = baseUrl;
-    this.logger = logger;
+  constructor(
+    dependencies: Pick<
+      Dependencies,
+      "config" | "logger" | "historicalEarthquakeRepository"
+    >,
+  ) {
+    this.dependencies = dependencies;
   }
 
   async getMostRecentEarthquakes(
@@ -55,7 +58,9 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     try {
       const url = this.buildUrl(params);
 
-      this.logger.debug("Fetching earthquakes from EQ API", { url });
+      this.dependencies.logger.debug("Fetching earthquakes from EQ API", {
+        url,
+      });
 
       const response = await fetch(url);
 
@@ -67,16 +72,19 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
 
       const data = (await response.json()) as EqGeoJSONResponse;
 
-      this.logger.info("Earthquakes fetched successfully from EQ API", {
-        count: data.features.length,
-        status: data.metadata.status,
-      });
+      this.dependencies.logger.info(
+        "Earthquakes fetched successfully from EQ API",
+        {
+          count: data.features.length,
+          status: data.metadata.status,
+        },
+      );
 
       return this.mapResponseToEarthquakes(data.features);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      this.logger.error("Error fetching earthquakes from EQ API", {
+      this.dependencies.logger.error("Error fetching earthquakes from EQ API", {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         params,
@@ -99,7 +107,7 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
       orderby: "time-asc",
     });
 
-    return `${this.baseUrl}?${queryParams.toString()}`;
+    return `${this.dependencies.config.urls.earthquakesApi}?${queryParams.toString()}`;
   }
 
   private mapResponseToEarthquakes(features: EqFeature[]): Earthquake[] {
@@ -113,23 +121,14 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
       });
     });
   }
-async getHistoricalEarthquakeStatistics(
+  async getHistoricalEarthquakeStatistics(
     countryName: string,
-    targetMonth: number
+    targetMonth: number,
   ): Promise<EarthquakeStatistics> {
-    if (!countryName || !targetMonth) {
-      throw new AppError(400, "Country name and target month are required");
-    }
-
-    if (targetMonth < 1 || targetMonth > 12) {
-      throw new AppError(400, "Month must be between 1 and 12");
-    }
-
-    if (!this.historicalRepo) {
-      throw new AppError(500, "Historical repository not configured");
-    }
-
-    const allEarthquakes = await this.historicalRepo.getEarthquakesByCountry(countryName);
+    const allEarthquakes =
+      await this.dependencies.historicalEarthquakeRepository.getEarthquakesByCountry(
+        countryName,
+      );
 
     if (allEarthquakes.length === 0) {
       return {
@@ -140,7 +139,7 @@ async getHistoricalEarthquakeStatistics(
       };
     }
 
-    const earthquakesInTargetMonth = allEarthquakes.filter(eq => {
+    const earthquakesInTargetMonth = allEarthquakes.filter((eq) => {
       const month = new Date(eq.date).getMonth() + 1;
       return month === targetMonth && eq.type === "earthquake";
     });
@@ -148,22 +147,27 @@ async getHistoricalEarthquakeStatistics(
     const totalEarthquakes = allEarthquakes.length;
     const totalInMonth = earthquakesInTargetMonth.length;
 
-    const monthlyPercentage = totalEarthquakes > 0
-      ? parseFloat(((totalInMonth / totalEarthquakes) * 100).toFixed(2))
-      : 0;
+    const monthlyPercentage =
+      totalEarthquakes > 0
+        ? parseFloat(((totalInMonth / totalEarthquakes) * 100).toFixed(2))
+        : 0;
 
-    const tsunamiCount = earthquakesInTargetMonth.filter(eq => eq.tsunami > 0).length;
-    const avgTsunamiCount = totalInMonth > 0
-      ? parseFloat((tsunamiCount / totalInMonth).toFixed(1))
-      : 0;
+    const tsunamiCount = earthquakesInTargetMonth.filter(
+      (eq) => eq.tsunami > 0,
+    ).length;
+    const avgTsunamiCount =
+      totalInMonth > 0
+        ? parseFloat((tsunamiCount / totalInMonth).toFixed(1))
+        : 0;
 
     const sumMagnitude = earthquakesInTargetMonth.reduce(
       (sum, eq) => sum + (isNaN(eq.magnitude) ? 0 : eq.magnitude),
-      0
+      0,
     );
-    const avgMagnitude = totalInMonth > 0
-      ? parseFloat((sumMagnitude / totalInMonth).toFixed(1))
-      : 0;
+    const avgMagnitude =
+      totalInMonth > 0
+        ? parseFloat((sumMagnitude / totalInMonth).toFixed(1))
+        : 0;
 
     return {
       totalEarthquakes,
@@ -172,5 +176,4 @@ async getHistoricalEarthquakeStatistics(
       avgMagnitude,
     };
   }
-
 }

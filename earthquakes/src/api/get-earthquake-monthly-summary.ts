@@ -37,7 +37,10 @@ export const handler = async (
       month: params.month,
     };
 
-    const result = await getMonthlyEarthquakeStatisticsQuery(query);
+    const result = await getMonthlyEarthquakeStatisticsQuery(
+      query,
+      dependencies,
+    );
 
     return {
       statusCode: 200,

@@ -19,7 +19,7 @@ variable "project_name" {
 variable "service_name" {
   description = "Service domain name"
   type        = string
-  default     = "earthquakes"
+  default     = "earthquake-service"
 }
 
 variable "node_env" {
