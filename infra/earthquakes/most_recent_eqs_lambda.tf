@@ -61,7 +61,22 @@ resource "aws_iam_role_policy" "most_recent_eqs_lambda_policy" {
           "ssm:GetParameters"
         ]
         Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/earthquakes/*"
+          "arn:aws:ssm:${var.aws_region}:*:parameter/*"
+        ]
+      },
+      {
+        Sid    = "AllowDynamoDBAccess"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query",
+          "dynamodb:DeleteItem"
+        ]
+        Resource = [
+          aws_dynamodb_table.historical_earthquakes.arn
         ]
       }
     ]
@@ -83,7 +98,6 @@ resource "aws_lambda_function" "most_recent_eqs" {
       EARTHQUAKES_API_URL        = data.aws_ssm_parameter.earthquakes_api_url.value
       REST_COUNTRIES_API_URL     = data.aws_ssm_parameter.rest_countries_api_url.value
       SERVICE_NAME               = var.service_name
-      DYNAMODB_EARTHQUAKES_TABLE = "earthquakes-table"
       NODE_ENV                   = var.node_env
       LOG_LEVEL                  = "info"
     }
@@ -100,18 +114,5 @@ resource "aws_lambda_function" "most_recent_eqs" {
     aws_iam_role_policy.most_recent_eqs_lambda_policy,
     aws_cloudwatch_log_group.most_recent_eqs_lambda_logs
   ]
-}
-
-resource "aws_ssm_parameter" "most_recent_eqs_lambda" {
-  name      = "/${var.service_name}/main/MOST_RECENT_EQS_LAMBDA"
-  type      = "String"
-  value     = aws_lambda_function.most_recent_eqs.function_name
-  overwrite = true
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-most-recent-eqs-lambda-param"
-    Environment = var.environment
-    Service     = "earthquakes"
-  }
 }
 

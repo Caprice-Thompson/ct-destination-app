@@ -1,5 +1,8 @@
 import { handler } from "@api/get-most-recent-earthquakes";
-import { makeDependencies } from "@infrastructure/dependencies";
+import {
+  type Dependencies,
+  makeDependencies,
+} from "@infrastructure/dependencies";
 import { Earthquake } from "@domain/entities/earthquake";
 import { Coordinates } from "@domain/entities/coordinates";
 import { APIGatewayEvent } from "../../../src/types";
@@ -7,26 +10,15 @@ import { APIGatewayEvent } from "../../../src/types";
 jest.mock("@infrastructure/dependencies");
 
 describe("handler", () => {
-  let mockDependencies: {
-    earthquakeRepository: { getMostRecentEarthquakes: jest.Mock };
-    coordinatesRepository: { getCoordinatesByCountryName: jest.Mock };
-    logger: {
-      debug: jest.Mock;
-      info: jest.Mock;
-      warn: jest.Mock;
-      error: jest.Mock;
-    };
-  };
+  let mockDependencies: Dependencies;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
     mockDependencies = {
-      earthquakeRepository: {
-        getMostRecentEarthquakes: jest.fn(),
-      },
-      coordinatesRepository: {
-        getCoordinatesByCountryName: jest.fn(),
+      config: {
+        urls: {
+          earthquakesApi: "https://api.example.com",
+          restCountriesApiUrl: "https://api.example.com",
+        },
       },
       logger: {
         debug: jest.fn(),
@@ -34,7 +26,17 @@ describe("handler", () => {
         warn: jest.fn(),
         error: jest.fn(),
       },
-    };
+      coordinatesRepository: {
+        getCoordinatesByCountryName: jest.fn(),
+      },
+      earthquakeRepository: {
+        getMostRecentEarthquakes: jest.fn(),
+      },
+      historicalEarthquakeRepository: {
+        getEarthquakesByCountry: jest.fn(),
+        saveEarthquake: jest.fn(),
+      },
+    } as unknown as Dependencies;
 
     (makeDependencies as jest.Mock).mockResolvedValue(mockDependencies);
   });
@@ -64,12 +66,14 @@ describe("handler", () => {
         }),
       ];
 
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockResolvedValue(
-        mockCoordinates,
-      );
-      mockDependencies.earthquakeRepository.getMostRecentEarthquakes.mockResolvedValue(
-        mockEarthquakes,
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockResolvedValue(mockCoordinates);
+      (
+        mockDependencies.earthquakeRepository
+          .getMostRecentEarthquakes as jest.Mock
+      ).mockResolvedValue(mockEarthquakes);
 
       const event: APIGatewayEvent = {
         queryStringParameters: {
@@ -91,12 +95,14 @@ describe("handler", () => {
 
     it("should return empty array when no earthquakes found", async () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockResolvedValue(
-        mockCoordinates,
-      );
-      mockDependencies.earthquakeRepository.getMostRecentEarthquakes.mockResolvedValue(
-        [],
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockResolvedValue(mockCoordinates);
+      (
+        mockDependencies.earthquakeRepository
+          .getMostRecentEarthquakes as jest.Mock
+      ).mockResolvedValue([]);
 
       const event: APIGatewayEvent = {
         queryStringParameters: {
@@ -145,9 +151,10 @@ describe("handler", () => {
 
   describe("Server Errors", () => {
     it("should return 500 when coordinates repository fails", async () => {
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockRejectedValue(
-        new Error("Country not found"),
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockRejectedValue(new Error("Country not found"));
 
       const event: APIGatewayEvent = {
         queryStringParameters: {
@@ -167,12 +174,14 @@ describe("handler", () => {
 
     it("should return 500 when earthquake repository fails", async () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockResolvedValue(
-        mockCoordinates,
-      );
-      mockDependencies.earthquakeRepository.getMostRecentEarthquakes.mockRejectedValue(
-        new Error("API error"),
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockResolvedValue(mockCoordinates);
+      (
+        mockDependencies.earthquakeRepository
+          .getMostRecentEarthquakes as jest.Mock
+      ).mockRejectedValue(new Error("API error"));
 
       const event: APIGatewayEvent = {
         queryStringParameters: {
@@ -188,9 +197,10 @@ describe("handler", () => {
     });
 
     it("should return 500 for unexpected errors", async () => {
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockRejectedValue(
-        "Unexpected error",
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockRejectedValue("Unexpected error");
 
       const event: APIGatewayEvent = {
         queryStringParameters: {
@@ -207,12 +217,14 @@ describe("handler", () => {
   describe("CORS Headers", () => {
     it("should include CORS headers in successful response", async () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      mockDependencies.coordinatesRepository.getCoordinatesByCountryName.mockResolvedValue(
-        mockCoordinates,
-      );
-      mockDependencies.earthquakeRepository.getMostRecentEarthquakes.mockResolvedValue(
-        [],
-      );
+      (
+        mockDependencies.coordinatesRepository
+          .getCoordinatesByCountryName as jest.Mock
+      ).mockResolvedValue(mockCoordinates);
+      (
+        mockDependencies.earthquakeRepository
+          .getMostRecentEarthquakes as jest.Mock
+      ).mockResolvedValue([]);
 
       const event: APIGatewayEvent = {
         queryStringParameters: {

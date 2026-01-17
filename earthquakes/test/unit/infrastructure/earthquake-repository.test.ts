@@ -1,23 +1,28 @@
 import { EarthquakeRepository } from "@infrastructure/repositories/earthquake-repository";
 import { Earthquake } from "@domain/entities/earthquake";
-import type { Logger } from "@application/interfaces/logger";
+import { Dependencies } from "@infrastructure/dependencies";
 
 describe("EarthquakeRepository", () => {
   let repository: EarthquakeRepository;
-  let mockLogger: Logger;
+  let mockDependencies: Dependencies;
 
   beforeEach(() => {
-    mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    };
+    mockDependencies = {
+      config: {
+        urls: {
+          earthquakesApi: "https://api.example.com",
+          restCountriesApiUrl: "https://api.example.com",
+        },
+      },
+      logger: {
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      },
+    } as unknown as Dependencies;
 
-    repository = new EarthquakeRepository(
-      "https://api.example.com",
-      mockLogger,
-    );
+    repository = new EarthquakeRepository(mockDependencies);
 
     global.fetch = jest.fn();
   });
@@ -87,13 +92,13 @@ describe("EarthquakeRepository", () => {
       expect(result[0].type).toBe("earthquake");
       expect(result[0].tsunami).toBe(0);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.debug).toHaveBeenCalledWith(
         "Fetching earthquakes from EQ API",
         expect.objectContaining({
           url: expect.stringContaining("latitude=40"),
         }),
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.info).toHaveBeenCalledWith(
         "Earthquakes fetched successfully from EQ API",
         expect.objectContaining({ count: 2, status: 200 }),
       );
@@ -184,7 +189,7 @@ describe("EarthquakeRepository", () => {
         "Failed to fetch most recent earthquakes",
       );
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockDependencies.logger.error).toHaveBeenCalledWith(
         "Error fetching earthquakes from EQ API",
         expect.objectContaining({
           error: expect.stringContaining("400"),
@@ -207,7 +212,13 @@ describe("EarthquakeRepository", () => {
         "Failed to fetch most recent earthquakes: Network error",
       );
 
-      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockDependencies.logger.error).toHaveBeenCalledWith(
+        "Error fetching earthquakes from EQ API",
+        expect.objectContaining({
+          error: expect.stringContaining("Network error"),
+          params,
+        }),
+      );
     });
   });
 });

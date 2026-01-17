@@ -42,7 +42,8 @@ export async function validateMonthlyEarthquakeStatisticsRequest(
       month: z
         .string()
         .min(1, "Month is required")
-        .regex(/^(0[1-9]|1[0-2])$/, "Month must be in MM format (01-12)"),
+        .regex(/^([1-9]|1[0-2])$/, "Month must be in MM format (1-12)")
+        .regex(/^([1-12])$/, "Month must be a number between 1 and 12"),
     });
     return await schema.parseAsync(query);
   } catch (error) {

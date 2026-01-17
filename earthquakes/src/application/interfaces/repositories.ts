@@ -20,3 +20,11 @@ export interface EarthquakeRepositoryInterface {
 export interface CoordinatesRepositoryInterface {
   getCoordinatesByCountryName(countryName: string): Promise<Coordinates>;
 }
+
+export interface HistoricalEarthquakeRepository {
+  getEarthquakesByCountry(countryName: string): Promise<Earthquake[]>;
+  saveEarthquake(
+    countryName: string,
+    earthquake: Earthquake & { id: string },
+  ): Promise<void>;
+}

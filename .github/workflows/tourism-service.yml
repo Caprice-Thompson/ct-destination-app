@@ -36,31 +36,9 @@ env:
   SERVICE_NAME: 'tourism'
 
 jobs:
-  detect-changes:
-    name: Detect Changes
-    runs-on: ubuntu-latest
-    outputs:
-      code_changed: ${{ steps.filter.outputs.code }}
-      infra_changed: ${{ steps.filter.outputs.infra }}
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            code:
-              - 'tourism/src/**'
-              - 'tourism/package*.json'
-              - 'tourism/tsconfig*.json'
-            infra:
-              - 'infra/tourism/**'
-
   test:
     name: Test & Build
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.code_changed == 'true' || github.event_name == 'workflow_dispatch'
     
     steps:
       - uses: actions/checkout@v4
@@ -113,11 +91,9 @@ jobs:
   deploy-infrastructure:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    needs: detect-changes
     if: |
       (github.event_name == 'push' && 
        github.ref == 'refs/heads/main' &&
-       needs.detect-changes.outputs.infra_changed == 'true') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy')
     environment: production
     
@@ -175,12 +151,10 @@ jobs:
   deploy-code-only:
     name: Deploy Lambda Code
     runs-on: ubuntu-latest
-    needs: [detect-changes, test]
+    needs: [test]
     if: |
       (github.event_name == 'push' && 
        github.ref == 'refs/heads/main' &&
-       needs.detect-changes.outputs.code_changed == 'true' &&
-       needs.detect-changes.outputs.infra_changed == 'false') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy-code-only')
     environment: production
     

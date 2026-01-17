@@ -10,3 +10,10 @@ export interface APIGatewayProxyResult {
   body: string;
   headers?: Record<string, string>;
 }
+
+export type EarthquakeStatistics = {
+  totalEarthquakes: number;
+  monthlyEarthquakePercentage: number;
+  avgTsunamiCount: number;
+  avgMagnitude: number;
+};

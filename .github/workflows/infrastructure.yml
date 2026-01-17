@@ -127,13 +127,6 @@ jobs:
             const plan = fs.readFileSync('infra/country/plan.txt', 'utf8');
             const truncatedPlan = plan.length > 65000 ? plan.substring(0, 65000) + '\n...(truncated)' : plan;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Infrastructure Plan\n\n\`\`\`terraform\n${truncatedPlan}\n\`\`\``
-            })
-
   deploy:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
