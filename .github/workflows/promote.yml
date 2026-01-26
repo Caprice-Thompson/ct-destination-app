@@ -359,7 +359,7 @@ jobs:
           environment             = "${{ env.ENVIRONMENT }}"
           project_name            = "${{ env.PROJECT_NAME }}"
           node_env                = "${{ secrets.NODE_ENV || 'production' }}"
-          rest_countries_api_url  = "https://restcountries.com/v3.1/name"
+          rest_countries_api_url  = "/country/api/REST_COUNTRIES_API_URL"
           db_username             = "/main/db/USERNAME"
           db_password             = "/main/db/PASSWORD"
           EOF
@@ -415,6 +415,8 @@ jobs:
           environment  = "${{ env.ENVIRONMENT }}"
           project_name = "${{ env.PROJECT_NAME }}"
           node_env     = "${{ secrets.NODE_ENV || 'production' }}"
+          earthquakes_api_url = "/earthquakes/api/EARTHQUAKES_API_URL"
+          rest_countries_api_url = "/earthquakes/api/REST_COUNTRIES_API_URL"
           EOF
 
       - name: Deploy earthquakes infrastructure
