@@ -27,10 +27,12 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   global_secondary_index {
-    name            = "country-type-index"
-    hash_key        = "country"
-    range_key       = "type"
-    projection_type = "INCLUDE"
+    name               = "country-type-index"
+    hash_key           = "country"
+    range_key          = "type"
+    projection_type    = "INCLUDE"
+    read_capacity      = 1
+    write_capacity     = 1
   }
 
   point_in_time_recovery {
