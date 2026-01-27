@@ -1,10 +1,10 @@
 resource "aws_dynamodb_table" "historical_earthquakes" {
-  name         = "${var.service_name}-historical_earthquakes"
-  billing_mode = "PROVISIONED"
+  name           = "${var.service_name}-historical_earthquakes"
+  billing_mode   = "PROVISIONED"
   read_capacity  = 1
   write_capacity = 1
-  hash_key     = "eventId"
-  range_key    = "time"
+  hash_key       = "eventId"
+  range_key      = "time"
 
   attribute {
     name = "eventId"
@@ -27,12 +27,12 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   global_secondary_index {
-    name               = "country-type-index"
-    hash_key           = "country"
-    range_key          = "type"
-    projection_type    = "INCLUDE"
-    read_capacity      = 1
-    write_capacity     = 1
+    name            = "country-type-index"
+    hash_key        = "country"
+    range_key       = "type"
+    projection_type = "ALL"
+    read_capacity   = 1
+    write_capacity  = 1
   }
 
   point_in_time_recovery {
@@ -40,7 +40,7 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   tags = {
-    Name        = "${var.service_name}-historical_earthquakes"
-    Service     = var.service_name
+    Name    = "${var.service_name}-historical_earthquakes"
+    Service = var.service_name
   }
 }

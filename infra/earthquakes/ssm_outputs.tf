@@ -37,8 +37,8 @@ resource "aws_ssm_parameter" "eq_monthly_stats_lambda" {
   overwrite = true
 
   tags = {
-    Name        = "${var.project_name}-${var.service_name}-eq-monthly-stats-lambda-param"
-    Service     = var.service_name
+    Name    = "${var.project_name}-${var.service_name}-eq-monthly-stats-lambda-param"
+    Service = var.service_name
   }
 }
 

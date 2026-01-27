@@ -95,11 +95,11 @@ resource "aws_lambda_function" "most_recent_eqs" {
 
   environment {
     variables = {
-      EARTHQUAKES_API_URL        = data.aws_ssm_parameter.earthquakes_api_url.value
-      REST_COUNTRIES_API_URL     = data.aws_ssm_parameter.rest_countries_api_url.value
-      SERVICE_NAME               = var.service_name
-      NODE_ENV                   = var.node_env
-      LOG_LEVEL                  = "info"
+      EARTHQUAKES_API_URL    = data.aws_ssm_parameter.earthquakes_api_url.value
+      REST_COUNTRIES_API_URL = data.aws_ssm_parameter.rest_countries_api_url.value
+      SERVICE_NAME           = var.service_name
+      NODE_ENV               = var.node_env
+      LOG_LEVEL              = "info"
     }
   }
 

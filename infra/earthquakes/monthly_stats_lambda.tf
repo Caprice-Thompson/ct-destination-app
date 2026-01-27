@@ -21,8 +21,8 @@ resource "aws_iam_role" "eq_monthly_stats_lambda_role" {
   })
 
   tags = {
-    Name        = "${var.project_name}-${var.service_name}-eq_monthly_stats-role"
-    Service     = var.service_name
+    Name    = "${var.project_name}-${var.service_name}-eq_monthly_stats-role"
+    Service = var.service_name
   }
 }
 
@@ -31,8 +31,8 @@ resource "aws_cloudwatch_log_group" "eq_monthly_stats_logs" {
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name        = "${var.project_name}-${var.service_name}-eq_monthly_stats-logs"
-    Service     = var.service_name
+    Name    = "${var.project_name}-${var.service_name}-eq_monthly_stats-logs"
+    Service = var.service_name
   }
 }
 
@@ -86,9 +86,9 @@ resource "aws_lambda_function" "eq_monthly_stats" {
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.service_name}-eq-monthly-stats"
-    Service     = var.service_name
-    Function    = "monthly-stats"
+    Name     = "${var.project_name}-${var.service_name}-eq-monthly-stats"
+    Service  = var.service_name
+    Function = "monthly-stats"
   }
 
   depends_on = [
