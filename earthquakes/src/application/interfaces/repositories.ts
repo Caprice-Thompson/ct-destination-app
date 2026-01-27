@@ -12,8 +12,11 @@ export interface EarthquakeQueryParams {
 }
 
 export interface EarthquakeRepositoryInterface {
-  getMostRecentEarthquakes(
+  getMostRecentEarthquakesByCountry(
     params: EarthquakeQueryParams,
+  ): Promise<Earthquake[]>;
+  getEarthquakeData(
+    params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
   ): Promise<Earthquake[]>;
 }
 
@@ -23,8 +26,6 @@ export interface CoordinatesRepositoryInterface {
 
 export interface HistoricalEarthquakeRepository {
   getEarthquakesByCountry(countryName: string): Promise<Earthquake[]>;
-  saveEarthquake(
-    countryName: string,
-    earthquake: Earthquake & { id: string },
-  ): Promise<void>;
+  saveEarthquake(countryName: string, earthquake: Earthquake): Promise<void>;
+  batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number>;
 }

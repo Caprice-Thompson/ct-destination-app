@@ -6,6 +6,7 @@ import { Earthquake } from "@domain/entities/earthquake";
 import { Dependencies } from "@infrastructure/dependencies";
 
 interface EqFeatureProperties {
+  eventId: string;
   mag: number;
   place: string;
   time: number;
@@ -52,11 +53,11 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     this.dependencies = dependencies;
   }
 
-  async getMostRecentEarthquakes(
+  async getMostRecentEarthquakesByCountry(
     params: EarthquakeQueryParams,
   ): Promise<Earthquake[]> {
     try {
-      const url = this.buildUrl(params);
+      const url = this.buildUrlForCountry(params);
 
       this.dependencies.logger.debug("Fetching earthquakes from EQ API", {
         url,
@@ -95,7 +96,50 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     }
   }
 
-  private buildUrl(params: EarthquakeQueryParams): string {
+  async getEarthquakeData(
+    params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
+  ): Promise<Earthquake[]> {
+    try {
+      const url = this.buildUrlForIngest(params);
+
+      this.dependencies.logger.debug("Fetching earthquakes from EQ API", {
+        url,
+      });
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(
+          `EQ API returned status ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      const data = (await response.json()) as EqGeoJSONResponse;
+
+      this.dependencies.logger.info(
+        "Earthquakes fetched successfully from EQ API",
+        {
+          count: data.features.length,
+          status: data.metadata.status,
+        },
+      );
+
+      return this.mapResponseToEarthquakes(data.features);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      this.dependencies.logger.error("Error fetching earthquakes from EQ API", {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        params,
+      });
+      throw new Error(
+        `Failed to fetch earthquakes for ingest: ${errorMessage}`,
+      );
+    }
+  }
+
+  private buildUrlForCountry(params: EarthquakeQueryParams): string {
     const queryParams = new URLSearchParams({
       format: "geojson",
       latitude: params.latitude.toString(),
@@ -110,9 +154,23 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     return `${this.dependencies.config.urls.earthquakesApi}?${queryParams.toString()}`;
   }
 
+  private buildUrlForIngest(
+    params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
+  ): string {
+    const queryParams = new URLSearchParams({
+      format: "geojson",
+      starttime: params.startTime,
+      endtime: params.endTime,
+      orderby: "time-asc",
+    });
+
+    return `${this.dependencies.config.urls.earthquakesApi}?${queryParams.toString()}`;
+  }
+
   private mapResponseToEarthquakes(features: EqFeature[]): Earthquake[] {
     return features.map((feature) => {
       return new Earthquake({
+        eventId: feature.id,
         name: feature.properties.place,
         magnitude: feature.properties.mag,
         date: new Date(feature.properties.time).toISOString().split("T")[0],

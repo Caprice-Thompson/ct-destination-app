@@ -1,4 +1,5 @@
 export interface EarthquakeProperties {
+  eventId: string;
   name: string;
   magnitude: number;
   date: string;
@@ -7,6 +8,7 @@ export interface EarthquakeProperties {
 }
 
 export class Earthquake {
+  public readonly eventId: string;
   public readonly name: string;
   public readonly magnitude: number;
   public readonly date: string;
@@ -14,6 +16,7 @@ export class Earthquake {
   public readonly tsunami: number;
 
   constructor(properties: EarthquakeProperties) {
+    this.eventId = properties.eventId;
     this.name = properties.name;
     this.magnitude = properties.magnitude;
     this.date = properties.date;

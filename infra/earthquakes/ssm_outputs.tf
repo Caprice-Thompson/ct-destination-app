@@ -68,3 +68,15 @@ resource "aws_ssm_parameter" "rest_countries_api_url" {
   }
 }
 
+resource "aws_ssm_parameter" "scheduled_ingest_lambda" {
+  name      = "/${var.service_name}/main/SCHEDULED_INGEST_LAMBDA"
+  type      = "String"
+  value     = aws_lambda_function.scheduled_ingest.function_name
+  overwrite = true
+
+  tags = {
+    Name    = "${var.project_name}-${var.service_name}-scheduled-ingest-lambda-param"
+    Service = var.service_name
+  }
+}
+

@@ -30,11 +30,13 @@ describe("handler", () => {
         getCoordinatesByCountryName: jest.fn(),
       },
       earthquakeRepository: {
-        getMostRecentEarthquakes: jest.fn(),
+        getMostRecentEarthquakesByCountry: jest.fn(),
+        getEarthquakeData: jest.fn(),
       },
       historicalEarthquakeRepository: {
         getEarthquakesByCountry: jest.fn(),
         saveEarthquake: jest.fn(),
+        batchSaveEarthquakes: jest.fn(),
       },
     } as unknown as Dependencies;
 
@@ -51,6 +53,7 @@ describe("handler", () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
       const mockEarthquakes = [
         new Earthquake({
+          eventId: "us6000dcq4",
           name: "2 km NW of Santafé, Spain",
           magnitude: 4.3,
           date: "2021-01-28",
@@ -58,6 +61,7 @@ describe("handler", () => {
           tsunami: 0,
         }),
         new Earthquake({
+          eventId: "us7000d3it",
           name: "2 km WNW of Atarfe, Spain",
           magnitude: 4.3,
           date: "2021-01-26",
@@ -72,9 +76,12 @@ describe("handler", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue(mockEarthquakes);
 
+      (
+        mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      ).mockResolvedValue(mockEarthquakes);
       const event: APIGatewayEvent = {
         queryStringParameters: {
           countryName: "Spain",
@@ -88,6 +95,8 @@ describe("handler", () => {
 
       const body = JSON.parse(response.body);
       expect(body.earthquakes).toHaveLength(2);
+      expect(body.earthquakes[0].eventId).toBe("us6000dcq4");
+      expect(body.earthquakes[1].eventId).toBe("us7000d3it");
       expect(body.earthquakes[0].name).toBe("2 km NW of Santafé, Spain");
       expect(body.earthquakes[0].magnitude).toBe(4.3);
       expect(body.countryName).toBe("Spain");
@@ -101,7 +110,7 @@ describe("handler", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue([]);
 
       const event: APIGatewayEvent = {
@@ -180,7 +189,7 @@ describe("handler", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockRejectedValue(new Error("API error"));
 
       const event: APIGatewayEvent = {
@@ -223,7 +232,7 @@ describe("handler", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue([]);
 
       const event: APIGatewayEvent = {

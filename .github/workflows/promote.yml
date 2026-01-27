@@ -415,8 +415,8 @@ jobs:
           environment  = "${{ env.ENVIRONMENT }}"
           project_name = "${{ env.PROJECT_NAME }}"
           node_env     = "${{ secrets.NODE_ENV || 'production' }}"
-          earthquakes_api_url = "/earthquakes/api/EARTHQUAKES_API_URL"
-          rest_countries_api_url = "/earthquakes/api/REST_COUNTRIES_API_URL"
+          earthquakes_api_url = $(aws ssm get-parameter --name "/earthquakes/api/EARTHQUAKES_API_URL" --query 'Parameter.Value' --output text)
+          rest_countries_api_url = $(aws ssm get-parameter --name "/earthquakes/api/REST_COUNTRIES_API_URL" --query 'Parameter.Value' --output text)
           EOF
 
       - name: Deploy earthquakes infrastructure
@@ -528,15 +528,15 @@ jobs:
           echo "db_username=${DB_USERNAME}" >> $GITHUB_OUTPUT
           echo "db_password=${DB_PASSWORD}" >> $GITHUB_OUTPUT
 
-      - name: Run migrations
-        working-directory: ./country
-        run: |
-          chmod +x runMigrations.sh
-          ./runMigrations.sh
-        env:
-          ENVIRONMENT: production
-          AWS_REGION: ${{ env.AWS_REGION }}
-          DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/country
+      # - name: Run migrations
+      #   working-directory: ./country
+      #   run: |
+      #     chmod +x runMigrations.sh
+      #     ./runMigrations.sh
+      #   env:
+      #     ENVIRONMENT: production
+      #     AWS_REGION: ${{ env.AWS_REGION }}
+      #     DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/country
 
   migrate-tourism:
     name: Run Tourism DB Migrations
@@ -632,11 +632,11 @@ jobs:
           EOF
           chmod +x runMigrations.sh
 
-      - name: Run migrations
-        working-directory: ./tourism
-        run: ./runMigrations.sh
-        env:
-          DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/tourism
+      # - name: Run migrations
+      #   working-directory: ./tourism
+      #   run: ./runMigrations.sh
+      #   env:
+      #     DATABASE_URL: postgresql://${{ steps.rds.outputs.db_username }}:${{ steps.rds.outputs.db_password }}@${{ steps.rds.outputs.rds_endpoint }}:5432/tourism
 
   summary:
     name: Deployment Summary
