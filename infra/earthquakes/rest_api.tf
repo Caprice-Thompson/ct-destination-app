@@ -67,11 +67,3 @@ resource "aws_api_gateway_stage" "main" {
   }
 }
 
-resource "aws_lambda_permission" "api_gateway_invoke_most_recent" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.most_recent_eqs.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
