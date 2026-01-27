@@ -3,10 +3,10 @@ import {
   EarthquakeQueryParams,
 } from "@application/interfaces/repositories";
 import { Earthquake } from "@domain/entities/earthquake";
+import { findCountryInString } from "@domain/utils/country-extractor";
 import { Dependencies } from "@infrastructure/dependencies";
 
 interface EqFeatureProperties {
-  eventId: string;
   mag: number;
   place: string;
   time: number;
@@ -169,13 +169,18 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
 
   private mapResponseToEarthquakes(features: EqFeature[]): Earthquake[] {
     return features.map((feature) => {
+      const place = feature.properties.place;
+      const country = findCountryInString(place);
+
       return new Earthquake({
         eventId: feature.id,
-        name: feature.properties.place,
+        name: place,
         magnitude: feature.properties.mag,
         date: new Date(feature.properties.time).toISOString().split("T")[0],
         type: feature.properties.type,
         tsunami: feature.properties.tsunami,
+        place: place,
+        country: country,
       });
     });
   }

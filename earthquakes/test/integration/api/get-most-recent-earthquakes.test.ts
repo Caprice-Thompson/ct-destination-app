@@ -59,6 +59,8 @@ describe("handler", () => {
           date: "2021-01-28",
           type: "earthquake",
           tsunami: 0,
+          place: "2 km NW of Santafé, Spain",
+          country: "Spain",
         }),
         new Earthquake({
           eventId: "us7000d3it",
@@ -67,6 +69,8 @@ describe("handler", () => {
           date: "2021-01-26",
           type: "earthquake",
           tsunami: 0,
+          place: "2 km WNW of Atarfe, Spain",
+          country: "Spain",
         }),
       ];
 

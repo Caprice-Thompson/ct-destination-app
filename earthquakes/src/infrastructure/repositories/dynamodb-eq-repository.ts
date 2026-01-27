@@ -1,8 +1,8 @@
 import { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { findCountryInString } from "@domain/utils/country-extractor";
 import {
   DynamoDBDocumentClient,
-  PutCommand,
   QueryCommand,
   BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
@@ -47,6 +47,8 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
             date: item.date,
             type: item.type,
             tsunami: item.tsunami,
+            place: item.place,
+            country: item.country,
           }),
       );
     } catch (error) {
@@ -55,34 +57,6 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
         { error: error instanceof Error ? error.message : "Unknown error" },
       );
       throw new Error("Failed to fetch earthquake data from database");
-    }
-  }
-
-  async saveEarthquake(
-    countryName: string,
-    earthquake: Earthquake,
-  ): Promise<void> {
-    try {
-      const command = new PutCommand({
-        TableName: this.dependencies.config.tables.earthquakes,
-        Item: {
-          countryName,
-          eventId: earthquake.eventId,
-          name: earthquake.name,
-          magnitude: earthquake.magnitude,
-          date: earthquake.date,
-          type: earthquake.type,
-          tsunami: earthquake.tsunami,
-        },
-      });
-
-      await this.docClient.send(command);
-    } catch (error) {
-      this.dependencies.logger.error("Error saving earthquake to DynamoDB", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        countryName,
-      });
-      throw new Error("Failed to save earthquake data");
     }
   }
 
@@ -99,19 +73,24 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
       while (unprocessedItems.length > 0 && retryCount <= MAX_RETRIES) {
         try {
-          const putRequests = unprocessedItems.map((eq) => ({
-            PutRequest: {
-              Item: {
-                eventId: eq.eventId,
-                time: new Date(eq.date).getTime(),
-                name: eq.name,
-                magnitude: eq.magnitude,
-                date: eq.date,
-                type: eq.type,
-                tsunami: eq.tsunami,
+          const putRequests = unprocessedItems.map((eq) => {
+            const country = findCountryInString(eq.place);
+            return {
+              PutRequest: {
+                Item: {
+                  eventId: eq.eventId,
+                  time: new Date(eq.date).getTime(),
+                  name: eq.name,
+                  magnitude: eq.magnitude,
+                  date: eq.date,
+                  type: eq.type,
+                  tsunami: eq.tsunami,
+                  place: eq.place,
+                  country: country,
+                },
               },
-            },
-          }));
+            };
+          });
 
           const command = new BatchWriteCommand({
             RequestItems: {
@@ -151,6 +130,8 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
                   date: earthquakeItem.date as string,
                   type: earthquakeItem.type as string,
                   tsunami: earthquakeItem.tsunami as number,
+                  place: earthquakeItem.place as string,
+                  country: earthquakeItem.country as string,
                 });
               },
             );

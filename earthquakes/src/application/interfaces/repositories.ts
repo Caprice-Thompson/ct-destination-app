@@ -26,6 +26,5 @@ export interface CoordinatesRepositoryInterface {
 
 export interface HistoricalEarthquakeRepository {
   getEarthquakesByCountry(countryName: string): Promise<Earthquake[]>;
-  saveEarthquake(countryName: string, earthquake: Earthquake): Promise<void>;
   batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number>;
 }

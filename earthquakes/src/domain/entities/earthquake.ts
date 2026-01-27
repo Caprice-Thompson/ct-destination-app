@@ -5,6 +5,8 @@ export interface EarthquakeProperties {
   date: string;
   type: string;
   tsunami: number;
+  place: string;
+  country: string;
 }
 
 export class Earthquake {
@@ -14,6 +16,8 @@ export class Earthquake {
   public readonly date: string;
   public readonly type: string;
   public readonly tsunami: number;
+  public readonly place: string;
+  public readonly country: string;
 
   constructor(properties: EarthquakeProperties) {
     this.eventId = properties.eventId;
@@ -22,5 +26,7 @@ export class Earthquake {
     this.date = properties.date;
     this.type = properties.type;
     this.tsunami = properties.tsunami;
+    this.place = properties.place;
+    this.country = properties.country;
   }
 }

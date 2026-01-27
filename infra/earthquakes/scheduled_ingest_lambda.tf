@@ -111,12 +111,12 @@ resource "aws_lambda_function" "scheduled_ingest" {
 }
 
 resource "aws_cloudwatch_event_rule" "earthquake_ingestion_schedule" {
-  name                = "${var.service_name}-fortnightly-ingestion"
-  description         = "Trigger earthquake data ingestion fortnightly on Friday"
-  schedule_expression = "cron(0 2 ? * FRI *)"
+  name                = "${var.service_name}-monthly-ingestion"
+  description         = "Trigger earthquake data ingestion monthly on Friday"
+  schedule_expression = "cron(0 2 1 * 5)"
 
   tags = {
-    Name    = "${var.service_name}-fortnightly-ingestion"
+    Name    = "${var.service_name}-monthly-ingestion"
     Service = var.service_name
   }
 }

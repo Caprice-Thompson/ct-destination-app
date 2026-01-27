@@ -1,6 +1,6 @@
 import {
   getMostRecentEarthquakesByCountry,
-  type getMostRecentEarthquakesByCountryQuery,
+  type GetMostRecentEarthquakesByCountryQuery,
 } from "@application/get-most-recent-eq-query";
 import { makeDependencies } from "@infrastructure/dependencies";
 import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
@@ -31,7 +31,7 @@ export const handler = async (
       };
     }
 
-    const query: getMostRecentEarthquakesByCountryQuery = {
+    const query: GetMostRecentEarthquakesByCountryQuery = {
       countryName: params.countryName,
     };
 

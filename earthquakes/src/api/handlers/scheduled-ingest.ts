@@ -8,10 +8,14 @@ export const handler = async () => {
   try {
     logger.info("Starting scheduled earthquake ingestion");
 
-    const endTime = new Date().toISOString().split("T")[0];
-    const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
+    const now = new Date();
+    const endDate = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+    const startDate = new Date(endDate);
+    startDate.setUTCMonth(startDate.getUTCMonth() - 1);
+    const endTime = endDate.toISOString().split("T")[0];
+    const startTime = startDate.toISOString().split("T")[0];
 
     logger.info("Fetching earthquake data", { startTime, endTime });
 

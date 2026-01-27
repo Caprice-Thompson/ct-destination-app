@@ -62,6 +62,8 @@ describe("getMostRecentEarthquakesQuery", () => {
           date: "2021-01-28",
           type: "earthquake",
           tsunami: 0,
+          place: "2 km NW of Santafé, Spain",
+          country: "Spain",
         }),
       ];
 

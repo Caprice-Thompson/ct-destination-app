@@ -8,7 +8,7 @@ import {
   maxRadiusKm,
 } from "./utils/constants";
 
-export type getMostRecentEarthquakesByCountryQuery = Readonly<{
+export type GetMostRecentEarthquakesByCountryQuery = Readonly<{
   countryName: string;
 }>;
 
@@ -27,7 +27,7 @@ export type EarthquakesResponse = {
  * 4. Return the results
  */
 export async function getMostRecentEarthquakesByCountry(
-  query: getMostRecentEarthquakesByCountryQuery,
+  query: GetMostRecentEarthquakesByCountryQuery,
   dependencies: Dependencies,
 ): Promise<EarthquakesResponse> {
   const { earthquakeRepository, coordinatesRepository, logger } = dependencies;

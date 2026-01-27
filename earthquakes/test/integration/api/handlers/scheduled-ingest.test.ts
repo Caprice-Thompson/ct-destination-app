@@ -69,6 +69,8 @@ describe("scheduled-ingest integration", () => {
       date: "2024-02-10",
       type: "earthquake",
       tsunami: 0,
+      place: `Location ${i}`,
+      country: `Country ${i}`,
     })).map((props) => new Earthquake(props));
 
     (
@@ -99,6 +101,8 @@ describe("scheduled-ingest integration", () => {
       date: "2024-02-10",
       type: "earthquake",
       tsunami: 0,
+      place: `Location ${i}`,
+      country: `Country ${i}`,
     })).map((props) => new Earthquake(props));
 
     (

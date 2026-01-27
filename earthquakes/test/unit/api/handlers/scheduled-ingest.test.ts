@@ -71,6 +71,8 @@ describe("scheduled-ingest handler", () => {
         date: "2024-02-10",
         type: "earthquake",
         tsunami: 0,
+        place: "2 km NW of Santafé, Spain",
+        country: "Spain",
       }),
       new Earthquake({
         eventId: "us7000d3it",
@@ -79,6 +81,8 @@ describe("scheduled-ingest handler", () => {
         date: "2024-02-12",
         type: "earthquake",
         tsunami: 0,
+        place: "2 km WNW of Atarfe, Spain",
+        country: "Spain",
       }),
     ];
 
@@ -101,7 +105,7 @@ describe("scheduled-ingest handler", () => {
     expect(
       mockDependencies.earthquakeRepository.getEarthquakeData,
     ).toHaveBeenCalledWith({
-      startTime: "2024-01-16",
+      startTime: "2024-01-15",
       endTime: "2024-02-15",
     });
 
@@ -171,6 +175,8 @@ describe("scheduled-ingest handler", () => {
         date: "2024-02-10",
         type: "earthquake",
         tsunami: 0,
+        place: "2 km NW of Santafé, Spain",
+        country: "Spain",
       }),
     ];
 
