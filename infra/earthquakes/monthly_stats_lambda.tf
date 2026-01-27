@@ -61,6 +61,18 @@ resource "aws_iam_role_policy" "eq_monthly_stats_lambda_policy" {
         Resource = [
           "arn:aws:ssm:${var.aws_region}:*:parameter/*"
         ]
+      },
+      {
+        Sid    = "AllowDynamoDBQuery"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = [
+          aws_dynamodb_table.historical_earthquakes.arn,
+          "${aws_dynamodb_table.historical_earthquakes.arn}/index/*"
+        ]
       }
     ]
   })
