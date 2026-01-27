@@ -1,6 +1,6 @@
 import {
-  getMostRecentEarthquakesQuery,
-  type GetMostRecentEarthquakesQuery,
+  getMostRecentEarthquakesByCountry,
+  type GetMostRecentEarthquakesByCountryQuery,
 } from "@application/get-most-recent-eq-query";
 import { makeDependencies } from "@infrastructure/dependencies";
 import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
@@ -31,11 +31,11 @@ export const handler = async (
       };
     }
 
-    const query: GetMostRecentEarthquakesQuery = {
+    const query: GetMostRecentEarthquakesByCountryQuery = {
       countryName: params.countryName,
     };
 
-    const result = await getMostRecentEarthquakesQuery(query, dependencies);
+    const result = await getMostRecentEarthquakesByCountry(query, dependencies);
 
     return {
       statusCode: 200,

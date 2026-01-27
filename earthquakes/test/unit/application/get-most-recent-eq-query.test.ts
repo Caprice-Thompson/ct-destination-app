@@ -1,4 +1,4 @@
-import { getMostRecentEarthquakesQuery } from "@application/get-most-recent-eq-query";
+import { getMostRecentEarthquakesByCountry } from "@application/get-most-recent-eq-query";
 import { Earthquake } from "@domain/entities/earthquake";
 import { Coordinates } from "@domain/entities/coordinates";
 import { Dependencies } from "@infrastructure/dependencies";
@@ -8,11 +8,17 @@ describe("getMostRecentEarthquakesQuery", () => {
 
   beforeEach(() => {
     mockDependencies = {
-      earthquakeRepository: {
-        getMostRecentEarthquakes: jest.fn(),
-      },
       coordinatesRepository: {
         getCoordinatesByCountryName: jest.fn(),
+      },
+      earthquakeRepository: {
+        getMostRecentEarthquakesByCountry: jest.fn(),
+        getEarthquakeData: jest.fn(),
+      },
+      historicalEarthquakeRepository: {
+        getEarthquakesByCountry: jest.fn(),
+        saveEarthquake: jest.fn(),
+        batchSaveEarthquakes: jest.fn(),
       },
       logger: {
         debug: jest.fn(),
@@ -50,11 +56,14 @@ describe("getMostRecentEarthquakesQuery", () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
       const mockEarthquakes = [
         new Earthquake({
+          eventId: "us6000dcq4",
           name: "2 km NW of Santafé, Spain",
           magnitude: 4.3,
           date: "2021-01-28",
           type: "earthquake",
           tsunami: 0,
+          place: "2 km NW of Santafé, Spain",
+          country: "Spain",
         }),
       ];
 
@@ -64,19 +73,20 @@ describe("getMostRecentEarthquakesQuery", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
-      ).mockResolvedValue(mockEarthquakes);
+          .getMostRecentEarthquakesByCountry as jest.Mock
+      ).mockResolvedValueOnce(mockEarthquakes);
 
       const query = {
         countryName: "Spain",
       };
 
-      const result = await getMostRecentEarthquakesQuery(
+      const result = await getMostRecentEarthquakesByCountry(
         query,
         mockDependencies,
       );
 
       expect(result.earthquakes).toHaveLength(1);
+      expect(result.earthquakes[0].eventId).toBe("us6000dcq4");
       expect(result.earthquakes[0].name).toBe("2 km NW of Santafé, Spain");
       expect(result.countryName).toBe("Spain");
 
@@ -84,7 +94,7 @@ describe("getMostRecentEarthquakesQuery", () => {
         mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
       ).toHaveBeenCalledWith("Spain");
       expect(
-        mockDependencies.earthquakeRepository.getMostRecentEarthquakes,
+        mockDependencies.earthquakeRepository.getMostRecentEarthquakesByCountry,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           latitude: 40,
@@ -105,17 +115,17 @@ describe("getMostRecentEarthquakesQuery", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue(mockEarthquakes);
 
       const query = {
         countryName: "Japan",
       };
 
-      await getMostRecentEarthquakesQuery(query, mockDependencies);
+      await getMostRecentEarthquakesByCountry(query, mockDependencies);
 
       expect(
-        mockDependencies.earthquakeRepository.getMostRecentEarthquakes,
+        mockDependencies.earthquakeRepository.getMostRecentEarthquakesByCountry,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           latitude: 35,
@@ -135,14 +145,14 @@ describe("getMostRecentEarthquakesQuery", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue([]);
 
       const query = {
         countryName: "Spain",
       };
 
-      const result = await getMostRecentEarthquakesQuery(
+      const result = await getMostRecentEarthquakesByCountry(
         query,
         mockDependencies,
       );
@@ -159,14 +169,14 @@ describe("getMostRecentEarthquakesQuery", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockResolvedValue([]);
 
       const query = {
         countryName: "Spain",
       };
 
-      await getMostRecentEarthquakesQuery(query, mockDependencies);
+      await getMostRecentEarthquakesByCountry(query, mockDependencies);
 
       expect(mockDependencies.logger.info).toHaveBeenCalledWith(
         "Starting get most recent earthquakes query",
@@ -191,7 +201,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       };
 
       await expect(
-        getMostRecentEarthquakesQuery(query, mockDependencies),
+        getMostRecentEarthquakesByCountry(query, mockDependencies),
       ).rejects.toThrow("Validation error");
     });
 
@@ -201,7 +211,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       };
 
       await expect(
-        getMostRecentEarthquakesQuery(query, mockDependencies),
+        getMostRecentEarthquakesByCountry(query, mockDependencies),
       ).rejects.toThrow("Validation error");
     });
 
@@ -211,7 +221,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       };
 
       await expect(
-        getMostRecentEarthquakesQuery(query, mockDependencies),
+        getMostRecentEarthquakesByCountry(query, mockDependencies),
       ).rejects.toThrow("Validation error");
     });
   });
@@ -228,7 +238,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       };
 
       await expect(
-        getMostRecentEarthquakesQuery(query, mockDependencies),
+        getMostRecentEarthquakesByCountry(query, mockDependencies),
       ).rejects.toThrow("Country not found");
     });
 
@@ -240,7 +250,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       ).mockResolvedValue(mockCoordinates);
       (
         mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakes as jest.Mock
+          .getMostRecentEarthquakesByCountry as jest.Mock
       ).mockRejectedValue(new Error("API error"));
 
       const query = {
@@ -248,7 +258,7 @@ describe("getMostRecentEarthquakesQuery", () => {
       };
 
       await expect(
-        getMostRecentEarthquakesQuery(query, mockDependencies),
+        getMostRecentEarthquakesByCountry(query, mockDependencies),
       ).rejects.toThrow("API error");
     });
   });

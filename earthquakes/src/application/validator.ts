@@ -1,9 +1,9 @@
 import { z, ZodError } from "zod";
-import { GetMostRecentEarthquakesQuery } from "./get-most-recent-eq-query";
+import { GetMostRecentEarthquakesByCountryQuery } from "./get-most-recent-eq-query";
 import { GetMonthlyEarthquakeStatisticsQuery } from "./monthly-statistics-query";
 
 export async function validateMostRecentEqRequest(
-  query: GetMostRecentEarthquakesQuery,
+  query: GetMostRecentEarthquakesByCountryQuery,
 ) {
   try {
     const schema = z.object({

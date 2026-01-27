@@ -82,7 +82,7 @@ describe("EarthquakeRepository", () => {
         limit: 10,
       };
 
-      const result = await repository.getMostRecentEarthquakes(params);
+      const result = await repository.getMostRecentEarthquakesByCountry(params);
 
       expect(result).toHaveLength(2);
       expect(result[0]).toBeInstanceOf(Earthquake);
@@ -125,7 +125,7 @@ describe("EarthquakeRepository", () => {
         limit: 20,
       };
 
-      await repository.getMostRecentEarthquakes(params);
+      await repository.getMostRecentEarthquakesByCountry(params);
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining("latitude=40"),
@@ -166,7 +166,7 @@ describe("EarthquakeRepository", () => {
         endTime: "2023-01-01",
       };
 
-      const result = await repository.getMostRecentEarthquakes(params);
+      const result = await repository.getMostRecentEarthquakesByCountry(params);
 
       expect(result).toHaveLength(0);
     });
@@ -185,9 +185,9 @@ describe("EarthquakeRepository", () => {
         endTime: "2023-01-01",
       };
 
-      await expect(repository.getMostRecentEarthquakes(params)).rejects.toThrow(
-        "Failed to fetch most recent earthquakes",
-      );
+      await expect(
+        repository.getMostRecentEarthquakesByCountry(params),
+      ).rejects.toThrow("Failed to fetch most recent earthquakes");
 
       expect(mockDependencies.logger.error).toHaveBeenCalledWith(
         "Error fetching earthquakes from EQ API",
@@ -208,7 +208,9 @@ describe("EarthquakeRepository", () => {
         endTime: "2023-01-01",
       };
 
-      await expect(repository.getMostRecentEarthquakes(params)).rejects.toThrow(
+      await expect(
+        repository.getMostRecentEarthquakesByCountry(params),
+      ).rejects.toThrow(
         "Failed to fetch most recent earthquakes: Network error",
       );
 

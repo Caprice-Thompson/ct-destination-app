@@ -6,7 +6,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "esbuild src/api/*.ts --minify --bundle --target=es2020 --platform=node --sourcemap --outdir=dist --external:pg-native",
+    "build": "esbuild src/api/*.ts src/api/handlers/*.ts --minify --bundle --target=es2020 --platform=node --sourcemap --outdir=dist --external:pg-native",
     "lint:check": "eslint .",
     "lint": "eslint . --fix",
     "format": "prettier --write .",

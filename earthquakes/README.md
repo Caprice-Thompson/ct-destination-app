@@ -7,6 +7,7 @@ Lambda service for retrieving earthquake data by country name.
 **Endpoint:** `GET /earthquakes`
 
 **Query Parameters:**
+
 - `countryName` (required): Country name
 - `startTime` (required): Start date (YYYY-MM-DD)
 - `endTime` (required): End date (YYYY-MM-DD)
@@ -15,11 +16,13 @@ Lambda service for retrieving earthquake data by country name.
 - `limit` (optional): Maximum number of results
 
 **Example:**
+
 ```bash
 GET /earthquakes?countryName=Spain&startTime=2020-01-01&endTime=2023-01-01&limit=10
 ```
 
 **Response:**
+
 ```json
 {
   "earthquakes": [
@@ -62,4 +65,3 @@ npm install
 npm run build
 npm test
 ```
-

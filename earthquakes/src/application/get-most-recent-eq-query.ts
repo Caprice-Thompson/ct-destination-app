@@ -8,7 +8,7 @@ import {
   maxRadiusKm,
 } from "./utils/constants";
 
-export type GetMostRecentEarthquakesQuery = Readonly<{
+export type GetMostRecentEarthquakesByCountryQuery = Readonly<{
   countryName: string;
 }>;
 
@@ -26,8 +26,8 @@ export type EarthquakesResponse = {
  * 3. Query EQ API for earthquakes near those coordinates
  * 4. Return the results
  */
-export async function getMostRecentEarthquakesQuery(
-  query: GetMostRecentEarthquakesQuery,
+export async function getMostRecentEarthquakesByCountry(
+  query: GetMostRecentEarthquakesByCountryQuery,
   dependencies: Dependencies,
 ): Promise<EarthquakesResponse> {
   const { earthquakeRepository, coordinatesRepository, logger } = dependencies;
@@ -51,7 +51,7 @@ export async function getMostRecentEarthquakesQuery(
   });
 
   const mostRecentEarthquakes =
-    await earthquakeRepository.getMostRecentEarthquakes({
+    await earthquakeRepository.getMostRecentEarthquakesByCountry({
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
       startTime: formattedStartDate,
