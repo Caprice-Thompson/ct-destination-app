@@ -1,39 +1,48 @@
-import { useRouter } from "@tanstack/react-router"
-import { useMutation } from "./hooks/useMutation"
-import { Auth } from "./Auth"
-
+import { useRouter } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import {
+  mockLogin,
+  mockSignup,
+  type AuthResponse,
+  type LoginCredentials,
+  type SignupCredentials,
+} from "../common/auth";
+import { Auth } from "./Auth";
 
 export function Login() {
-  const router = useRouter()
+  const router = useRouter();
 
   const loginMutation = useMutation({
-    fn: loginFn,
-    onSuccess: async (ctx) => {
-      if (!ctx.data?.error) {
-        await router.invalidate()
-        router.navigate({ to: '/' })
-        return
+    mutationFn: (credentials: LoginCredentials) => mockLogin(credentials),
+    onSuccess: async (data: AuthResponse) => {
+      if (data.success) {
+        await router.invalidate();
+        router.navigate({ to: "/" });
       }
     },
-  })
+  });
 
   const signupMutation = useMutation({
-    fn: useServerFn(signupFn),
-  })
+    mutationFn: (credentials: SignupCredentials) => mockSignup(credentials),
+    onSuccess: async (data: AuthResponse) => {
+      if (data.success) {
+        await router.invalidate();
+        router.navigate({ to: "/" });
+      }
+    },
+  });
 
   return (
     <Auth
       actionText="Login"
       status={loginMutation.status}
       onSubmit={(e) => {
-        const formData = new FormData(e.target as HTMLFormElement)
+        const formData = new FormData(e.target as HTMLFormElement);
 
         loginMutation.mutate({
-          data: {
-            email: formData.get('email') as string,
-            password: formData.get('password') as string,
-          },
-        })
+          email: formData.get("email") as string,
+          password: formData.get("password") as string,
+        });
       }}
       afterSubmit={
         loginMutation.data ? (
@@ -46,14 +55,12 @@ export function Login() {
                   onClick={(e) => {
                     const formData = new FormData(
                       (e.target as HTMLButtonElement).form!,
-                    )
+                    );
 
                     signupMutation.mutate({
-                      data: {
-                        email: formData.get('email') as string,
-                        password: formData.get('password') as string,
-                      },
-                    })
+                      email: formData.get("email") as string,
+                      password: formData.get("password") as string,
+                    });
                   }}
                   type="button"
                 >
@@ -65,5 +72,5 @@ export function Login() {
         ) : null
       }
     />
-  )
+  );
 }
