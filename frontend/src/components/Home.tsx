@@ -1,41 +1,55 @@
-import { Link } from "@tanstack/react-router";
-import { getCurrentUser } from "../common/auth";
+import { useAuth } from "../hooks/useAuth";
+import Dropdown from "./Dropdown";
 
 export function Home() {
-  const user = getCurrentUser();
+  const { user } = useAuth();
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8">Welcome to Destination App</h1>
-
-      {user ? (
-        <div className="space-y-4">
-          <p className="text-lg">
-            You are logged in as: <strong>{user}</strong>
+      <div className="mb-8">
+        {/* {user ? (
+          <p className="text-lg text-green-600 dark:text-green-400">
+            You are logged in as {user.email}
           </p>
-          <div className="text-gray-600">
-            <p>Start exploring destinations around the world.</p>
-          </div>
+        ) : (
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            You are browsing as a guest
+          </p>
+        )} */}
+      </div>
+      <div className="space-y-4">
+        <div className="text-gray-600 dark:text-gray-300">
+          <p className="text-lg mb-4">
+            Start exploring destinations around the world.
+          </p>
+          {!user && (
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Tip:</strong> Create an account to save your favorite
+                destinations and get personalised recommendations!
+              </p>
+            </div>
+          )}
+          <Dropdown
+            id="country"
+            name="country"
+            className="w-full p-2 border border-gray-300 rounded-md"
+            options={[{ value: "United States", label: "January" }, { value: "Canada", label: "February" }, { value: "United Kingdom", label: "March" }, { value: "Australia", label: "April" }, { value: "New Zealand", label: "May" }]}
+            label="Select a country"
+            value="January"
+          />
+
+          <p>Select a country from the list</p>
+          <select className="w-full p-2 border border-gray-300 rounded-md" >
+            <option value="United States">United States</option>
+            <option value="Canada">Canada</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+            <option value="New Zealand">New Zealand</option>
+          </select>
+          <button className="w-full p-2 bg-blue-500 text-white rounded-md">Search</button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-lg">Please log in to access the application.</p>
-          <div className="flex gap-4">
-            <Link
-              to="/login"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

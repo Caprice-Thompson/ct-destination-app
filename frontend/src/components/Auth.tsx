@@ -1,57 +1,112 @@
-export function Auth({
-    actionText,
-    onSubmit,
-    status,
-    afterSubmit,
-  }: {
-    actionText: string
-    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-    status: 'pending' | 'idle' | 'success' | 'error'
-    afterSubmit?: React.ReactNode
-  }) {
-    return (
-      <div className="fixed inset-0 bg-white dark:bg-black flex items-start justify-center p-8">
-        <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold mb-4">{actionText}</h1>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              onSubmit(e)
-            }}
-            className="space-y-4"
-          >
+import { useState } from 'react';
+import { useRouter, Link } from '@tanstack/react-router';
+import { supabase } from '../lib/supabase';
+import { AppRoute } from '../common/enums';
+
+interface AuthFormProps {
+  mode?: 'login' | 'signup';
+}
+
+export const AuthForm = ({ mode = 'login' }: AuthFormProps) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const isSignUp = mode === 'signup';
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = isSignUp 
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      alert(error.message);
+    } else if (isSignUp) {
+      alert('Check your email for the confirmation link!');
+    } else {
+      // Redirect to home after successful login
+      router.navigate({ to: AppRoute.Home });
+    }
+    
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            {isSignUp ? 'Create your account' : 'Welcome back'}
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            {isSignUp ? 'Sign up to save your favorite destinations' : 'Sign in to your account'}
+          </p>
+        </div>
+        <form onSubmit={handleAuth} className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-xs">
-                Email
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email address
               </label>
-              <input
-                type="email"
-                name="email"
+              <input 
                 id="email"
-                className="px-2 py-1 w-full rounded-sm border border-gray-500/20 bg-white dark:bg-gray-800"
+                type="email" 
+                placeholder="you@example.com" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                required 
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-xs">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
+              <input 
                 id="password"
-                className="px-2 py-1 w-full rounded-sm border border-gray-500/20 bg-white dark:bg-gray-800"
+                type="password" 
+                placeholder="••••••••" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                required 
+                minLength={6}
               />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-cyan-600 text-white rounded-sm py-2 font-black uppercase"
-              disabled={status === 'pending'}
+          </div>
+
+          <button 
+            type="submit"
+            disabled={loading} 
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
+          </button>
+
+          <div className="text-center space-y-2">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+            </div>
+            <Link
+              to={isSignUp ? AppRoute.Login : AppRoute.Signup}
+              className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
             >
-              {status === 'pending' ? '...' : actionText}
-            </button>
-            {afterSubmit ? afterSubmit : null}
-          </form>
-        </div>
+              {isSignUp ? 'Sign in instead' : 'Create an account'}
+            </Link>
+            <div className="pt-2">
+              <Link
+                to={AppRoute.Landing}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                ← Back to landing
+              </Link>
+            </div>
+          </div>
+        </form>
       </div>
-    )
-  }
+    </div>
+  );
+};
