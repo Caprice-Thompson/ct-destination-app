@@ -5,7 +5,7 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import App from "../App";
-import { Home } from "../components/Home";
+import { Home } from "../pages/Home";
 import { DefaultCatchBoundary } from "../components/DefaultCatchBoundary";
 import { loginRoute } from "./login";
 import { signupRoute } from "./signup";

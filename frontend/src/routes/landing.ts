@@ -1,7 +1,7 @@
 import { createRoute, redirect } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
 import { rootRoute } from "./routes";
-import { Landing } from "../components/Landing";
+import { Landing } from "../pages/Landing";
 import { supabase } from "../lib/supabase";
 
 export const landingRoute = createRoute({
