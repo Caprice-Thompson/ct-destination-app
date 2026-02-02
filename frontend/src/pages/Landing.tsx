@@ -1,5 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
+import { europeanCountries } from "../common/constants";
 
 export function Landing() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export function Landing() {
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center h-full px-16">
           <div className="max-w-2xl">
+
             <h1 className="text-7xl font-bold text-white mb-6 leading-tight">
               Destination
               <br />
@@ -34,7 +36,7 @@ export function Landing() {
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
                   <span className="text-2xl">🌍</span>
                 </div>
-                <span className="text-lg">195 Countries</span>
+                <span className="text-lg">{europeanCountries.length} Countries</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">

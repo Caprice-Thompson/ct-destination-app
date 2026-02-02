@@ -26,10 +26,12 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     AWS_ACCESS_KEY_ID: z.string().default(""),
     AWS_SECRET_ACCESS_KEY: z.string().default(""),
     AWS_SESSION_TOKEN: z.string().optional(),
+    AWS_ENDPOINT_URL: z.string().optional(),
     DYNAMODB_EARTHQUAKES_TABLE: z.string().default(""),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
     SERVICE_NAME: z.string(),
+    NODE_ENV: z.string().optional(),
   });
 
   const parsedEnv = schema.parse(process.env);

@@ -36,10 +36,17 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
 
   async getCountryFacts(countryName: string): Promise<CountryFacts | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/${encodeURIComponent(countryName)}`);
+      const url = `${this.baseUrl}/${encodeURIComponent(countryName)}`;
+
+      logger.info('Fetching country facts', { countryName, url });
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: RestCountriesApiResponse[] = await response.json();
-      logger.info('Country facts fetched successfully');
 
       if (!data || data.length === 0) {
         return null;

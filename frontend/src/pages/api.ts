@@ -105,3 +105,42 @@ export const fetchEarthquakeStatistics = async (
   );
   return response.json();
 };
+
+// Combined search result for React Query cache
+export interface SearchParams {
+  country: string;
+  month: string;
+}
+
+export interface SearchResult {
+  countryData: CountryApiResponse;
+  tourismData: TourismAPIResponse;
+  earthquakeData: EarthquakeAPIResponse;
+  earthquakeStatistics: EarthquakeStatisticsResponse;
+}
+
+// Query key factory for search - use consistently across Home and Dashboard
+export const searchQueryKeys = {
+  all: ["search"] as const,
+  detail: (params: SearchParams) =>
+    ["search", params.country, params.month] as const,
+};
+
+export const searchAPI = async (
+  params: SearchParams,
+): Promise<SearchResult> => {
+  const [countryData, tourismData, earthquakeData, earthquakeStatistics] =
+    await Promise.all([
+      fetchCountryData(params.country),
+      fetchTourismData(params.country),
+      fetchEarthquakeData(params.country, params.month),
+      fetchEarthquakeStatistics(params.country, params.month),
+    ]);
+
+  return {
+    countryData,
+    tourismData,
+    earthquakeData,
+    earthquakeStatistics,
+  };
+};

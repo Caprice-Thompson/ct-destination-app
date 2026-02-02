@@ -19,7 +19,7 @@ export class CoordinatesRepository implements CoordinatesRepositoryInterface {
 
   async getCoordinatesByCountryName(countryName: string): Promise<Coordinates> {
     try {
-      const url = `${this.dependencies.config.urls.restCountriesApiUrl}/name/${encodeURIComponent(countryName)}`;
+      const url = `${this.dependencies.config.urls.restCountriesApiUrl}/${encodeURIComponent(countryName)}`;
 
       this.dependencies.logger.debug(
         "Fetching coordinates from REST Countries API",

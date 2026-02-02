@@ -15,10 +15,21 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
   constructor(dependencies: Pick<Dependencies, "config" | "logger">) {
     this.dependencies = dependencies;
+    const clientConfig: any = {
+      region: dependencies.config.aws.region,
+    };
+    
+    const endpointUrl = process.env.AWS_ENDPOINT_URL;
+    if (endpointUrl) {
+      clientConfig.endpoint = endpointUrl;
+      clientConfig.credentials = {
+        accessKeyId: dependencies.config.aws.accessKeyId || 'test',
+        secretAccessKey: dependencies.config.aws.secretAccessKey || 'test',
+      };
+    }
+    
     this.docClient = DynamoDBDocumentClient.from(
-      new DynamoDBClient({
-        region: dependencies.config.aws.region,
-      }),
+      new DynamoDBClient(clientConfig),
     );
   }
 

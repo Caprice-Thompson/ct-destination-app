@@ -39,6 +39,12 @@ export async function makeConfig(): Promise<ApplicationConfig> {
   });
 
   const parsedEnv = schema.parse(process.env);
+  
+  const extendedSchema = schema.extend({
+    DB_USER: z.string().optional(),
+    DB_PASSWORD: z.string().optional(),
+  });
+  const extendedEnv = extendedSchema.parse(process.env);
 
   let connectionString: string;
 
@@ -52,6 +58,8 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     const dbName = parsedEnv.DB_NAME || 'tourism';
 
     connectionString = `postgresql://${username}:${password}@${host}:${port}/${dbName}`;
+  } else if (parsedEnv.DB_HOST && extendedEnv.DB_USER && extendedEnv.DB_PASSWORD) {
+    connectionString = `postgresql://${extendedEnv.DB_USER}:${extendedEnv.DB_PASSWORD}@${parsedEnv.DB_HOST}:${parsedEnv.DB_PORT || '5432'}/${parsedEnv.DB_NAME || 'destination_db'}?schema=tourism`;
   } else {
     throw new Error('Database configuration missing. Provide either DATABASE_URL or DB_HOST with SSM parameter paths.');
   }

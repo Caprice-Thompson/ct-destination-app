@@ -1,0 +1,18 @@
+{
+  "watch": [
+    "server.ts",
+    "../country/src/**/*.ts",
+    "../tourism/src/**/*.ts",
+    "../earthquakes/src/**/*.ts"
+  ],
+  "ext": "ts",
+  "ignore": [
+    "node_modules/**",
+    "../*/node_modules/**",
+    "../*/dist/**",
+    "../*/test/**",
+    "**/*.test.ts"
+  ],
+  "exec": "npm run prebuild && tsx --tsconfig ./tsconfig.json server.ts",
+  "delay": 1000
+}

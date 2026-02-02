@@ -1,7 +1,7 @@
 interface ButtonProps {
   className: string;
   type: "submit" | "reset";
-  onClick: () => void;
+  onClick?: () => void;
   children?: React.ReactNode;
   icon?: React.ReactNode;
   disabled?: boolean;
@@ -18,7 +18,7 @@ export function Button({
     <button
       className={className}
       type={type}
-      onClick={onClick}
+      onClick={onClick || undefined}
       disabled={disabled}
     >
       {icon && <span className="btn-icon">{icon}</span>}

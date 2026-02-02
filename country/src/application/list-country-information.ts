@@ -49,7 +49,6 @@ export class ListCountryInformation {
   async listCountryInfo(countryName: string): Promise<CountryInformationResult> {
     logger.info(`Fetching Country facts for country name: ${countryName}`);
     const countryFacts = await this.countryApiRepository.getCountryFacts(countryName);
-
     if (!countryFacts) {
       throw new Error(`Country Facts not found: ${countryName}`);
     }

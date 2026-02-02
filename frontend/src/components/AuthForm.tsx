@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useRouter, Link } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
 import { AppRoute } from '../common/enums';
+import { Input } from './Input';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
 interface AuthFormProps {
   mode?: 'login' | 'signup';
@@ -12,6 +14,7 @@ export const AuthForm = ({ mode = 'login' }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const isSignUp = mode === 'signup';
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -19,7 +22,7 @@ export const AuthForm = ({ mode = 'login' }: AuthFormProps) => {
     setLoading(true);
 
     const { error } = isSignUp 
-      ? await supabase.auth.signUp({ email, password })
+      ? await supabase.auth.signUp({ email, password, options: { data: { displayName } } })
       : await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -46,34 +49,41 @@ export const AuthForm = ({ mode = 'login' }: AuthFormProps) => {
           </p>
         </div>
         <form onSubmit={handleAuth} className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email address
-              </label>
-              <input 
-                id="email"
-                type="email" 
-                placeholder="you@example.com" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
+            <div>
+              {isSignUp && (
+                  <Input
+                  label="Display Name"
+                  type="text"
+                  placeholder="Enter a display name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  required={true}
+                  dataTestId="displayName"
+                />
+              )}
+              <Input
+                label="Email address"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                required 
+                required={true}
+                dataTestId="email"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
-              </label>
-              <input 
-                id="password"
-                type="password" 
-                placeholder="••••••••" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                required 
-                minLength={6}
+              <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              required={true}
+              dataTestId="password"
               />
             </div>
           </div>
@@ -101,7 +111,11 @@ export const AuthForm = ({ mode = 'login' }: AuthFormProps) => {
                 to={AppRoute.Landing}
                 className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               >
-                ← Back to landing
+                <span className="flex items-center gap-2">                
+                <ArrowUturnLeftIcon height={16} width={16} />
+                Back to landing
+                </span>
+
               </Link>
             </div>
           </div>

@@ -1,13 +1,13 @@
 import { createRoute, redirect } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
 import { rootRoute } from "./routes";
-import SignupComp from "../components/SignUp";
+import { SignUpPage } from "../pages/SignUp";
 import { supabase } from "../lib/supabase";
 
 export const signupRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: AppRoute.Signup,
-  component: SignupComp,
+  component: SignUpPage,
   beforeLoad: async () => {
     const {
       data: { session },
