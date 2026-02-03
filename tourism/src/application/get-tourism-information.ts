@@ -29,10 +29,10 @@ export class GetTourismInformation {
     return {
       unescoSites: unescoSites.map((site) => ({
         countryCode: site.countryCode,
-        countryName: site.countryName,
+        countryName: site.countryName, // states_name_en
         areaName: site.areaName,
-        site: site.site,
-        description: site.description,
+        site: site.site, // name_en
+        description: site.description, // short_description_en
       })),
     };
   }

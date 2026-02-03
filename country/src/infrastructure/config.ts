@@ -48,6 +48,12 @@ export async function makeConfig(): Promise<ApplicationConfig> {
   const parsedEnv = schema.parse(process.env);
   const isTestEnv = parsedEnv.NODE_ENV === 'test';
 
+  const extendedSchema = schema.extend({
+    DB_USER: z.string().optional(),
+    DB_PASSWORD: z.string().optional(),
+  });
+  const extendedEnv = extendedSchema.parse(process.env);
+
   // Build DATABASE_URL either from direct env var or by fetching credentials from SSM
   let connectionString: string;
 
@@ -62,6 +68,8 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     const dbName = parsedEnv.DB_NAME || 'country';
 
     connectionString = `postgresql://${username}:${password}@${host}:${port}/${dbName}`;
+  } else if (parsedEnv.DB_HOST && extendedEnv.DB_USER && extendedEnv.DB_PASSWORD) {
+    connectionString = `postgresql://${extendedEnv.DB_USER}:${extendedEnv.DB_PASSWORD}@${parsedEnv.DB_HOST}:${parsedEnv.DB_PORT || '5432'}/${parsedEnv.DB_NAME || 'destination_db'}?schema=country`;
   } else {
     throw new Error('Database configuration missing. Provide either DATABASE_URL or DB_HOST with SSM parameter paths.');
   }
