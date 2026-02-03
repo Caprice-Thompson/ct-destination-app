@@ -55,7 +55,7 @@ export class ListCountryInformation {
 
     const [nationalDish, cityPopulations] = await Promise.all([
       this.countryDatabaseRepository.getNationalDish(countryName),
-      this.populationApiRepository.getTopCityPopulations(countryName),
+      this.countryDatabaseRepository.getCityPopulationsFromDB(countryName),
     ]);
 
     return {

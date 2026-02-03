@@ -8,6 +8,7 @@ export interface CountryApiRepositoryInterface {
 
 export interface CountryDatabaseRepositoryInterface {
   getNationalDish(countryName: string): Promise<NationalDish | null>;
+  getCityPopulationsFromDB(countryName: string): Promise<CityPopulation[] | null>;
 }
 export interface PopulationApiRepositoryInterface {
   getTopCityPopulations(countryName: string): Promise<CityPopulation[]>;
