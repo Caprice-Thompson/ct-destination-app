@@ -3,9 +3,11 @@ services:
     image: postgres:15-alpine
     container_name: destination-postgres
     restart: unless-stopped
+    env_file:
+      - .env.local
     environment:
       POSTGRES_USER: destination-user
-      POSTGRES_PASSWORD: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: destination_db
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     ports:
@@ -41,10 +43,10 @@ services:
     command: sh -c "apt-get update && apt-get install -y postgresql-client && chmod +x runMigrations.sh && ./runMigrations.sh"
     working_dir: /app/country
     environment:
-      DATABASE_URL: postgresql://destination-user:app@postgres:5432/destination_db?schema=country
+      DATABASE_URL: postgresql://destination-user:${DB_PASSWORD}@postgres:5432/destination_db?schema=country
       DB_HOST: postgres
       DB_USER: destination-user
-      DB_PASSWORD: app
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: destination_db
       DB_PORT: 5432
       DB_SCHEMA: country
@@ -63,10 +65,10 @@ services:
     command: sh -c "apt-get update && apt-get install -y postgresql-client && chmod +x runMigrations.sh && ./runMigrations.sh"
     working_dir: /app/tourism
     environment:
-      DATABASE_URL: postgresql://destination-user:app@postgres:5432/destination_db?schema=tourism
+      DATABASE_URL: postgresql://destination-user:${DB_PASSWORD}@postgres:5432/destination_db?schema=tourism
       DB_HOST: postgres
       DB_USER: destination-user
-      DB_PASSWORD: app
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: destination_db
       DB_PORT: 5432
       DB_SCHEMA: tourism
