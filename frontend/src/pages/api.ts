@@ -86,12 +86,11 @@ export const fetchTourismData = async (
   return response.json();
 };
 
-export const fetchEarthquakeData = async (
+export const fetchMostRecentEarthquakes = async (
   countryName: string,
-  month: string,
 ): Promise<EarthquakeAPIResponse> => {
   const response = await fetch(
-    `/api/earthquakes?countryName=${encodeURIComponent(countryName)}&month=${encodeURIComponent(month)}`,
+    `/api/earthquakes?countryName=${encodeURIComponent(countryName)}`,
   );
   return response.json();
 };
@@ -133,7 +132,7 @@ export const searchAPI = async (
     await Promise.all([
       fetchCountryData(params.country),
       fetchTourismData(params.country),
-      fetchEarthquakeData(params.country, params.month),
+      fetchMostRecentEarthquakes(params.country),
       fetchEarthquakeStatistics(params.country, params.month),
     ]);
 

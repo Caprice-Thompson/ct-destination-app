@@ -58,12 +58,16 @@ export async function getMostRecentEarthquakesByCountry(
       endTime: formattedEndDate,
       maxRadiusKm: maxRadiusKm,
       limit: limit,
+      countryName: validatedQuery.countryName,
     });
 
-  logger.info("Get most recent earthquakes query completed successfully", {
-    countryName: validatedQuery.countryName,
-    earthquakesCount: mostRecentEarthquakes.length,
-  });
+  logger.info(
+    `Get most recent earthquakes query completed successfully ${mostRecentEarthquakes.length}`,
+    {
+      countryName: validatedQuery.countryName,
+      earthquakesCount: mostRecentEarthquakes.length,
+    },
+  );
 
   return {
     earthquakes: mostRecentEarthquakes,

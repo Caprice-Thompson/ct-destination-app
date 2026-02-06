@@ -30,12 +30,42 @@ export const handler = async () => {
       logger.info("No earthquakes to ingest");
       return { statusCode: 200, body: { message: "No earthquakes to ingest" } };
     }
+// move logic to repo
+    const eventIds = earthquakes.map((eq) => eq.eventId);
+    const existingIds = await historicalEarthquakeRepository.checkExistingEarthquakes(eventIds);
+
+    logger.info("Checked for existing earthquakes", {
+      total: earthquakes.length,
+      existing: existingIds.size,
+      new: earthquakes.length - existingIds.size,
+    });
+
+    const newEarthquakes = earthquakes.filter((eq) => !existingIds.has(eq.eventId));
+
+    if (newEarthquakes.length === 0) {
+      logger.info("No new earthquakes to ingest");
+      return {
+        statusCode: 200,
+        body: {
+          message: "No new earthquakes to ingest",
+          totalFetched: earthquakes.length,
+          alreadyExists: existingIds.size,
+        }
+      };
+    }
+
+    logger.info("Enriching new earthquakes with country data", {
+      count: newEarthquakes.length,
+    });
+    const enrichedEarthquakes = await earthquakeRepository.enrichEarthquakesWithCountry(newEarthquakes);
 
     const successCount =
-      await historicalEarthquakeRepository.batchSaveEarthquakes(earthquakes);
+      await historicalEarthquakeRepository.batchSaveEarthquakes(enrichedEarthquakes);
 
     logger.info("Scheduled ingestion completed", {
       totalFetched: earthquakes.length,
+      alreadyExists: existingIds.size,
+      newEarthquakes: newEarthquakes.length,
       successfullyWritten: successCount,
     });
 
@@ -44,6 +74,8 @@ export const handler = async () => {
       body: {
         message: "Ingestion completed successfully",
         totalFetched: earthquakes.length,
+        alreadyExists: existingIds.size,
+        newEarthquakes: newEarthquakes.length,
         successfullyWritten: successCount,
       },
     };

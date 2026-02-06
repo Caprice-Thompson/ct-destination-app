@@ -30,6 +30,8 @@ services:
     command: -jar DynamoDBLocal.jar -sharedDb
     ports:
       - "8000:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal
     working_dir: /home/dynamodblocal
     networks:
       - destination-network
@@ -80,6 +82,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  dynamodb_data:
     driver: local
 
 networks:

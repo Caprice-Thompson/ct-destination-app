@@ -89,19 +89,12 @@ app.get("/api/tourism", async (req: Request, res: Response) => {
 // Earthquake API endpoint - most recent
 app.get("/api/earthquakes", async (req: Request, res: Response) => {
   try {
-    const { countryName, month } = req.query;
+    const { countryName } = req.query;
 
     if (!countryName || typeof countryName !== "string") {
       return res.status(400).json({
         error: "Missing query parameter",
         message: "countryName is required",
-      });
-    }
-
-    if (!month || typeof month !== "string") {
-      return res.status(400).json({
-        error: "Missing query parameter",
-        message: "month is required",
       });
     }
 
