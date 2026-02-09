@@ -19,7 +19,9 @@ export interface EarthquakeRepositoryInterface {
   getEarthquakeData(
     params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
   ): Promise<Earthquake[]>;
-  enrichEarthquakesWithCountry(earthquakes: Earthquake[]): Promise<Earthquake[]>;
+  enrichEarthquakesWithCountry(
+    earthquakes: Earthquake[],
+  ): Promise<Earthquake[]>;
 }
 
 export interface CoordinatesRepositoryInterface {

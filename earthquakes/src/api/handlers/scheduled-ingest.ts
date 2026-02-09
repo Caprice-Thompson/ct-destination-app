@@ -30,9 +30,10 @@ export const handler = async () => {
       logger.info("No earthquakes to ingest");
       return { statusCode: 200, body: { message: "No earthquakes to ingest" } };
     }
-// move logic to repo
+    // move logic to repo
     const eventIds = earthquakes.map((eq) => eq.eventId);
-    const existingIds = await historicalEarthquakeRepository.checkExistingEarthquakes(eventIds);
+    const existingIds =
+      await historicalEarthquakeRepository.checkExistingEarthquakes(eventIds);
 
     logger.info("Checked for existing earthquakes", {
       total: earthquakes.length,
@@ -40,7 +41,9 @@ export const handler = async () => {
       new: earthquakes.length - existingIds.size,
     });
 
-    const newEarthquakes = earthquakes.filter((eq) => !existingIds.has(eq.eventId));
+    const newEarthquakes = earthquakes.filter(
+      (eq) => !existingIds.has(eq.eventId),
+    );
 
     if (newEarthquakes.length === 0) {
       logger.info("No new earthquakes to ingest");
@@ -50,17 +53,20 @@ export const handler = async () => {
           message: "No new earthquakes to ingest",
           totalFetched: earthquakes.length,
           alreadyExists: existingIds.size,
-        }
+        },
       };
     }
 
     logger.info("Enriching new earthquakes with country data", {
       count: newEarthquakes.length,
     });
-    const enrichedEarthquakes = await earthquakeRepository.enrichEarthquakesWithCountry(newEarthquakes);
+    const enrichedEarthquakes =
+      await earthquakeRepository.enrichEarthquakesWithCountry(newEarthquakes);
 
     const successCount =
-      await historicalEarthquakeRepository.batchSaveEarthquakes(enrichedEarthquakes);
+      await historicalEarthquakeRepository.batchSaveEarthquakes(
+        enrichedEarthquakes,
+      );
 
     logger.info("Scheduled ingestion completed", {
       totalFetched: earthquakes.length,

@@ -40,7 +40,7 @@ export function Home() {
     }
 
     setError(null);
-    mutation.mutate({ country: selectedCountry, month: String(selectedMonth) });
+    mutation.mutate({ country: selectedCountry, month: selectedMonth });
   };
   return (
     <div className="p-8 max-w-4xl mx-auto">

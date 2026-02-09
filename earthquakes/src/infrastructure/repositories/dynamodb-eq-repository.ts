@@ -18,16 +18,16 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     const clientConfig: any = {
       region: dependencies.config.aws.region,
     };
-    
+
     const endpointUrl = process.env.AWS_ENDPOINT_URL;
     if (endpointUrl) {
       clientConfig.endpoint = endpointUrl;
       clientConfig.credentials = {
-        accessKeyId: dependencies.config.aws.accessKeyId || 'test',
-        secretAccessKey: dependencies.config.aws.secretAccessKey || 'test',
+        accessKeyId: dependencies.config.aws.accessKeyId || "test",
+        secretAccessKey: dependencies.config.aws.secretAccessKey || "test",
       };
     }
-    
+
     this.docClient = DynamoDBDocumentClient.from(
       new DynamoDBClient(clientConfig),
     );
@@ -37,9 +37,10 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     try {
       const command = new QueryCommand({
         TableName: this.dependencies.config.tables.earthquakes,
-        KeyConditionExpression: "countryName = :countryName",
+        IndexName: "country-type-index", // Use the GSI
+        KeyConditionExpression: "country = :country",
         ExpressionAttributeValues: {
-          ":countryName": countryName,
+          ":country": countryName,
         },
       });
 
@@ -71,7 +72,9 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     }
   }
 
-  async batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number> {
+  async batchSaveEarthquakes(
+    earthquakes: (Earthquake & { latitude: number; longitude: number })[],
+  ): Promise<number> {
     const BATCH_SIZE = 25;
     const DELAY_MS = 1000;
     const MAX_RETRIES = 3;
@@ -85,20 +88,27 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
       while (unprocessedItems.length > 0 && retryCount <= MAX_RETRIES) {
         try {
           const putRequests = unprocessedItems.map((eq) => {
-            const country = findCountryInString(eq.place);
+            // Use the country from the earthquake object (already fetched from coordinates)
+            // Fall back to extracting from place string, and if still empty, use "Unknown"
+            const country =
+              eq.country || findCountryInString(eq.place) || "Unknown";
+
+            // Ensure all values are properly typed and not null/undefined
+            const item: Record<string, any> = {
+              eventId: String(eq.eventId),
+              time: new Date(eq.date).getTime(),
+              name: String(eq.name || "Unknown"),
+              magnitude: Number(eq.magnitude) || 0,
+              date: String(eq.date),
+              type: String(eq.type || "earthquake"),
+              tsunami: Number(eq.tsunami) || 0,
+              place: String(eq.place || "Unknown"),
+              country: String(country),
+            };
+
             return {
               PutRequest: {
-                Item: {
-                  eventId: eq.eventId,
-                  time: new Date(eq.date).getTime(),
-                  name: eq.name,
-                  magnitude: eq.magnitude,
-                  date: eq.date,
-                  type: eq.type,
-                  tsunami: eq.tsunami,
-                  place: eq.place,
-                  country: country,
-                },
+                Item: item,
               },
             };
           });
@@ -185,5 +195,61 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     }
 
     return successCount;
+  }
+
+  async checkExistingEarthquakes(eventIds: string[]): Promise<Set<string>> {
+    const existingIds = new Set<string>();
+    const BATCH_SIZE = 100; // DynamoDB BatchGet limit
+
+    for (let i = 0; i < eventIds.length; i += BATCH_SIZE) {
+      const batch = eventIds.slice(i, i + BATCH_SIZE);
+
+      try {
+        // We need to provide both hash and range key for BatchGet
+        // Since we don't have the time values, we'll use Query instead
+        // But Query requires exact keys, so let's use a different approach:
+        // We'll do individual GetItem calls in parallel (more expensive but works)
+
+        const checkPromises = batch.map(async (eventId) => {
+          try {
+            const command = new QueryCommand({
+              TableName: this.dependencies.config.tables.earthquakes,
+              KeyConditionExpression: "eventId = :eventId",
+              ExpressionAttributeValues: {
+                ":eventId": eventId,
+              },
+              Limit: 1,
+              Select: "COUNT",
+            });
+
+            const response = await this.docClient.send(command);
+            if (response.Count && response.Count > 0) {
+              return eventId;
+            }
+            return null;
+          } catch (error) {
+            this.dependencies.logger.warn(
+              "Error checking earthquake existence",
+              {
+                eventId,
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+            );
+            return null;
+          }
+        });
+
+        const results = await Promise.all(checkPromises);
+        results.forEach((id) => {
+          if (id) existingIds.add(id);
+        });
+      } catch (error) {
+        this.dependencies.logger.error("Error in batch check", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+
+    return existingIds;
   }
 }

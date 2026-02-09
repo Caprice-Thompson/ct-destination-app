@@ -3,7 +3,10 @@ import {
   EarthquakeQueryParams,
 } from "@application/interfaces/repositories";
 import { Earthquake } from "@domain/entities/earthquake";
-import { findCountryInString } from "@domain/utils/country-extractor";
+import {
+  findCountryInString,
+  retrieveCountryFromCoordinates,
+} from "@domain/utils/country-extractor";
 import { Dependencies } from "@infrastructure/dependencies";
 
 interface EqFeatureProperties {
@@ -17,6 +20,10 @@ interface EqFeatureProperties {
 interface EqFeature {
   type: "Feature";
   properties: EqFeatureProperties;
+  geometry: {
+    type: "Point";
+    coordinates: [number, number, number]; // [longitude, latitude, depth]
+  };
   id: string;
 }
 
@@ -81,7 +88,20 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
         },
       );
 
-      return this.mapResponseToEarthquakes(data.features);
+      return data.features.map((feature) => {
+        return new Earthquake({
+          eventId: feature.id,
+          name: feature.properties.place,
+          magnitude: feature.properties.mag,
+          date: new Date(feature.properties.time).toISOString().split("T")[0],
+          type: feature.properties.type,
+          tsunami: feature.properties.tsunami,
+          place: feature.properties.place,
+          country: params.countryName!, // Use the country from params
+        });
+      });
+
+      return this.mapResponseToEarthquakesWithoutGeocoding(data.features);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -123,8 +143,7 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
           status: data.metadata.status,
         },
       );
-
-      return this.mapResponseToEarthquakes(data.features);
+      return this.mapResponseToEarthquakesWithoutGeocoding(data.features);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -155,21 +174,33 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
   }
 
   private buildUrlForIngest(
-    params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
+    params: Pick<
+      EarthquakeQueryParams,
+      "startTime" | "endTime" | "latitude" | "longitude" | "maxRadiusKm"
+    >,
   ): string {
     const queryParams = new URLSearchParams({
       format: "geojson",
-      starttime: params.startTime,
-      endtime: params.endTime,
+      starttime: "2010-01-01",
+      endtime: new Date().toISOString().split("T")[0],
+      latitude: "55.0",
+      longitude: "25.0",
+      maxradiuskm: "3800",
+      limit: "13000",
+      minmagnitude: "4.0",
       orderby: "time-asc",
     });
 
     return `${this.dependencies.config.urls.earthquakesApi}?${queryParams.toString()}`;
   }
 
-  private mapResponseToEarthquakes(features: EqFeature[]): Earthquake[] {
+  private mapResponseToEarthquakesWithoutGeocoding(
+    features: EqFeature[],
+  ): Earthquake[] {
     return features.map((feature) => {
       const place = feature.properties.place;
+
+      // Extract country from place string only (no geocoding API call)
       const country = findCountryInString(place);
 
       return new Earthquake({
@@ -180,9 +211,42 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
         type: feature.properties.type,
         tsunami: feature.properties.tsunami,
         place: place,
-        country: country,
+        country: country, // Will be empty if not found in place string
       });
     });
+  }
+
+  private async mapResponseToEarthquakes(
+    features: EqFeature[],
+  ): Promise<Earthquake[]> {
+    const earthquakes: Earthquake[] = [];
+
+    for (const feature of features) {
+      const place = feature.properties.place;
+
+      const [longitude, latitude] = feature.geometry.coordinates;
+
+      let country = await retrieveCountryFromCoordinates(latitude, longitude);
+
+      if (!country) {
+        country = findCountryInString(place);
+      }
+
+      earthquakes.push(
+        new Earthquake({
+          eventId: feature.id,
+          name: place,
+          magnitude: feature.properties.mag,
+          date: new Date(feature.properties.time).toISOString().split("T")[0],
+          type: feature.properties.type,
+          tsunami: feature.properties.tsunami,
+          place: place,
+          country: country,
+        }),
+      );
+    }
+
+    return earthquakes;
   }
   async getHistoricalEarthquakeStatistics(
     countryName: string,
@@ -238,5 +302,33 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
       avgTsunamiCount,
       avgMagnitude,
     };
+  }
+
+  async enrichEarthquakesWithCountry(
+    earthquakes: Earthquake[],
+  ): Promise<Earthquake[]> {
+    const enriched: Earthquake[] = [];
+
+    for (const eq of earthquakes) {
+      if (eq.country) {
+        enriched.push(eq);
+        continue;
+      }
+
+      const country = findCountryInString(eq.place) || "Unknown";
+
+      enriched.push(
+        new Earthquake({
+          ...eq,
+          country: country,
+        }),
+      );
+    }
+
+    this.dependencies.logger.info("Enriched earthquakes with country data", {
+      count: enriched.length,
+    });
+
+    return enriched;
   }
 }
