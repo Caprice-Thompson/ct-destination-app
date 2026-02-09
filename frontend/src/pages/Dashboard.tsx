@@ -42,8 +42,12 @@ export function Dashboard() {
       <div className="min-h-[60vh] flex items-center justify-center p-8">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-600 font-medium">Loading your destination data...</p>
-          <p className="text-sm text-gray-500 mt-1">Fetching country, tourism & earthquake info</p>
+          <p className="text-gray-600 font-medium">
+            Loading your destination data...
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Fetching country, tourism & earthquake info
+          </p>
         </div>
       </div>
     );
@@ -75,7 +79,8 @@ export function Dashboard() {
 
   if (!data) return null;
 
-  const { countryData, tourismData, earthquakeData, earthquakeStatistics } = data;
+  const { countryData, tourismData, earthquakeData, earthquakeStatistics } =
+    data;
   const { countryDetails } = countryData;
 
   return (
@@ -117,29 +122,71 @@ export function Dashboard() {
               <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-2xl">🌍</span>
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Country details</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Country details
+              </h2>
             </div>
             <dl className="space-y-4">
               <div>
-                <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Capital</dt>
-                <dd className="text-gray-800 font-medium">{countryDetails.capitalCityName}</dd>
+                <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                  Capital
+                </dt>
+                <dd className="text-gray-800 font-medium">
+                  {countryDetails.capitalCityName}
+                </dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Currency</dt>
+                <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                  Currency
+                </dt>
                 <dd className="text-gray-800 font-medium">
                   {countryDetails.currency.name}
                   {countryDetails.currency.symbol && (
-                    <span className="text-gray-600 ml-1">({countryDetails.currency.symbol})</span>
+                    <span className="text-gray-600 ml-1">
+                      ({countryDetails.currency.symbol})
+                    </span>
                   )}
                 </dd>
               </div>
               {countryDetails.languages?.length > 0 && (
                 <div>
-                  <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Languages</dt>
-                  <dd className="text-gray-800 font-medium">{countryDetails.languages.join(", ")}</dd>
+                  <dt className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                    Languages
+                  </dt>
+                  <dd className="text-gray-800 font-medium">
+                    {countryDetails.languages.join(", ")}
+                  </dd>
                 </div>
               )}
             </dl>
+          </section>
+
+          {/* Map card */}
+          <section className="bg-white rounded-2xl shadow-lg shadow-blue-100/50 border border-blue-50/80 p-6 lg:p-8 hover:shadow-xl hover:shadow-blue-100/50 transition-shadow duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-2xl">🗺️</span>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">Location</h2>
+            </div>
+            <div className="relative w-full h-64 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-inner">
+              <iframe
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${countryDetails.coordinates.longitude - 3},${countryDetails.coordinates.latitude - 3},${countryDetails.coordinates.longitude + 3},${countryDetails.coordinates.latitude + 3}&layer=mapnik&marker=${countryDetails.coordinates.latitude},${countryDetails.coordinates.longitude}`}
+                className="w-full h-full"
+                style={{ border: 0 }}
+                loading="lazy"
+                title={`Map of ${countryDetails.countryName}`}
+              />
+            </div>
+            <a
+              href={countryDetails.maps.googleMaps}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex items-center justify-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
+            >
+              View in Google Maps
+              <span className="text-xs">↗</span>
+            </a>
           </section>
 
           {/* Earthquake stats card */}
@@ -148,11 +195,15 @@ export function Dashboard() {
               <div className="w-12 h-12 bg-linear-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-2xl">🌋</span>
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Earthquake activity</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Earthquake activity
+              </h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-blue-50/60 rounded-xl p-4">
-                <p className="text-2xl font-bold text-blue-700">{earthquakeStatistics.totalEarthquakes}</p>
+                <p className="text-2xl font-bold text-blue-700">
+                  {earthquakeStatistics.totalEarthquakes}
+                </p>
                 <p className="text-sm text-gray-600">Total in {month}</p>
               </div>
               <div className="bg-blue-50/60 rounded-xl p-4">
@@ -164,6 +215,79 @@ export function Dashboard() {
             </div>
           </section>
 
+          {/* National Dish card */}
+          {countryData.nationalDish && (
+            <section className="bg-white rounded-2xl shadow-lg shadow-blue-100/50 border border-blue-50/80 p-6 lg:p-8 hover:shadow-xl hover:shadow-blue-100/50 transition-shadow duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-linear-to-br from-rose-500 to-red-600 rounded-xl flex items-center justify-center shadow-md">
+                  <span className="text-2xl">🍽️</span>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  National Dish
+                </h2>
+              </div>
+              <div className="space-y-4">
+                {countryData.nationalDish.imageUrl && (
+                  <div className="relative w-full h-48 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+                    <img
+                      src={countryData.nationalDish.imageUrl}
+                      alt={countryData.nationalDish.dishName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {countryData.nationalDish.dishName}
+                  </h3>
+                  {countryData.nationalDish.description && (
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {countryData.nationalDish.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* City Populations card */}
+          {countryData.cityPopulation &&
+            countryData.cityPopulation.length > 0 && (
+              <section className="bg-white rounded-2xl shadow-lg shadow-blue-100/50 border border-blue-50/80 p-6 lg:p-8 hover:shadow-xl hover:shadow-blue-100/50 transition-shadow duration-300">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                    <span className="text-2xl">🏙️</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Top Cities
+                  </h2>
+                </div>
+                <ul className="space-y-3">
+                  {[...countryData.cityPopulation]
+                    .sort((a, b) => b.population - a.population)
+                    .slice(0, 5)
+                    .map((city, index) => (
+                      <li
+                        key={city.cityName}
+                        className="flex items-center justify-between gap-4 p-4 bg-cyan-50/50 rounded-xl border border-cyan-100/60"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 font-bold text-sm">
+                            {index + 1}
+                          </span>
+                          <span className="text-gray-800 font-medium">
+                            {city.cityName}
+                          </span>
+                        </div>
+                        <span className="text-sm text-gray-600 font-medium shrink-0">
+                          {city.population.toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )}
+
           {/* UNESCO sites - full width when present */}
           {tourismData.unescoSites.length > 0 && (
             <section className="lg:col-span-2 bg-white rounded-2xl shadow-lg shadow-blue-100/50 border border-blue-50/80 p-6 lg:p-8 hover:shadow-xl hover:shadow-blue-100/50 transition-shadow duration-300">
@@ -171,7 +295,9 @@ export function Dashboard() {
                 <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
                   <span className="text-2xl">🏛️</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">UNESCO World Heritage Sites</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  UNESCO World Heritage Sites
+                </h2>
               </div>
               <ul className="grid sm:grid-cols-2 gap-3">
                 {tourismData.unescoSites.map((site) => (
@@ -183,7 +309,7 @@ export function Dashboard() {
                     <div>
                       <p className="font-medium text-gray-800">{site.site}</p>
                       {site.areaName && (
-                        <p className="text-sm text-gray-500">{site.areaName}</p>
+                        <p className="text-sm text-gray-500">{site.description}</p>
                       )}
                     </div>
                   </li>
@@ -199,7 +325,9 @@ export function Dashboard() {
                 <div className="w-12 h-12 bg-linear-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
                   <span className="text-2xl">📊</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Recent earthquakes</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Recent earthquakes
+                </h2>
               </div>
               <ul className="space-y-3">
                 {earthquakeData.earthquakes.slice(0, 5).map((eq) => (
@@ -211,7 +339,9 @@ export function Dashboard() {
                       <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100 text-amber-800 font-bold text-sm">
                         M{eq.magnitude}
                       </span>
-                      <span className="text-gray-800 font-medium">{eq.location}</span>
+                      <span className="text-gray-800 font-medium">
+                        {eq.location}
+                      </span>
                     </div>
                     <span className="text-sm text-gray-500 shrink-0">
                       {new Date(eq.timestamp).toLocaleDateString()}

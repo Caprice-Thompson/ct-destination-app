@@ -4,10 +4,7 @@ import { europeanCountries, months } from "../common/constants";
 import { useAuth } from "../hooks/useAuth";
 import Dropdown from "../components/Dropdown";
 import { Button } from "../components/Button";
-import {
-  searchAPI,
-  searchQueryKeys,
-} from "./api";
+import { searchAPI, searchQueryKeys } from "./api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppRoute } from "../common/enums";
 
@@ -63,15 +60,18 @@ export function Home() {
           {!user && (
             <div className="mt-8 mb-10 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/50 shadow-sm">
               <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
-                <strong className="font-semibold">Tip:</strong> Create an account to save your favorite
-                destinations and get personalised recommendations!
+                <strong className="font-semibold">Tip:</strong> Create an
+                account to save your favorite destinations and get personalised
+                recommendations!
               </p>
             </div>
           )}
-          
+
           <div className="space-y-8 mt-10">
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">Select a month</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
+                Select the month you want to explore
+              </p>
               <Dropdown
                 name="month"
                 className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -83,7 +83,9 @@ export function Home() {
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">Select a country from the list</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
+                Select the country you want to travel to
+              </p>
               <Dropdown
                 name="country"
                 className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -101,14 +103,16 @@ export function Home() {
             </div>
           )}
 
-          <Button
-            className="w-full p-2 bg-blue-500 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-            type="submit"
-            onClick={handleSearch}
-            disabled={mutation.isPending || !selectedCountry || !selectedMonth}
-          >
-            {mutation.isPending ? "Searching..." : "Search"}
-          </Button>
+          <div className="mt-6">
+            <Button
+              className="w-full p-2 bg-blue-500 text-white rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              onClick={handleSearch}
+              disabled={mutation.isPending || !selectedCountry || !selectedMonth}
+            >
+              {mutation.isPending ? "Searching..." : "Search"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
