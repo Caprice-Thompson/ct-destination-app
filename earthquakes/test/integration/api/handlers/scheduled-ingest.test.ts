@@ -74,7 +74,7 @@ describe("scheduled-ingest integration", () => {
     })).map((props) => new Earthquake(props));
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     (
@@ -106,7 +106,7 @@ describe("scheduled-ingest integration", () => {
     })).map((props) => new Earthquake(props));
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     (

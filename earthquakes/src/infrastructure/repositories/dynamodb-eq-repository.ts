@@ -15,7 +15,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
   constructor(dependencies: Pick<Dependencies, "config" | "logger">) {
     this.dependencies = dependencies;
-    const clientConfig: any = {
+    const clientConfig: Record<string, unknown> = {
       region: dependencies.config.aws.region,
     };
 
@@ -72,9 +72,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     }
   }
 
-  async batchSaveEarthquakes(
-    earthquakes: (Earthquake & { latitude: number; longitude: number })[],
-  ): Promise<number> {
+  async batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number> {
     const BATCH_SIZE = 25;
     const DELAY_MS = 1000;
     const MAX_RETRIES = 3;
@@ -94,9 +92,9 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
               eq.country || findCountryInString(eq.place) || "Unknown";
 
             // Ensure all values are properly typed and not null/undefined
-            const item: Record<string, any> = {
+            const item: Record<string, unknown> = {
               eventId: String(eq.eventId),
-              time: new Date(eq.date).getTime(),
+              time: Number(new Date(eq.date).getTime()),
               name: String(eq.name || "Unknown"),
               magnitude: Number(eq.magnitude) || 0,
               date: String(eq.date),
@@ -197,26 +195,29 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     return successCount;
   }
 
-  async checkExistingEarthquakes(eventIds: string[]): Promise<Set<string>> {
+  async checkExistingEarthquakes(
+    eventIds: string[],
+    times: string[],
+  ): Promise<Set<string>> {
     const existingIds = new Set<string>();
-    const BATCH_SIZE = 100; // DynamoDB BatchGet limit
+    const BATCH_SIZE = 100;
 
     for (let i = 0; i < eventIds.length; i += BATCH_SIZE) {
       const batch = eventIds.slice(i, i + BATCH_SIZE);
-
+      const batchTimes = times.slice(i, i + BATCH_SIZE);
       try {
-        // We need to provide both hash and range key for BatchGet
-        // Since we don't have the time values, we'll use Query instead
-        // But Query requires exact keys, so let's use a different approach:
-        // We'll do individual GetItem calls in parallel (more expensive but works)
-
-        const checkPromises = batch.map(async (eventId) => {
+        // Use Query with both partition key (eventId) and sort key (time)
+        const checkPromises = batch.map(async (eventId, index) => {
           try {
             const command = new QueryCommand({
               TableName: this.dependencies.config.tables.earthquakes,
-              KeyConditionExpression: "eventId = :eventId",
+              KeyConditionExpression: "eventId = :eventId AND #time = :time",
+              ExpressionAttributeNames: {
+                "#time": "time",
+              },
               ExpressionAttributeValues: {
                 ":eventId": eventId,
+                ":time": batchTimes[index],
               },
               Limit: 1,
               Select: "COUNT",
@@ -232,6 +233,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
               "Error checking earthquake existence",
               {
                 eventId,
+                time: batchTimes[index],
                 error: error instanceof Error ? error.message : "Unknown error",
               },
             );

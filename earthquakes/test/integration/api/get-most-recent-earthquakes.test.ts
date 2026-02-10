@@ -84,7 +84,8 @@ describe("handler", () => {
       ).mockResolvedValue(mockEarthquakes);
 
       (
-        mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+        mockDependencies.earthquakeRepository
+          .getEarthquakeIngestData as jest.Mock
       ).mockResolvedValue(mockEarthquakes);
       const event: APIGatewayEvent = {
         queryStringParameters: {

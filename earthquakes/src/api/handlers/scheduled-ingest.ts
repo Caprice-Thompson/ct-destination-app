@@ -19,7 +19,7 @@ export const handler = async () => {
 
     logger.info("Fetching earthquake data", { startTime, endTime });
 
-    const earthquakes = await earthquakeRepository.getEarthquakeData({
+    const earthquakes = await earthquakeRepository.getEarthquakeIngestData({
       startTime,
       endTime,
     });
@@ -30,10 +30,14 @@ export const handler = async () => {
       logger.info("No earthquakes to ingest");
       return { statusCode: 200, body: { message: "No earthquakes to ingest" } };
     }
-    // move logic to repo
+
     const eventIds = earthquakes.map((eq) => eq.eventId);
+    const times = earthquakes.map((eq) => eq.date);
     const existingIds =
-      await historicalEarthquakeRepository.checkExistingEarthquakes(eventIds);
+      await historicalEarthquakeRepository.checkExistingEarthquakes(
+        eventIds,
+        times,
+      );
 
     logger.info("Checked for existing earthquakes", {
       total: earthquakes.length,
