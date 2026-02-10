@@ -37,6 +37,16 @@ npm run dev
 
 The server will start on `http://localhost:3001`
 
+### Mock Data Mode
+
+To use mock data instead of real API calls, set the `USE_MOCK_DATA` environment variable to `true` in `.env.local`:
+
+```bash
+USE_MOCK_DATA=true
+```
+
+Mock data is available for the following countries: Spain, Japan, Italy
+
 ## Available Endpoints
 
 - `GET /api/countries?countryName=Spain` - Get country information

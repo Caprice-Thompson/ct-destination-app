@@ -41,17 +41,6 @@ export function Home() {
   };
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        {user ? (
-          <p className="text-lg text-green-600 dark:text-green-400">
-            You are logged in as {user.user_metadata.display_name}
-          </p>
-        ) : (
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            You are browsing as a guest
-          </p>
-        )}
-      </div>
       <div className="space-y-8">
         <div className="text-gray-600 dark:text-gray-300">
           <p className="text-2xl font-light mb-8 text-gray-800 dark:text-gray-200">
@@ -105,10 +94,12 @@ export function Home() {
 
           <div className="mt-6">
             <Button
-              className="w-full p-2 bg-blue-500 text-white rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
               onClick={handleSearch}
-              disabled={mutation.isPending || !selectedCountry || !selectedMonth}
+              disabled={
+                mutation.isPending || !selectedCountry || !selectedMonth
+              }
             >
               {mutation.isPending ? "Searching..." : "Search"}
             </Button>

@@ -1,0 +1,27 @@
+{
+  "Spain": {
+    "unescoSites": [
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Catalonia",
+        "site": "Works of Antoni Gaudí",
+        "description": "Seven properties in Barcelona that are exceptional examples of Gaudí's architectural genius"
+      },
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Andalusia",
+        "site": "Alhambra, Generalife and Albayzín, Granada",
+        "description": "Magnificent medieval Islamic architecture and gardens"
+      },
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Madrid",
+        "site": "Monastery and Site of the Escurial, Madrid",
+        "description": "Royal monastery built in the 16th century"
+      }
+    ]
+  }
+}

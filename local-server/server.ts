@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +14,28 @@ dotenv.config();
 const app = express();
 const PORT = 3001;
 
-// Middleware
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA === "true";
+
+const mockData = USE_MOCK_DATA
+  ? {
+      countries: JSON.parse(
+        fs.readFileSync(path.join(__dirname, "mocks/countries.json"), "utf-8")
+      ),
+      tourism: JSON.parse(
+        fs.readFileSync(path.join(__dirname, "mocks/tourism.json"), "utf-8")
+      ),
+      earthquakes: JSON.parse(
+        fs.readFileSync(path.join(__dirname, "mocks/earthquakes.json"), "utf-8")
+      ),
+      earthquakeStatistics: JSON.parse(
+        fs.readFileSync(
+          path.join(__dirname, "mocks/earthquake-statistics.json"),
+          "utf-8"
+        )
+      ),
+    }
+  : null;
+
 app.use(cors());
 app.use(express.json());
 
@@ -22,7 +44,6 @@ app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Country API endpoint
 app.get("/api/countries", async (req: Request, res: Response) => {
   try {
     const { countryName } = req.query;
@@ -32,6 +53,11 @@ app.get("/api/countries", async (req: Request, res: Response) => {
         error: "Missing query parameter",
         message: "countryName is required",
       });
+    }
+
+    if (USE_MOCK_DATA && mockData) {
+      const data = mockData.countries[countryName] || mockData.countries["Spain"];
+      return res.status(200).json(data);
     }
 
     // @ts-ignore - built JS module
@@ -54,7 +80,6 @@ app.get("/api/countries", async (req: Request, res: Response) => {
   }
 });
 
-// Tourism API endpoint
 app.get("/api/tourism", async (req: Request, res: Response) => {
   try {
     const { countryName } = req.query;
@@ -64,6 +89,11 @@ app.get("/api/tourism", async (req: Request, res: Response) => {
         error: "Missing query parameter",
         message: "countryName is required",
       });
+    }
+
+    if (USE_MOCK_DATA && mockData) {
+      const data = mockData.tourism[countryName] || mockData.tourism["Spain"];
+      return res.status(200).json(data);
     }
 
     // @ts-ignore - built JS module
@@ -86,7 +116,6 @@ app.get("/api/tourism", async (req: Request, res: Response) => {
   }
 });
 
-// Earthquake API endpoint - most recent
 app.get("/api/earthquakes", async (req: Request, res: Response) => {
   try {
     const { countryName } = req.query;
@@ -96,6 +125,11 @@ app.get("/api/earthquakes", async (req: Request, res: Response) => {
         error: "Missing query parameter",
         message: "countryName is required",
       });
+    }
+
+    if (USE_MOCK_DATA && mockData) {
+      const data = mockData.earthquakes[countryName] || mockData.earthquakes["Spain"];
+      return res.status(200).json(data);
     }
 
     // @ts-ignore - built JS module
@@ -118,7 +152,6 @@ app.get("/api/earthquakes", async (req: Request, res: Response) => {
   }
 });
 
-// Earthquake Statistics API endpoint
 app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
   try {
     const { countryName, month } = req.query;
@@ -135,6 +168,12 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
         error: "Missing query parameter",
         message: "month is required",
       });
+    }
+
+    if (USE_MOCK_DATA && mockData) {
+      const countryData = mockData.earthquakeStatistics[countryName] || mockData.earthquakeStatistics["Spain"];
+      const data = countryData[month] || countryData["1"];
+      return res.status(200).json(data);
     }
 
     // @ts-ignore - built JS module
@@ -157,13 +196,13 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Local API server running on http://localhost:${PORT}`);
+  console.log(`Mode: ${USE_MOCK_DATA ? "MOCK DATA" : "REAL DATA"}`);
   console.log(`Available endpoints:`);
   console.log(`   - GET /api/countries?countryName=Spain`);
   console.log(`   - GET /api/tourism?countryName=Spain`);
-  console.log(`   - GET /api/earthquakes?countryName=Spain&month=1`);
+  console.log(`   - GET /api/earthquakes?countryName=Spain`);
   console.log(`   - GET /api/earthquakes/statistics?countryName=Spain&month=1`);
   console.log(`   - GET /health`);
 });
