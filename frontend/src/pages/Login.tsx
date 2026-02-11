@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { supabase } from "../lib/supabase";
+import { useState } from "react";
 import { AppRoute } from "../common/enums";
-import { Input } from "../components/Input";
+import { AuthFormFooter } from "../components/AuthFormFooter";
 import { Button } from "../components/Button";
 import { FormHeader } from "../components/FormHeader";
-import { AuthFormFooter } from "../components/AuthFormFooter";
+import { Input } from "../components/Input";
+import { supabase } from "../lib/supabase";
 
 export const LoginPage = () => {
   const router = useRouter();
@@ -64,11 +64,7 @@ export const LoginPage = () => {
             dataTestId="password"
           />
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4"
-          >
+          <Button type="submit" disabled={loading} className="w-full py-2 px-4">
             {loading ? "Processing..." : "Sign In"}
           </Button>
 

@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { europeanCountries, months } from "../common/constants";
-import { useAuth } from "../hooks/useAuth";
-import Dropdown from "../components/Dropdown";
-import { Button } from "../components/Button";
-import { searchAPI, searchQueryKeys } from "./api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { europeanCountries, months } from "../common/constants";
 import { AppRoute } from "../common/enums";
+import { Button } from "../components/Button";
+import Dropdown from "../components/Dropdown";
+import { useAuth } from "../hooks/useAuth";
+import { searchAPI, searchQueryKeys } from "./api";
 
 export function Home() {
   const { user } = useAuth();

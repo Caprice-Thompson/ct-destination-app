@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
 import { AppRoute } from "../common/enums";
-import { Input } from "../components/Input";
-import { FormHeader } from "../components/FormHeader";
 import { AuthFormFooter } from "../components/AuthFormFooter";
 import { Button } from "../components/Button";
+import { FormHeader } from "../components/FormHeader";
+import { Input } from "../components/Input";
+import { supabase } from "../lib/supabase";
 
 export const SignUpPage = () => {
   const [loading, setLoading] = useState(false);

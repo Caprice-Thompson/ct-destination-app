@@ -1,6 +1,11 @@
-import { CountryApiRepositoryInterface } from '@application/interfaces/repositories';
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
-import { logger } from '@infrastructure/logger';
+import type { CountryApiRepositoryInterface } from "@application/interfaces/repositories";
+import {
+  Coordinates,
+  CountryFacts,
+  Currency,
+  MapDetails,
+} from "@domain/entities/country-facts";
+import { logger } from "@infrastructure/logger";
 
 interface RestCountriesApiResponse {
   name: {
@@ -27,7 +32,9 @@ interface RestCountriesApiResponse {
   };
 }
 
-export class RestCountriesApiRepository implements CountryApiRepositoryInterface {
+export class RestCountriesApiRepository
+  implements CountryApiRepositoryInterface
+{
   private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
@@ -38,7 +45,7 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
     try {
       const url = `${this.baseUrl}/${encodeURIComponent(countryName)}`;
 
-      logger.info('Fetching country facts', { countryName, url });
+      logger.info("Fetching country facts", { countryName, url });
 
       const response = await fetch(url);
 
@@ -53,12 +60,13 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
       }
 
       const countryData = data[0];
-      logger.info('Mapping Country data to CountryFacts entity');
+      logger.info("Mapping Country data to CountryFacts entity");
 
       return this.mapToCountryDetail(countryData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.debug('Error fetching country details from REST Countries API', {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      logger.debug("Error fetching country details from REST Countries API", {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
       });
@@ -67,17 +75,29 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
   }
 
   private mapToCountryDetail(data: RestCountriesApiResponse): CountryFacts {
-    const currencyCode = data.currencies ? Object.keys(data.currencies)[0] : null;
-    const currencyData = currencyCode && data.currencies ? data.currencies[currencyCode] : null;
-    const currency = new Currency(currencyData?.name || 'Unknown', currencyData?.symbol || '');
+    const currencyCode = data.currencies
+      ? Object.keys(data.currencies)[0]
+      : null;
+    const currencyData =
+      currencyCode && data.currencies ? data.currencies[currencyCode] : null;
+    const currency = new Currency(
+      currencyData?.name || "Unknown",
+      currencyData?.symbol || "",
+    );
 
     // Extract languages
     const languages = data.languages ? Object.values(data.languages) : [];
 
     // Extract coordinates
-    const coordinates = new Coordinates(data.latlng?.[0] || 0, data.latlng?.[1] || 0);
+    const coordinates = new Coordinates(
+      data.latlng?.[0] || 0,
+      data.latlng?.[1] || 0,
+    );
     // Extract map details
-    const maps = new MapDetails(data.maps?.googleMaps ?? '', data.maps?.openStreetMaps ?? '');
+    const maps = new MapDetails(
+      data.maps?.googleMaps ?? "",
+      data.maps?.openStreetMaps ?? "",
+    );
 
     const capital = data.capital?.[0];
 

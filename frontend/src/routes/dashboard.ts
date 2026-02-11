@@ -1,7 +1,7 @@
 import { createRoute } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
-import { rootRoute } from "./routes";
 import { Dashboard } from "../pages/Dashboard";
+import { rootRoute } from "./routes";
 
 export const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,

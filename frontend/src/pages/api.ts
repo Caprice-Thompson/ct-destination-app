@@ -99,7 +99,13 @@ export const fetchEarthquakeStatistics = async (
   countryName: string,
   month: string,
 ): Promise<EarthquakeStatisticsResponse> => {
-  console.log("fetching earthquake statistics", countryName, month, "month type:", typeof month);
+  console.log(
+    "fetching earthquake statistics",
+    countryName,
+    month,
+    "month type:",
+    typeof month,
+  );
   const response = await fetch(
     `/api/earthquakes/statistics?countryName=${encodeURIComponent(countryName)}&month=${encodeURIComponent(month)}`,
   );

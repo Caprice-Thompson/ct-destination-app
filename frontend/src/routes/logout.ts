@@ -1,7 +1,7 @@
 import { createRoute, redirect } from "@tanstack/react-router";
-import { rootRoute } from "./routes";
-import { supabase } from "../lib/supabase";
 import { AppRoute } from "../common/enums";
+import { supabase } from "../lib/supabase";
+import { rootRoute } from "./routes";
 
 export const logoutRoute = createRoute({
   getParentRoute: () => rootRoute,

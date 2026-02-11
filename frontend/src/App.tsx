@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useAuth } from "./hooks/useAuth";
 import { AppRoute } from "./common/enums";
+import { useAuth } from "./hooks/useAuth";
 import "./App.css";
 import { Navbar } from "./components/NavBar";
 

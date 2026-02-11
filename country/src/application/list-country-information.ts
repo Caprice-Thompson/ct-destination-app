@@ -1,9 +1,9 @@
-import logger from '@infrastructure/logger';
-import {
+import logger from "@infrastructure/logger";
+import type {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
   PopulationApiRepositoryInterface,
-} from './interfaces/repositories';
+} from "./interfaces/repositories";
 
 export interface CountryInformationResult {
   countryDetails: {
@@ -46,9 +46,12 @@ export class ListCountryInformation {
     private readonly populationApiRepository: PopulationApiRepositoryInterface,
   ) {}
 
-  async listCountryInfo(countryName: string): Promise<CountryInformationResult> {
+  async listCountryInfo(
+    countryName: string,
+  ): Promise<CountryInformationResult> {
     logger.info(`Fetching Country facts for country name: ${countryName}`);
-    const countryFacts = await this.countryApiRepository.getCountryFacts(countryName);
+    const countryFacts =
+      await this.countryApiRepository.getCountryFacts(countryName);
     if (!countryFacts) {
       throw new Error(`Country Facts not found: ${countryName}`);
     }
@@ -62,8 +65,8 @@ export class ListCountryInformation {
       countryDetails: {
         countryCode: countryFacts.code,
         countryName: countryFacts.name,
-        capitalCityName: countryFacts.capital ?? '',
-        flagUrl: countryFacts.flag ?? '',
+        capitalCityName: countryFacts.capital ?? "",
+        flagUrl: countryFacts.flag ?? "",
         languages: countryFacts.languageList,
         currency: {
           name: countryFacts.currencyInfo.name,
@@ -74,8 +77,8 @@ export class ListCountryInformation {
           longitude: countryFacts.location.longitude,
         },
         maps: {
-          googleMaps: countryFacts.mapLinks?.googleMaps ?? '',
-          openStreetMaps: countryFacts.mapLinks?.openStreetMaps ?? '',
+          googleMaps: countryFacts.mapLinks?.googleMaps ?? "",
+          openStreetMaps: countryFacts.mapLinks?.openStreetMaps ?? "",
         },
       },
       cityPopulation:

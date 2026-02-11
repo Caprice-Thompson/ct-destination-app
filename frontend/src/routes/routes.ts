@@ -5,14 +5,14 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import App from "../App";
-import { Home } from "../pages/Home";
-import { DefaultCatchBoundary } from "../components/DefaultCatchBoundary";
-import { loginRoute } from "./login";
-import { signupRoute } from "./signup";
-import { logoutRoute } from "./logout";
-import { landingRoute } from "./landing";
-import { dashboardRoute } from "./dashboard";
 import { AppRoute } from "../common/enums";
+import { DefaultCatchBoundary } from "../components/DefaultCatchBoundary";
+import { Home } from "../pages/Home";
+import { dashboardRoute } from "./dashboard";
+import { landingRoute } from "./landing";
+import { loginRoute } from "./login";
+import { logoutRoute } from "./logout";
+import { signupRoute } from "./signup";
 
 function RootNotFound() {
   return redirect({ to: AppRoute.Landing, replace: true });

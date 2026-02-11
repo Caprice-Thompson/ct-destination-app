@@ -1,8 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
-import { AppRoute } from "../common/enums";
 import { europeanCountries } from "../common/constants";
-import { FormHeader } from "../components/FormHeader";
+import { AppRoute } from "../common/enums";
 import { Button } from "../components/Button";
+import { FormHeader } from "../components/FormHeader";
 
 export function Landing() {
   const router = useRouter();

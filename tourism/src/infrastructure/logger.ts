@@ -36,8 +36,7 @@ const getSentry = () => {
         environment: process.env.NODE_ENV ?? "development",
         enableLogs: true,
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
   return Sentry;
 };

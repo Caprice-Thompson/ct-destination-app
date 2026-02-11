@@ -1,6 +1,6 @@
-import { PopulationApiRepositoryInterface } from '@application/interfaces/repositories';
-import { CityPopulation } from '@domain/entities/city-population';
-import { logger } from '@infrastructure/logger';
+import type { PopulationApiRepositoryInterface } from "@application/interfaces/repositories";
+import { CityPopulation } from "@domain/entities/city-population";
+import { logger } from "@infrastructure/logger";
 
 interface PopulationAPIResponse {
   total_count: number;
@@ -22,7 +22,9 @@ interface PopulationAPIResponse {
   }>;
 }
 
-export class PopulationApiRepository implements PopulationApiRepositoryInterface {
+export class PopulationApiRepository
+  implements PopulationApiRepositoryInterface
+{
   private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
@@ -31,8 +33,8 @@ export class PopulationApiRepository implements PopulationApiRepositoryInterface
 
   async getTopCityPopulations(countryName: string): Promise<CityPopulation[]> {
     const params = new URLSearchParams({
-      order_by: 'population DESC',
-      limit: '4',
+      order_by: "population DESC",
+      limit: "4",
       refine: 'timezone:"Europe"',
       where: `cou_name_en='${countryName.replace(/'/g, "\\'")}'`,
     });
@@ -54,8 +56,9 @@ export class PopulationApiRepository implements PopulationApiRepositoryInterface
           }),
       );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.debug('Error fetching top city populations from Population API', {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      logger.debug("Error fetching top city populations from Population API", {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
       });

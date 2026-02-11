@@ -1,9 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { dashboardRoute } from "../routes/dashboard";
-import { searchAPI, searchQueryKeys, type SearchResult } from "./api";
 import { AppRoute } from "../common/enums";
+import { dashboardRoute } from "../routes/dashboard";
+import { type SearchResult, searchAPI, searchQueryKeys } from "./api";
 
 export function Dashboard() {
   const { country, month } = useSearch({ from: dashboardRoute.id });
@@ -309,7 +309,9 @@ export function Dashboard() {
                     <div>
                       <p className="font-medium text-gray-800">{site.site}</p>
                       {site.areaName && (
-                        <p className="text-sm text-gray-500">{site.description}</p>
+                        <p className="text-sm text-gray-500">
+                          {site.description}
+                        </p>
                       )}
                     </div>
                   </li>
