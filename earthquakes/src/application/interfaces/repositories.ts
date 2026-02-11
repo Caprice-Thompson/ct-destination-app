@@ -1,5 +1,5 @@
-import { Earthquake } from "@domain/entities/earthquake";
-import { Coordinates } from "@domain/entities/coordinates";
+import type { Coordinates } from "@domain/entities/coordinates";
+import type { Earthquake } from "@domain/entities/earthquake";
 
 export interface EarthquakeQueryParams {
   latitude: number;

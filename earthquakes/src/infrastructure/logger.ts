@@ -1,6 +1,6 @@
+import type { Logger } from "@application/interfaces/logger";
 import { createLogger, format, transports } from "winston";
 import type { ApplicationConfig } from "./config";
-import type { Logger } from "@application/interfaces/logger";
 
 const isDev = process.env.NODE_ENV === "dev";
 
@@ -21,8 +21,7 @@ const getSentry = () => {
         environment: process.env.NODE_ENV ?? "development",
         enableLogs: true,
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
   return Sentry;
 };
@@ -45,12 +44,12 @@ export const makeLogger = (config: ApplicationConfig): Logger => {
   const sentry = getSentry();
 
   const logToSentry = (level: string, message: string, context?: any) => {
-    if (sentry && sentry.logger) {
+    if (sentry?.logger) {
       const attributes = {
         service: config.service.name,
         ...context,
       };
-      
+
       switch (level) {
         case "info":
           sentry.logger.info(message, attributes);

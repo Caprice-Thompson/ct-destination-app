@@ -1,12 +1,12 @@
-import { Dependencies } from "@infrastructure/dependencies";
-import { Earthquake } from "@domain/entities/earthquake";
-import { validateMostRecentEqRequest } from "./validator";
+import type { Earthquake } from "@domain/entities/earthquake";
+import type { Dependencies } from "@infrastructure/dependencies";
 import {
   formattedEndDate,
   formattedStartDate,
   limit,
   maxRadiusKm,
 } from "./utils/constants";
+import { validateMostRecentEqRequest } from "./validator";
 
 export type GetMostRecentEarthquakesByCountryQuery = Readonly<{
   countryName: string;

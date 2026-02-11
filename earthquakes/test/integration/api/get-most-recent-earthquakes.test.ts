@@ -1,11 +1,11 @@
 import { handler } from "@api/get-most-recent-earthquakes";
+import { Coordinates } from "@domain/entities/coordinates";
+import { Earthquake } from "@domain/entities/earthquake";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { Earthquake } from "@domain/entities/earthquake";
-import { Coordinates } from "@domain/entities/coordinates";
-import { APIGatewayEvent } from "../../../src/types";
+import type { APIGatewayEvent } from "../../../src/types";
 
 jest.mock("@infrastructure/dependencies");
 

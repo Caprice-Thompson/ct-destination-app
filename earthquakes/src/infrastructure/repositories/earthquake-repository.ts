@@ -1,10 +1,10 @@
-import {
-  EarthquakeRepositoryInterface,
+import type {
   EarthquakeQueryParams,
+  EarthquakeRepositoryInterface,
 } from "@application/interfaces/repositories";
 import { Earthquake } from "@domain/entities/earthquake";
 import { findCountryInString } from "@domain/utils/country-extractor";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
 
 interface EqFeatureProperties {
   mag: number;
@@ -268,7 +268,9 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
 
     const monthlyPercentage =
       totalEarthquakes > 0
-        ? parseFloat(((totalInMonth / totalEarthquakes) * 100).toFixed(2))
+        ? Number.parseFloat(
+            ((totalInMonth / totalEarthquakes) * 100).toFixed(2),
+          )
         : 0;
 
     const tsunamiCount = earthquakesInTargetMonth.filter(
@@ -276,16 +278,16 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     ).length;
     const avgTsunamiCount =
       totalInMonth > 0
-        ? parseFloat((tsunamiCount / totalInMonth).toFixed(1))
+        ? Number.parseFloat((tsunamiCount / totalInMonth).toFixed(1))
         : 0;
 
     const sumMagnitude = earthquakesInTargetMonth.reduce(
-      (sum, eq) => sum + (isNaN(eq.magnitude) ? 0 : eq.magnitude),
+      (sum, eq) => sum + (Number.isNaN(eq.magnitude) ? 0 : eq.magnitude),
       0,
     );
     const avgMagnitude =
       totalInMonth > 0
-        ? parseFloat((sumMagnitude / totalInMonth).toFixed(1))
+        ? Number.parseFloat((sumMagnitude / totalInMonth).toFixed(1))
         : 0;
 
     return {

@@ -1,9 +1,9 @@
 import { handler } from "@api/handlers/scheduled-ingest";
+import { Earthquake } from "@domain/entities/earthquake";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { Earthquake } from "@domain/entities/earthquake";
 
 jest.mock("@infrastructure/dependencies");
 

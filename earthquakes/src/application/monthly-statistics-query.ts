@@ -1,6 +1,6 @@
-import { EarthquakeStatistics } from "types";
+import type { Dependencies } from "@infrastructure/dependencies";
+import type { EarthquakeStatistics } from "types";
 import { validateMonthlyEarthquakeStatisticsRequest } from "./validator";
-import { Dependencies } from "@infrastructure/dependencies";
 
 export type GetMonthlyEarthquakeStatisticsQuery = {
   countryName: string;
@@ -21,7 +21,7 @@ export async function getMonthlyEarthquakeStatisticsQuery(
   const statistics =
     await earthquakeRepository.getHistoricalEarthquakeStatistics(
       validatedQuery.countryName,
-      parseInt(validatedQuery.month, 10),
+      Number.parseInt(validatedQuery.month, 10),
     );
 
   return {

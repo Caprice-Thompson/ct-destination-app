@@ -1,15 +1,17 @@
-import { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
+import type { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { findCountryInString } from "@domain/utils/country-extractor";
 import {
+  BatchWriteCommand,
   DynamoDBDocumentClient,
   QueryCommand,
-  BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
-import { Dependencies } from "@infrastructure/dependencies";
+import { findCountryInString } from "@domain/utils/country-extractor";
+import type { Dependencies } from "@infrastructure/dependencies";
 
-export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeRepository {
+export class DynamoDBEarthquakeRepository
+  implements HistoricalEarthquakeRepository
+{
   private readonly docClient: DynamoDBDocumentClient;
   private readonly dependencies: Pick<Dependencies, "config" | "logger">;
 
@@ -121,10 +123,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
           const tableName = this.dependencies.config.tables.earthquakes;
 
-          if (
-            response.UnprocessedItems &&
-            response.UnprocessedItems[tableName]
-          ) {
+          if (response.UnprocessedItems?.[tableName]) {
             const unprocessedCount =
               response.UnprocessedItems[tableName].length;
             successCount += unprocessedItems.length - unprocessedCount;
@@ -158,7 +157,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
             retryCount++;
             if (unprocessedItems.length > 0) {
               await new Promise((resolve) =>
-                setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
+                setTimeout(resolve, DELAY_MS * 2 ** retryCount),
               );
             }
           } else {
@@ -181,7 +180,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
           if (retryCount <= MAX_RETRIES) {
             await new Promise((resolve) =>
-              setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
+              setTimeout(resolve, DELAY_MS * 2 ** retryCount),
             );
           }
         }
@@ -242,9 +241,9 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
         });
 
         const results = await Promise.all(checkPromises);
-        results.forEach((id) => {
+        for (const id of results) {
           if (id) existingIds.add(id);
-        });
+        }
       } catch (error) {
         this.dependencies.logger.error("Error in batch check", {
           error: error instanceof Error ? error.message : "Unknown error",

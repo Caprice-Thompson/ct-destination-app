@@ -1,6 +1,6 @@
-import { z, ZodError } from "zod";
-import { GetMostRecentEarthquakesByCountryQuery } from "./get-most-recent-eq-query";
-import { GetMonthlyEarthquakeStatisticsQuery } from "./monthly-statistics-query";
+import { ZodError, z } from "zod";
+import type { GetMostRecentEarthquakesByCountryQuery } from "./get-most-recent-eq-query";
+import type { GetMonthlyEarthquakeStatisticsQuery } from "./monthly-statistics-query";
 
 export async function validateMostRecentEqRequest(
   query: GetMostRecentEarthquakesByCountryQuery,

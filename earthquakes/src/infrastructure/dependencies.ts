@@ -1,10 +1,10 @@
+import type { Logger } from "@application/interfaces/logger";
 import type { ApplicationConfig } from "./config";
 import { makeConfig } from "./config";
 import { makeLogger } from "./logger";
-import type { Logger } from "@application/interfaces/logger";
 import { CoordinatesRepository } from "./repositories/coordinates-repository";
-import { EarthquakeRepository } from "./repositories/earthquake-repository";
 import { DynamoDBEarthquakeRepository } from "./repositories/dynamodb-eq-repository";
+import { EarthquakeRepository } from "./repositories/earthquake-repository";
 
 export type Dependencies = {
   config: ApplicationConfig;
