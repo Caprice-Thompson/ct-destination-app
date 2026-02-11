@@ -45,15 +45,14 @@ export interface TourismAPIResponse {
 
 // Earthquake Response Types
 export interface EarthquakeData {
-  id: string;
+  eventId: string;
+  name: string;
   magnitude: number;
-  depth: number;
-  location: string;
-  timestamp: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
+  date: string;
+  type: string;
+  tsunami: number;
+  place: string;
+  country: string;
 }
 
 export interface EarthquakeAPIResponse {
