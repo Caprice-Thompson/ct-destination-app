@@ -71,9 +71,8 @@ app.get("/api/countries", async (req: Request, res: Response) => {
     }
 
     // @ts-ignore - built JS module
-    const { listCountryInformationHandler } = await import(
-      "../country/dist/list-country-information.js"
-    );
+    const { listCountryInformationHandler } =
+      await import("../country/dist/list-country-information.js");
 
     const event = {
       queryStringParameters: { countryName },
@@ -108,9 +107,8 @@ app.get("/api/tourism", async (req: Request, res: Response) => {
     }
 
     // @ts-ignore - built JS module
-    const { getTourismInformationHandler } = await import(
-      "../tourism/dist/get-tourism-information.js"
-    );
+    const { getTourismInformationHandler } =
+      await import("../tourism/dist/get-tourism-information.js");
 
     const event = {
       queryStringParameters: { countryName },
@@ -146,9 +144,8 @@ app.get("/api/earthquakes", async (req: Request, res: Response) => {
     }
 
     // @ts-ignore - built JS module
-    const { handler } = await import(
-      "../earthquakes/dist/get-most-recent-earthquakes.js"
-    );
+    const { handler } =
+      await import("../earthquakes/dist/get-most-recent-earthquakes.js");
 
     const event = {
       queryStringParameters: { countryName },
@@ -193,9 +190,8 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
     }
 
     // @ts-ignore - built JS module
-    const { handler } = await import(
-      "../earthquakes/dist/get-earthquake-monthly-summary.js"
-    );
+    const { handler } =
+      await import("../earthquakes/dist/get-earthquake-monthly-summary.js");
 
     const event = {
       queryStringParameters: { countryName, month },
