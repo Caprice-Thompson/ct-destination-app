@@ -1,9 +1,11 @@
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import fs from "fs";
+import * as Sentry from "@sentry/node";
+import "./sentry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,22 +20,22 @@ const USE_MOCK_DATA = process.env.USE_MOCK_DATA === "true";
 
 const mockData = USE_MOCK_DATA
   ? {
-      countries: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/countries.json"), "utf-8")
-      ),
-      tourism: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/tourism.json"), "utf-8")
-      ),
-      earthquakes: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/earthquakes.json"), "utf-8")
-      ),
-      earthquakeStatistics: JSON.parse(
-        fs.readFileSync(
-          path.join(__dirname, "mocks/earthquake-statistics.json"),
-          "utf-8"
-        )
-      ),
-    }
+    countries: JSON.parse(
+      fs.readFileSync(path.join(__dirname, "mocks/countries.json"), "utf-8")
+    ),
+    tourism: JSON.parse(
+      fs.readFileSync(path.join(__dirname, "mocks/tourism.json"), "utf-8")
+    ),
+    earthquakes: JSON.parse(
+      fs.readFileSync(path.join(__dirname, "mocks/earthquakes.json"), "utf-8")
+    ),
+    earthquakeStatistics: JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "mocks/earthquake-statistics.json"),
+        "utf-8"
+      )
+    ),
+  }
   : null;
 
 app.use(cors());
@@ -195,6 +197,14 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
     });
   }
 });
+
+Sentry.setupExpressErrorHandler(app);
+
+app.use(
+  (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    res.status(500).send(res.locals.sentry + "\n");
+  },
+);
 
 app.listen(PORT, () => {
   console.log(`Local API server running on http://localhost:${PORT}`);
