@@ -1,8 +1,8 @@
-import { makeConfig, type ApplicationConfig } from './config';
-import { TourismInformationRepositoryInterface } from '@application/interfaces/tourism-repo';
-import { rdsClient, type DbClient } from './rds';
-import { TourismDatabaseRepository } from './repositories/tourism-database-repository';
-import { GetTourismInformation } from '@application/get-tourism-information';
+import { GetTourismInformation } from "@application/get-tourism-information";
+import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
+import { type ApplicationConfig, makeConfig } from "./config";
+import { type DbClient, rdsClient } from "./rds";
+import { TourismDatabaseRepository } from "./repositories/tourism-database-repository";
 
 export interface Dependencies {
   config: ApplicationConfig;
@@ -14,8 +14,11 @@ export interface Dependencies {
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
   const dbClient = await makeRdsClient(config);
-  const tourismInformationRepository = makeTourismInformationRepository(dbClient);
-  const getTourismInformationUseCase = makeGetTourismInformationUseCase(tourismInformationRepository);
+  const tourismInformationRepository =
+    makeTourismInformationRepository(dbClient);
+  const getTourismInformationUseCase = makeGetTourismInformationUseCase(
+    tourismInformationRepository,
+  );
 
   return {
     config,
@@ -35,11 +38,15 @@ async function makeRdsClient(config: ApplicationConfig): Promise<DbClient> {
       useSSl: config.database.useSSL,
     });
   } catch (error) {
-    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Database connection failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
-function makeTourismInformationRepository(dbClient: DbClient): TourismInformationRepositoryInterface {
+function makeTourismInformationRepository(
+  dbClient: DbClient,
+): TourismInformationRepositoryInterface {
   return new TourismDatabaseRepository(dbClient);
 }
 

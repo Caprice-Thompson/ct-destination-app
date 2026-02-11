@@ -1,11 +1,14 @@
-import * as pg from 'pg';
-import type { QueryResultRow } from 'pg';
+import * as pg from "pg";
+import type { QueryResultRow } from "pg";
 
-export { DatabaseError, type QueryResultRow } from 'pg';
+export { DatabaseError, type QueryResultRow } from "pg";
 
 export type RowMapper<T> = (row: QueryResultRow) => T;
 
-export interface QueryHandler<T, U = Array<string | string[] | number | boolean | null>> {
+export interface QueryHandler<
+  T,
+  U = Array<string | string[] | number | boolean | null>,
+> {
   query: string;
   bindVariables?: U;
   rowMapper?: RowMapper<T>;
@@ -59,17 +62,21 @@ export const rdsClient = async ({
     const result = await query(handler.query, handler.bindVariables);
 
     if (result.rows.length === 0) {
-      throw new Error('No results found');
+      throw new Error("No results found");
     }
 
     if (result.rows.length > 1) {
-      throw new Error('More than expected number of results');
+      throw new Error("More than expected number of results");
     }
 
-    return handler.rowMapper ? result.rows.map(handler.rowMapper)[0] : result.rows[0];
+    return handler.rowMapper
+      ? result.rows.map(handler.rowMapper)[0]
+      : result.rows[0];
   };
 
-  const querySingleRowOptional = async <T>(handler: QueryHandler<T>): Promise<T | null> => {
+  const querySingleRowOptional = async <T>(
+    handler: QueryHandler<T>,
+  ): Promise<T | null> => {
     const result = await query(handler.query, handler.bindVariables);
 
     if (result.rows.length === 0) {
@@ -77,13 +84,17 @@ export const rdsClient = async ({
     }
 
     if (result.rows.length > 1) {
-      throw new Error('More than expected number of results');
+      throw new Error("More than expected number of results");
     }
 
-    return handler.rowMapper ? result.rows.map(handler.rowMapper)[0] : result.rows[0];
+    return handler.rowMapper
+      ? result.rows.map(handler.rowMapper)[0]
+      : result.rows[0];
   };
 
-  const queryMultipleRows = async <T>(handler: QueryHandler<T>): Promise<T[]> => {
+  const queryMultipleRows = async <T>(
+    handler: QueryHandler<T>,
+  ): Promise<T[]> => {
     const result = await query(handler.query, handler.bindVariables);
 
     return handler.rowMapper ? result.rows.map(handler.rowMapper) : result.rows;
@@ -96,15 +107,15 @@ export const rdsClient = async ({
   };
 
   const beginTransaction = async (): Promise<void> => {
-    await query('BEGIN');
+    await query("BEGIN");
   };
 
   const commitTransaction = async (): Promise<void> => {
-    await query('COMMIT');
+    await query("COMMIT");
   };
 
   const rollbackTransaction = async (): Promise<void> => {
-    await query('ROLLBACK');
+    await query("ROLLBACK");
   };
 
   const closeConnection = async (): Promise<void> => {

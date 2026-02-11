@@ -1,9 +1,11 @@
-import { TourismInformationRepositoryInterface } from '@application/interfaces/tourism-repo';
-import { UNESCOSites } from '@domain/entities/unesco-sites';
-import { DbClient, QueryResultRow } from '../rds';
-import logger from '../logger';
+import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+import logger from "../logger";
+import type { DbClient, QueryResultRow } from "../rds";
 
-export class TourismDatabaseRepository implements TourismInformationRepositoryInterface {
+export class TourismDatabaseRepository
+  implements TourismInformationRepositoryInterface
+{
   constructor(private readonly dbClient: DbClient) {}
 
   async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
@@ -28,15 +30,17 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
         rowMapper: this.mapRowToUNESCOSite,
       });
 
-      logger.info(`Found ${sites.length} UNESCO sites for country: ${countryName}`);
+      logger.info(
+        `Found ${sites.length} UNESCO sites for country: ${countryName}`,
+      );
       return sites;
     } catch (error) {
-      logger.error('Error fetching tourism information from database', {
+      logger.error("Error fetching tourism information from database", {
         countryName,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw new Error(
-        `Failed to fetch tourism information: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to fetch tourism information: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }

@@ -1,5 +1,5 @@
-import logger from '@infrastructure/logger';
-import { TourismInformationRepositoryInterface } from './interfaces/tourism-repo';
+import logger from "@infrastructure/logger";
+import type { TourismInformationRepositoryInterface } from "./interfaces/tourism-repo";
 
 export interface TourismInformationResult {
   unescoSites: {
@@ -12,12 +12,15 @@ export interface TourismInformationResult {
 }
 
 export class GetTourismInformation {
-  constructor(private readonly tourismRepository: TourismInformationRepositoryInterface) {}
+  constructor(
+    private readonly tourismRepository: TourismInformationRepositoryInterface,
+  ) {}
 
   async getTourismInfo(countryName: string): Promise<TourismInformationResult> {
     logger.info(`Fetching tourism information for country: ${countryName}`);
 
-    const unescoSites = await this.tourismRepository.getTourismInformation(countryName);
+    const unescoSites =
+      await this.tourismRepository.getTourismInformation(countryName);
 
     if (!unescoSites || unescoSites.length === 0) {
       logger.info(`No tourism information found for country: ${countryName}`);
