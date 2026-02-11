@@ -39,6 +39,7 @@ export const europeanCountries: DropdownOption[] = [
   { value: "Iceland", label: "Iceland" },
   { value: "Ireland", label: "Ireland" },
   { value: "Italy", label: "Italy" },
+  { value: "Japan", label: "Japan" },
   { value: "Kosovo", label: "Kosovo" },
   { value: "Latvia", label: "Latvia" },
   { value: "Liechtenstein", label: "Liechtenstein" },

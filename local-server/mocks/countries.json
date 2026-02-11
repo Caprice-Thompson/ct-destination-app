@@ -36,5 +36,51 @@
       "imageUrl": "https://chefspencil.com/wp-content/uploads/Zagorski-Strukli-960x960.jpg",
       "description": "A traditional Spanish rice dish from Valencia"
     }
+  },
+  "Japan": {
+    "countryDetails": {
+      "countryCode": "JP",
+      "countryName": "Japan",
+      "capitalCityName": "Tokyo",
+      "flagUrl": "https://flagcdn.com/jp.svg",
+      "languages": ["Japanese"],
+      "currency": {
+        "name": "Japanese Yen",
+        "symbol": "¥"
+      },
+      "coordinates": {
+        "latitude": 35.6762,
+        "longitude": 139.6503
+      },
+      "maps": {
+        "googleMaps": "https://goo.gl/maps/japan",
+        "openStreetMaps": "https://www.openstreetmap.org/relation/382313"
+      }
+    },
+    "cityPopulation": [
+      {
+        "cityName": "Tokyo",
+        "population": 13960000
+      },
+      {
+        "cityName": "Yokohama",
+        "population": 3750000
+      },
+      {
+        "cityName": "Osaka",
+        "population": 2750000
+      },
+      {
+        "cityName": "Nagoya",
+        "population": 2320000
+      }
+    ],
+    "nationalDish": {
+      "countryCode": "JP",
+      "countryName": "Japan",
+      "dishName": "Sushi",
+      "imageUrl": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351",
+      "description": "Traditional Japanese dish featuring vinegared rice with various toppings"
+    }
   }
 }

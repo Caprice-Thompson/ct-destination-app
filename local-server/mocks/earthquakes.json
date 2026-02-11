@@ -33,5 +33,40 @@
       }
     ],
     "countryName": "Spain"
+  },
+  "Japan": {
+    "earthquakes": [
+      {
+        "eventId": "jp2024001",
+        "name": "M 5.8 - 45 km E of Tokyo",
+        "magnitude": 5.8,
+        "date": "2024-12-20T03:15:22.000Z",
+        "type": "earthquake",
+        "tsunami": 0,
+        "place": "45 km E of Tokyo",
+        "country": "Japan"
+      },
+      {
+        "eventId": "jp2024002",
+        "name": "M 4.9 - 30 km NW of Osaka",
+        "magnitude": 4.9,
+        "date": "2024-12-18T18:42:11.000Z",
+        "type": "earthquake",
+        "tsunami": 0,
+        "place": "30 km NW of Osaka",
+        "country": "Japan"
+      },
+      {
+        "eventId": "jp2024003",
+        "name": "M 5.2 - 60 km SE of Sendai",
+        "magnitude": 5.2,
+        "date": "2024-12-15T09:28:33.000Z",
+        "type": "earthquake",
+        "tsunami": 0,
+        "place": "60 km SE of Sendai",
+        "country": "Japan"
+      }
+    ],
+    "countryName": "Japan"
   }
 }
