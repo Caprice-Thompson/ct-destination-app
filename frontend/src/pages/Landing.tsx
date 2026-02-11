@@ -59,7 +59,7 @@ export function Landing() {
       </div>
 
       {/* Right Side - 1/4 width with light blue background */}
-      <div className="w-1/4 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-8 relative">
+      <div className="w-1/3 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-8 relative">
         {/* Decorative element */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full -mr-16 -mt-16 opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-300 rounded-full -ml-12 -mb-12 opacity-50"></div>
@@ -74,6 +74,7 @@ export function Landing() {
               <FormHeader
                 title="Welcome"
                 description="Start your journey today"
+                className="font-extrabold"
               />
             </div>
 
@@ -88,7 +89,7 @@ export function Landing() {
               </Button>
               <Button
                 type="submit"
-                variant="secondary"
+                variant="green"
                 onClick={() => router.navigate({ to: AppRoute.Signup })}
                 className="w-full"
               >
@@ -106,7 +107,7 @@ export function Landing() {
 
               <Button
                 type="submit"
-                variant="secondary"
+                variant="grey"
                 onClick={handleGuestAccess}
                 className="w-full"
               >
@@ -116,7 +117,7 @@ export function Landing() {
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center leading-relaxed">
-                Save favorite destinations and get personalised recommendations
+                Save favourite destinations and get personalised recommendations
               </p>
             </div>
           </div>

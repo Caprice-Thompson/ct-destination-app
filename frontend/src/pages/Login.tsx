@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { FormHeader } from "../components/FormHeader";
 import { Input } from "../components/Input";
 import { supabase } from "../lib/supabase";
+import { FormContainer } from "../components/FormContainer";
 
 export const LoginPage = () => {
   const router = useRouter();
@@ -37,11 +38,9 @@ export const LoginPage = () => {
         <FormHeader
           title="Welcome back"
           description="Sign in to your account"
+          className="font-extrabold"
         />
-        <form
-          onSubmit={handleAuth}
-          className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md"
-        >
+        <FormContainer onSubmit={handleAuth}>
           <Input
             label="Email address"
             type="email"
@@ -75,7 +74,7 @@ export const LoginPage = () => {
             returnLink={AppRoute.Landing}
             returnLinkText="Back to landing"
           />
-        </form>
+        </FormContainer>
       </div>
     </div>
   );

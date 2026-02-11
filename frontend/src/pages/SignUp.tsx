@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { FormHeader } from "../components/FormHeader";
 import { Input } from "../components/Input";
 import { supabase } from "../lib/supabase";
+import { FormContainer } from "../components/FormContainer";
 
 export const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
@@ -37,11 +38,9 @@ export const SignUpPage = () => {
         <FormHeader
           title="Create your account"
           description="Sign up to save your favorite destinations"
+          className="font-extrabold"
         />
-        <form
-          onSubmit={handleAuth}
-          className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md"
-        >
+        <FormContainer onSubmit={handleAuth}>
           <div>
             <div>
               <Input
@@ -89,7 +88,7 @@ export const SignUpPage = () => {
             returnLink={AppRoute.Landing}
             returnLinkText="Back to landing"
           />
-        </form>
+        </FormContainer>
       </div>
     </div>
   );
