@@ -12,6 +12,12 @@ export interface CountryInformationResult {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
+    population: number;
+    timezone: string[];
+    continent: string;
+    drivingSide: {
+      side: string;
+    };
     currency: {
       name: string;
       symbol: string;
@@ -63,22 +69,28 @@ export class ListCountryInformation {
 
     return {
       countryDetails: {
-        countryCode: countryFacts.code,
-        countryName: countryFacts.name,
-        capitalCityName: countryFacts.capital ?? "",
-        flagUrl: countryFacts.flag ?? "",
-        languages: countryFacts.languageList,
+        countryCode: countryFacts.countryCode,
+        countryName: countryFacts.countryName,
+        capitalCityName: countryFacts.capitalCityName ?? "",
+        flagUrl: countryFacts.flagUrl ?? "",
+        languages: countryFacts.languages,
+        population: countryFacts.population,
+        timezone: countryFacts.timezone,
+        continent: countryFacts.continent,
+        drivingSide: {
+          side: countryFacts.drivingSide.side,
+        },
         currency: {
-          name: countryFacts.currencyInfo.name,
-          symbol: countryFacts.currencyInfo.symbol,
+          name: countryFacts.currency.name,
+          symbol: countryFacts.currency.symbol,
         },
         coordinates: {
-          latitude: countryFacts.location.latitude,
-          longitude: countryFacts.location.longitude,
+          latitude: countryFacts.coordinates.latitude,
+          longitude: countryFacts.coordinates.longitude,
         },
         maps: {
-          googleMaps: countryFacts.mapLinks?.googleMaps ?? "",
-          openStreetMaps: countryFacts.mapLinks?.openStreetMaps ?? "",
+          googleMaps: countryFacts.maps?.googleMaps ?? "",
+          openStreetMaps: countryFacts.maps?.openStreetMaps ?? "",
         },
       },
       cityPopulation:

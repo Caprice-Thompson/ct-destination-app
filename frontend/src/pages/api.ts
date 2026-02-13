@@ -6,6 +6,12 @@ export interface CountryApiResponse {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
+    population: number;
+    timezone: string[];
+    continent: string;
+    drivingSide: {
+      side: string;
+    };
     currency: {
       name: string;
       symbol: string;

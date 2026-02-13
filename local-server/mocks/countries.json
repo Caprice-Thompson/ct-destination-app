@@ -6,6 +6,12 @@
       "capitalCityName": "Madrid",
       "flagUrl": "https://flagcdn.com/es.svg",
       "languages": ["Spanish", "Catalan", "Galician", "Basque"],
+      "population": 47350000,
+      "timezone": ["CET (UTC+1)", "CEST (UTC+2)"],
+      "continent": "Europe",
+      "drivingSide": {
+        "side": "right"
+      },
       "currency": {
         "name": "Euro",
         "symbol": "€"

@@ -3,6 +3,7 @@ import {
   Coordinates,
   CountryFacts,
   Currency,
+  DrivingSide,
   MapDetails,
 } from "@domain/entities/country-facts";
 import { logger } from "@infrastructure/logger";
@@ -12,8 +13,14 @@ interface RestCountriesApiResponse {
     common: string;
   };
   cca2: string;
-  capital?: string[];
-  languages?: Record<string, string>;
+  capital: string[];
+  languages: Record<string, string>;
+  population: number;
+  timezones: string[];
+  continents: string[];
+  car: {
+    side: string;
+  };
   currencies?: Record<
     string,
     {
@@ -102,15 +109,22 @@ export class RestCountriesApiRepository
     const capital = data.capital?.[0];
 
     const flagUrl = data.flags?.svg ?? data.flags?.png ?? null;
-
+    const population = data.population;
+    const timezone = data.timezones;
+    const continent = data.continents ? data.continents[0] : "";
+    const drivingSide = new DrivingSide(data.car.side);
     return new CountryFacts({
       countryCode: data.cca2,
       countryName: data.name.common,
-      capitalCityName: capital ?? null,
+      capitalCityName: capital!,
       flagUrl,
       languages,
       currency,
       coordinates,
+      population,
+      timezone,
+      continent,
+      drivingSide,
       maps,
     });
   }
