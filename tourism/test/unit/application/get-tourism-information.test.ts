@@ -1,17 +1,24 @@
+<<<<<<< Updated upstream
 import { GetTourismInformation } from '@application/get-tourism-information';
 import { TourismInformationRepositoryInterface } from '@application/interfaces/tourism-repo';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
+=======
+import { getTourismInfo } from "@application/get-tourism-info/get-tourism-information";
+import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+import { Dependencies } from "@infrastructure/dependencies";
+import { type DeepMockProxy, mockDeep } from "jest-mock-extended";
+>>>>>>> Stashed changes
 
 describe('GetTourismInformation', () => {
   let mockRepository: jest.Mocked<TourismInformationRepositoryInterface>;
-  let useCase: GetTourismInformation;
 
   beforeEach(() => {
     mockRepository = {
       getTourismInformation: jest.fn(),
     };
+    dependencies = mockDeep<Dependencies>();
 
-    useCase = new GetTourismInformation(mockRepository);
   });
 
   describe('getTourismInfo', () => {
@@ -23,7 +30,11 @@ describe('GetTourismInformation', () => {
 
       mockRepository.getTourismInformation.mockResolvedValue(mockSites);
 
+<<<<<<< Updated upstream
       const result = await useCase.getTourismInfo('Spain');
+=======
+      const result = await getTourismInfo({ countryName: "Spain" }, { tourismInformationRepository: mockRepository, rdsClient: mockRdsClient, config: mockConfig, logger: mockLogger });
+>>>>>>> Stashed changes
 
       expect(result.unescoSites).toHaveLength(2);
       expect(result.unescoSites[0]).toEqual({

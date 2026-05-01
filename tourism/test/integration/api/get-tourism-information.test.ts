@@ -1,7 +1,17 @@
+<<<<<<< Updated upstream
 import { getTourismInformationHandler, resetDependencies } from '@infrastructure/../api/get-tourism-information';
 import { makeDependencies } from '@infrastructure/dependencies';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
 import { APIGatewayEvent } from 'src/types';
+=======
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+import {
+  getTourismInformationHandler,
+  resetDependencies,
+} from "src/api/get-tourism-information";
+import { makeDependencies } from "@infrastructure/dependencies";
+import type { APIGatewayEvent } from "src/types";
+>>>>>>> Stashed changes
 
 jest.mock('@infrastructure/dependencies');
 
@@ -23,7 +33,11 @@ describe('getTourismInformationHandler Integration Tests', () => {
       tourismInformationRepository: mockTourismRepository,
     });
 
+<<<<<<< Updated upstream
     jest.spyOn(console, 'error').mockImplementation(() => {});
+=======
+    jest.spyOn(console, "error").mockImplementation(() => { });
+>>>>>>> Stashed changes
   });
 
   afterEach(() => {

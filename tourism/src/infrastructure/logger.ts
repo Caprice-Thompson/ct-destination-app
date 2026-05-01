@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import winston from 'winston';
 
 const isDev = process.env.NODE_ENV === 'dev';
@@ -22,3 +23,18 @@ export const logger = winston.createLogger({
 });
 
 export default logger;
+=======
+import { createLogger, format, type LoggerOptions, transports } from "winston";
+
+export const makeLogger = (options: LoggerOptions) => {
+  return createLogger({
+    ...options,
+    defaultMeta: {},
+    level: "debug",
+    format: format.json(),
+    transports: [new transports.Console()],
+  });
+};
+
+export const logger = makeLogger({});
+>>>>>>> Stashed changes

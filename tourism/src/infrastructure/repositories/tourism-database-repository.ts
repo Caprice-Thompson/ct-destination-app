@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { TourismInformationRepositoryInterface } from '@application/interfaces/tourism-repo';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
 import { DbClient, QueryResultRow } from '../rds';
@@ -9,6 +10,15 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
   async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
     try {
       logger.info(`Querying tourism database for country: ${countryName}`);
+=======
+
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+import { Dependencies } from "@infrastructure/dependencies";
+
+export async function makeTourismInformationRepository({ rdsClient }: Pick<Dependencies, "rdsClient">) {
+  return {
+    async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
+>>>>>>> Stashed changes
 
       const query = `
         SELECT 
@@ -22,12 +32,19 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
         ORDER BY site ASC
       `;
 
-      const sites = await this.dbClient.queryMultipleRows<UNESCOSites>({
+      const sites = await rdsClient.queryMultipleRows<UNESCOSites>({
         query,
         bindVariables: [countryName],
-        rowMapper: this.mapRowToUNESCOSite,
+        rowMapper: (row) => new UNESCOSites(
+          row.country_code as string,
+          row.country_name as string,
+          row.area_name as string,
+          row.site as string,
+          row.description as string | undefined,
+        ),
       });
 
+<<<<<<< Updated upstream
       logger.info(`Found ${sites.length} UNESCO sites for country: ${countryName}`);
       return sites;
     } catch (error) {
@@ -38,16 +55,9 @@ export class TourismDatabaseRepository implements TourismInformationRepositoryIn
       throw new Error(
         `Failed to fetch tourism information: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+=======
+      return sites;
+>>>>>>> Stashed changes
     }
-  }
-
-  private mapRowToUNESCOSite(row: QueryResultRow): UNESCOSites {
-    return new UNESCOSites(
-      row.country_code as string,
-      row.country_name as string,
-      row.area_name as string,
-      row.site as string,
-      row.description as string | undefined,
-    );
-  }
+  };
 }

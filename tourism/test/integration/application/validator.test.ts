@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import { validateGetTourismInformationRequest } from '@application/validator';
+=======
+import { validateGetTourismInformationRequest } from "@application/get-tourism-info/validator";
+>>>>>>> Stashed changes
 
 describe('Validator Integration Tests', () => {
   describe('Valid Inputs', () => {

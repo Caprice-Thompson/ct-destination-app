@@ -1,14 +1,24 @@
+<<<<<<< Updated upstream
 import { validateGetTourismInformationRequest } from '@application/validator';
 import { makeDependencies, type Dependencies } from '@infrastructure/dependencies';
 import { logger } from '@infrastructure/logger';
 import { APIGatewayEvent, APIGatewayProxyResult, ErrorResponse } from '../types';
+=======
+import { type APIGatewayProxyEvent, createApiHandler } from "./wrappers";
+import { getTourismInfo } from "@application/get-tourism-info/get-tourism-information";
+import type { Dependencies } from "@infrastructure/dependencies";
+import { GetTourismInformationQuery } from "@application/get-tourism-info/get-tourism-information";
+>>>>>>> Stashed changes
 
-let dependencies: Dependencies | null = null;
+export function getTourismInformationHandler(dependencies: Dependencies, event: APIGatewayProxyEvent) {
+  const queryParams = {
+    countryName: event.queryStringParameters?.countryName,
+  } as GetTourismInformationQuery;
 
-export const resetDependencies = () => {
-  dependencies = null;
-};
+  return getTourismInfo(queryParams, dependencies);
+}
 
+<<<<<<< Updated upstream
 export const getTourismInformationHandler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
     const query = await validateGetTourismInformationRequest(event.queryStringParameters);
@@ -62,3 +72,7 @@ export const getTourismInformationHandler = async (event: APIGatewayEvent): Prom
     };
   }
 };
+=======
+export const handler = createApiHandler(getTourismInformationHandler, { successStatusCode: 200 });
+
+>>>>>>> Stashed changes

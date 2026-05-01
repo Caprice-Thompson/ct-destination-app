@@ -1,6 +1,12 @@
+<<<<<<< Updated upstream
 import { GetTourismInformation } from '@application/get-tourism-information';
 import { TourismInformationRepositoryInterface } from '@application/interfaces/tourism-repo';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
+=======
+import { GetTourismInformation } from "@application/get-tourism-info/get-tourism-information";
+import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+>>>>>>> Stashed changes
 
 describe('GetTourismInformation Use Case Integration Tests', () => {
   let mockRepository: jest.Mocked<TourismInformationRepositoryInterface>;
