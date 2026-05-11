@@ -7,4 +7,4 @@ export { rdsClient } from './infrastructure/rds';
 export type { DbClient } from './infrastructure/rds';
 export { logger } from './infrastructure/logger';
 export { validateGetTourismInformationRequest } from './application/validator';
-export type { GetTourismInformationQuery, APIGatewayEvent, APIGatewayProxyResult } from './types';
+export type { GetTourismInformationQuery } from './application/get-tourism-info/get-tourism-information';

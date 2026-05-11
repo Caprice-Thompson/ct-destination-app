@@ -1,25 +1,27 @@
-import { TourismDatabaseRepository } from '@infrastructure/repositories/tourism-database-repository';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
-import { DbClient } from '@infrastructure/rds';
+import { type DbClient } from '@infrastructure/rds';
+import { makeTourismInformationRepository } from '@infrastructure/repositories/tourism-database-repository';
 
-describe('TourismDatabaseRepository', () => {
-  let mockDbClient: jest.Mocked<DbClient>;
-  let repository: TourismDatabaseRepository;
 
-  beforeEach(() => {
-    mockDbClient = {
-      queryMultipleRows: jest.fn(),
-      querySingleRow: jest.fn(),
-      querySingleRowOptional: jest.fn(),
-      update: jest.fn(),
-      closeConnection: jest.fn(),
-      beginTransaction: jest.fn(),
-      commitTransaction: jest.fn(),
-      rollbackTransaction: jest.fn(),
+  jest.mock("@aws-sdk/client-dynamodb");
+  jest.mock("@aws-sdk/lib-dynamodb");
+  
+  describe('TourismDatabaseRepository', () => {
+    let repository: Awaited<ReturnType<typeof makeTourismInformationRepository>>;
+    let mockDbClient: {
+      queryMultipleRows: jest.Mock;
     };
-
-    repository = new TourismDatabaseRepository(mockDbClient);
-  });
+  
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      mockDbClient = {
+        queryMultipleRows: jest.fn(),
+      };
+  
+      repository = await makeTourismInformationRepository({
+        rdsClient: mockDbClient as unknown as DbClient,
+      });
+    });
 
   describe('getTourismInformation', () => {
     it('should return UNESCO sites for a given country', async () => {

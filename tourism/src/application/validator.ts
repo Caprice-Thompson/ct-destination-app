@@ -1,4 +1,4 @@
-import { GetTourismInformationQuery } from 'src/types';
+import type { GetTourismInformationQuery } from '@application/get-tourism-info/get-tourism-information';
 import { z, ZodError } from 'zod';
 
 const getTourismInformationSchema = z.object({

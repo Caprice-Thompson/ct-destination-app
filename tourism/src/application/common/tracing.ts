@@ -1,18 +1,17 @@
-import { logger } from "@infrastructure/logger";
-
+import { logger } from '@infrastructure/logger';
 
 export enum TracedProperties {
-    amazonTraceId = "amazonTraceId",
+  amazonTraceId = 'amazonTraceId',
 }
 export type TracingInfo = Record<TracedProperties, string>;
 
 export interface HackedLambdaContext {
-    clientContext?: Record<string, TracingInfo>;
-    invokedFunctionArn: string;
+  clientContext?: Record<string, TracingInfo>;
+  invokedFunctionArn: string;
 }
 
 export const initializeTracingInfo = (tracingInfo?: Record<string, Partial<TracingInfo>>) => {
-    logger.defaultMeta.tracingInfo = tracingInfo;
+  logger.defaultMeta.tracingInfo = tracingInfo;
 };
 /**
  * Wrapper around a lambda handler that populates log metadata with information received
@@ -25,10 +24,10 @@ export const initializeTracingInfo = (tracingInfo?: Record<string, Partial<Traci
  * You can add any properties to the HackedLambdaContext type that you want to access.
  */
 export const withTraceLogging = <Input, Output>(
-    handler: (event?: Input, context?: HackedLambdaContext) => Promise<Output>,
+  handler: (event?: Input, context?: HackedLambdaContext) => Promise<Output>,
 ) => {
-    return (event?: Input, context?: HackedLambdaContext) => {
-        initializeTracingInfo(context?.clientContext);
-        return handler(event, context);
-    };
+  return (event?: Input, context?: HackedLambdaContext) => {
+    initializeTracingInfo(context?.clientContext);
+    return handler(event, context);
+  };
 };
