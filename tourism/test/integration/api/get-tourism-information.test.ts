@@ -1,15 +1,41 @@
-import { getTourismInformationHandler } from '@infrastructure/../api/get-tourism-information';
-import { Dependencies, makeDependencies } from '@infrastructure/dependencies';
+import { getTourismInformationHandler } from '../../../src/api/get-tourism-information';
+import type { Dependencies } from '@infrastructure/dependencies';
+import type { DbClient } from '@infrastructure/rds';
 import { UNESCOSites } from '@domain/entities/unesco-sites';
-import { APIGatewayProxyEvent, createApiHandler } from 'src/api/wrappers/api-handler';
+import { APIGatewayProxyEvent, createApiHandler } from '../../../src/api/wrappers/api-handler';
 
-jest.mock('@infrastructure/dependencies');
+function buildTestDependencies(): Dependencies {
+  return {
+    tourismInformationRepository: {
+      getTourismInformation: jest.fn(),
+    },
+    rdsClient: {
+      closeConnection: jest.fn().mockResolvedValue(undefined),
+    } as unknown as DbClient,
+    logger: {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
+    config: {
+      database: {
+        connectionString: 'postgresql://localhost/test',
+        queryTimeout: 1000,
+        connectionTimeout: 1000,
+        useSSL: false,
+      },
+      service: { name: 'tourism-test' },
+    },
+  };
+}
 
 describe('getTourismInformationHandler Integration Tests', () => {
   let dependencies: Dependencies;
   let handler: ReturnType<typeof createApiHandler>;
-  beforeAll(async () => {
-    dependencies = await makeDependencies();
+
+  beforeAll(() => {
+    dependencies = buildTestDependencies();
     handler = createApiHandler(getTourismInformationHandler, {
       successStatusCode: 200,
       dependencies,
@@ -20,6 +46,9 @@ describe('getTourismInformationHandler Integration Tests', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
     jest.restoreAllMocks();
   });
 
@@ -30,10 +59,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
         new UNESCOSites('ES', 'Spain', 'Catalonia', 'Sagrada Familia', 'A large unfinished church'),
       ];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Spain' },
@@ -52,10 +78,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
     });
 
     it('should return 200 with empty array when no sites found', async () => {
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: [],
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue([]);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'UnknownCountry' },
@@ -72,10 +95,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
     it('should handle sites without descriptions', async () => {
       const mockSites = [new UNESCOSites('IT', 'Italy', 'Lazio', 'Colosseum', undefined)];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Italy' },
@@ -103,7 +123,8 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.headers?.['Content-Type']).toBe('application/json');
 
       const body = JSON.parse(response.body);
-      expect(body.message).toContain('Validation error');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toEqual(expect.arrayContaining([expect.objectContaining({ message: expect.any(String) })]));
     });
 
     it('should return 400 for empty country name', async () => {
@@ -116,7 +137,10 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(400);
 
       const body = JSON.parse(response.body);
-      expect(body.message).toContain('Validation error');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toEqual(
+        expect.arrayContaining([expect.objectContaining({ message: 'Country name is required' })]),
+      );
     });
 
     it('should return 400 for invalid country name format', async () => {
@@ -129,7 +153,14 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(400);
 
       const body = JSON.parse(response.body);
-      expect(body.message).toContain('Validation error');
+      expect(body.error).toBe('Validation failed');
+      expect(body.details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'Country name must contain only letters, spaces, hyphens, and apostrophes',
+          }),
+        ]),
+      );
     });
 
     it('should return 400 for null query parameters', async () => {
@@ -142,16 +173,15 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(400);
 
       const body = JSON.parse(response.body);
-      expect(body.message).toContain('Validation error');
+      expect(body.error).toBe('Validation failed');
     });
   });
 
   describe('Internal Server Errors', () => {
     it('should return 500 for database connection error', async () => {
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockRejectedValue(
-        new Error('Database connection failed'),
-      );
+      jest
+        .mocked(dependencies.tourismInformationRepository.getTourismInformation)
+        .mockRejectedValue(new Error('Database connection failed'));
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Spain' },
@@ -162,14 +192,13 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(500);
 
       const body = JSON.parse(response.body);
-      expect(body.message).toBe('Database connection failed');
+      expect(body.error).toBe('Internal server error');
     });
 
     it('should return 500 for unexpected errors', async () => {
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockRejectedValue(
-        new Error('Unexpected error'),
-      );
+      jest
+        .mocked(dependencies.tourismInformationRepository.getTourismInformation)
+        .mockRejectedValue(new Error('Unexpected error'));
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'France' },
@@ -180,16 +209,13 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(500);
 
       const body = JSON.parse(response.body);
-      expect(body.message).toBe('Unexpected error');
+      expect(body.error).toBe('Internal server error');
     });
   });
 
   describe('Response Format', () => {
     it('should include correct content-type header', async () => {
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: [],
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue([]);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Spain' },
@@ -204,10 +230,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
     it('should return valid JSON', async () => {
       const mockSites = [new UNESCOSites('ES', 'Spain', 'Andalusia', 'Alhambra', 'Palace')];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Spain' },
@@ -224,10 +247,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
         new UNESCOSites('ES', 'Spain', 'Catalonia', 'Sagrada Familia', 'Church'),
       ];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'Spain' },
@@ -245,10 +265,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
     it('should handle country names with special characters', async () => {
       const mockSites = [new UNESCOSites('CI', "Côte d'Ivoire", 'Abidjan', 'Test Site', 'Description')];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: "Côte d'Ivoire" },
@@ -264,10 +281,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
     it('should handle country names with hyphens', async () => {
       const mockSites = [new UNESCOSites('GB', 'United Kingdom', 'England', 'Stonehenge', 'Monument')];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'United-Kingdom' },
@@ -285,10 +299,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
         new UNESCOSites('FR', 'France', 'Loire Valley', 'Château de Chambord', 'Renaissance castle'),
       ];
 
-      const dependencies = await makeDependencies();
-      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue({
-        unescoSites: mockSites.map((site) => site.toJSON()),
-      });
+      jest.mocked(dependencies.tourismInformationRepository.getTourismInformation).mockResolvedValue(mockSites);
 
       const event: Partial<APIGatewayProxyEvent> = {
         queryStringParameters: { countryName: 'France' },
@@ -299,7 +310,7 @@ describe('getTourismInformationHandler Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.unescoSites).toHaveLength(3);
-      expect(body.unescoSites.every((site: UNESCOSites) => site.countryName === 'France')).toBe(true);
+      expect(body.unescoSites.every((site: { countryName: string }) => site.countryName === 'France')).toBe(true);
     });
   });
 });

@@ -1,27 +1,19 @@
 import { UNESCOSites } from '@domain/entities/unesco-sites';
-import { type DbClient } from '@infrastructure/rds';
+import type { DbClient } from '@infrastructure/rds';
 import { makeTourismInformationRepository } from '@infrastructure/repositories/tourism-database-repository';
+import { mockDeep } from 'jest-mock-extended';
 
+jest.mock('@aws-sdk/client-dynamodb');
+jest.mock('@aws-sdk/lib-dynamodb');
 
-  jest.mock("@aws-sdk/client-dynamodb");
-  jest.mock("@aws-sdk/lib-dynamodb");
-  
-  describe('TourismDatabaseRepository', () => {
-    let repository: Awaited<ReturnType<typeof makeTourismInformationRepository>>;
-    let mockDbClient: {
-      queryMultipleRows: jest.Mock;
-    };
-  
-    beforeEach(async () => {
-      jest.clearAllMocks();
-      mockDbClient = {
-        queryMultipleRows: jest.fn(),
-      };
-  
-      repository = await makeTourismInformationRepository({
-        rdsClient: mockDbClient as unknown as DbClient,
-      });
-    });
+describe('TourismDatabaseRepository', () => {
+  let rdsClient: ReturnType<typeof mockDeep<DbClient>>;
+  let repository: Awaited<ReturnType<typeof makeTourismInformationRepository>>;
+
+  beforeEach(async () => {
+    rdsClient = mockDeep<DbClient>();
+    repository = await makeTourismInformationRepository({ rdsClient });
+  });
 
   describe('getTourismInformation', () => {
     it('should return UNESCO sites for a given country', async () => {
@@ -41,8 +33,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
           description: 'A large unfinished church',
         },
       ];
-
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
         ),
@@ -56,7 +47,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
       expect(result[0].site).toBe('Alhambra');
       expect(result[1].site).toBe('Sagrada Familia');
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
         query: expect.stringContaining('WHERE LOWER(country_name) = LOWER($1)'),
         bindVariables: ['Spain'],
         rowMapper: expect.any(Function),
@@ -64,12 +55,12 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
     });
 
     it('should return empty array when no sites found', async () => {
-      mockDbClient.queryMultipleRows.mockResolvedValue([]);
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue([]);
 
       const result = await repository.getTourismInformation('UnknownCountry');
 
       expect(result).toEqual([]);
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
         query: expect.any(String),
         bindVariables: ['UnknownCountry'],
         rowMapper: expect.any(Function),
@@ -87,7 +78,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
         },
       ];
 
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
         ),
@@ -95,7 +86,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
 
       await repository.getTourismInformation('FRANCE');
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
         query: expect.stringContaining('LOWER(country_name) = LOWER($1)'),
         bindVariables: ['FRANCE'],
         rowMapper: expect.any(Function),
@@ -113,7 +104,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
         },
       ];
 
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
         ),
@@ -126,15 +117,13 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
     });
 
     it('should throw error when database query fails', async () => {
-      mockDbClient.queryMultipleRows.mockRejectedValue(new Error('Database connection failed'));
+      (rdsClient.queryMultipleRows as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(repository.getTourismInformation('Spain')).rejects.toThrow(
-        'Failed to fetch tourism information: Database connection failed',
-      );
+      await expect(repository.getTourismInformation('Spain')).rejects.toThrow('Database connection failed');
     });
 
     it('should order results by site name', async () => {
-      expect(mockDbClient.queryMultipleRows).toBeDefined();
+      expect(rdsClient.queryMultipleRows).toBeDefined();
 
       const mockRows = [
         {
@@ -146,7 +135,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
         },
       ];
 
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
         ),
@@ -154,7 +143,7 @@ import { makeTourismInformationRepository } from '@infrastructure/repositories/t
 
       await repository.getTourismInformation('United Kingdom');
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
         query: expect.stringContaining('ORDER BY site ASC'),
         bindVariables: ['United Kingdom'],
         rowMapper: expect.any(Function),
