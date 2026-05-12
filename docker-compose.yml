@@ -1,0 +1,91 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: destination-postgres
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    environment:
+      POSTGRES_USER: destination-user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: destination_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U destination-user -d destination_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - destination-network
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: destination-dynamodb
+    restart: unless-stopped
+    command: -jar DynamoDBLocal.jar -sharedDb
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal
+    working_dir: /home/dynamodblocal
+    networks:
+      - destination-network
+
+  country-migrations:
+    image: node:18
+    container_name: country-migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "apt-get update && apt-get install -y postgresql-client && chmod +x runMigrations.sh && ./runMigrations.sh"
+    working_dir: /app/country
+    environment:
+      DATABASE_URL: postgresql://destination-user:${DB_PASSWORD}@postgres:5432/destination_db?schema=country
+      DB_HOST: postgres
+      DB_USER: destination-user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: destination_db
+      DB_PORT: 5432
+      DB_SCHEMA: country
+    volumes:
+      - ./country:/app/country
+      - /app/country/node_modules
+    networks:
+      - destination-network
+
+  tourism-migrations:
+    image: node:18
+    container_name: tourism-migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "apt-get update && apt-get install -y postgresql-client && chmod +x runMigrations.sh && ./runMigrations.sh"
+    working_dir: /app/tourism
+    environment:
+      DATABASE_URL: postgresql://destination-user:${DB_PASSWORD}@postgres:5432/destination_db?schema=tourism
+      DB_HOST: postgres
+      DB_USER: destination-user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: destination_db
+      DB_PORT: 5432
+      DB_SCHEMA: tourism
+    volumes:
+      - ./tourism:/app/tourism
+      - /app/tourism/node_modules
+    networks:
+      - destination-network
+
+volumes:
+  postgres_data:
+    driver: local
+  dynamodb_data:
+    driver: local
+
+networks:
+  destination-network:
+    driver: bridge

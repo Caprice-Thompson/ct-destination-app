@@ -1,6 +1,6 @@
-import { CoordinatesRepository } from "@infrastructure/repositories/coordinates-repository";
 import { Coordinates } from "@domain/entities/coordinates";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
+import { CoordinatesRepository } from "@infrastructure/repositories/coordinates-repository";
 
 describe("CoordinatesRepository", () => {
   let repository: CoordinatesRepository;

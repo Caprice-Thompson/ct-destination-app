@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020"],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@application/*": [
+        "../country/src/application/*",
+        "../tourism/src/application/*",
+        "../earthquakes/src/application/*"
+      ],
+      "@domain/*": [
+        "../country/src/domain/*",
+        "../tourism/src/domain/*",
+        "../earthquakes/src/domain/*"
+      ],
+      "@infrastructure/*": [
+        "../country/src/infrastructure/*",
+        "../tourism/src/infrastructure/*",
+        "../earthquakes/src/infrastructure/*"
+      ],
+      "@api/*": ["../earthquakes/src/api/*"]
+    }
+  },
+  "include": ["server.ts"],
+  "exclude": ["node_modules", "dist"]
+}

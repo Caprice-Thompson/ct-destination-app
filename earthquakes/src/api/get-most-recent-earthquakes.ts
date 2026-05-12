@@ -1,9 +1,9 @@
 import {
-  getMostRecentEarthquakesByCountry,
   type GetMostRecentEarthquakesByCountryQuery,
+  getMostRecentEarthquakesByCountry,
 } from "@application/get-most-recent-eq-query";
 import { makeDependencies } from "@infrastructure/dependencies";
-import { APIGatewayEvent, APIGatewayProxyResult } from "../types";
+import type { APIGatewayEvent, APIGatewayProxyResult } from "../types";
 
 /**
  * Lambda handler for getting most recent earthquakes for a country

@@ -20,18 +20,18 @@ describe('GetTourismInformation', () => {
       const result = await getTourismInfo({ countryName: 'Spain' }, dependencies);
       expect(result.unescoSites).toHaveLength(2);
       expect(result.unescoSites[0]).toEqual({
-        countryCode: 'ES',
-        countryName: 'Spain',
-        areaName: 'Andalusia',
-        site: 'Alhambra',
-        description: 'A palace and fortress complex',
+        countryCode: "ES",
+        countryName: "Spain",
+        areaName: "Andalusia",
+        site: "Alhambra",
+        description: "A palace and fortress complex",
       });
       expect(result.unescoSites[1]).toEqual({
-        countryCode: 'ES',
-        countryName: 'Spain',
-        areaName: 'Catalonia',
-        site: 'Sagrada Familia',
-        description: 'A large unfinished church',
+        countryCode: "ES",
+        countryName: "Spain",
+        areaName: "Catalonia",
+        site: "Sagrada Familia",
+        description: "A large unfinished church",
       });
     });
 
@@ -54,8 +54,10 @@ describe('GetTourismInformation', () => {
       expect(result.unescoSites).toEqual([]);
     });
 
-    it('should handle sites without description', async () => {
-      const mockSites = [new UNESCOSites('IT', 'Italy', 'Lazio', 'Colosseum', undefined)];
+    it("should handle sites without description", async () => {
+      const mockSites = [
+        new UNESCOSites("IT", "Italy", "Lazio", "Colosseum", undefined),
+      ];
 
       (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
 
@@ -75,11 +77,29 @@ describe('GetTourismInformation', () => {
       );
     });
 
-    it('should handle multiple sites from same country', async () => {
+    it("should handle multiple sites from same country", async () => {
       const mockSites = [
-        new UNESCOSites('FR', 'France', 'Île-de-France', 'Palace of Versailles', 'Royal château'),
-        new UNESCOSites('FR', 'France', 'Île-de-France', 'Notre-Dame Cathedral', 'Gothic cathedral'),
-        new UNESCOSites('FR', 'France', 'Provence', 'Pont du Gard', 'Ancient Roman aqueduct'),
+        new UNESCOSites(
+          "FR",
+          "France",
+          "Île-de-France",
+          "Palace of Versailles",
+          "Royal château",
+        ),
+        new UNESCOSites(
+          "FR",
+          "France",
+          "Île-de-France",
+          "Notre-Dame Cathedral",
+          "Gothic cathedral",
+        ),
+        new UNESCOSites(
+          "FR",
+          "France",
+          "Provence",
+          "Pont du Gard",
+          "Ancient Roman aqueduct",
+        ),
       ];
 
       (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
@@ -87,11 +107,21 @@ describe('GetTourismInformation', () => {
       const result = await getTourismInfo({ countryName: 'France' }, dependencies);
 
       expect(result.unescoSites).toHaveLength(3);
-      expect(result.unescoSites.every((site) => site.countryName === 'France')).toBe(true);
+      expect(
+        result.unescoSites.every((site) => site.countryName === "France"),
+      ).toBe(true);
     });
 
-    it('should handle special characters in country names', async () => {
-      const mockSites = [new UNESCOSites('CI', "Côte d'Ivoire", 'Abidjan', 'Test Site', 'Description')];
+    it("should handle special characters in country names", async () => {
+      const mockSites = [
+        new UNESCOSites(
+          "CI",
+          "Côte d'Ivoire",
+          "Abidjan",
+          "Test Site",
+          "Description",
+        ),
+      ];
 
       (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
 

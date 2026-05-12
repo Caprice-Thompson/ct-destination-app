@@ -1,9 +1,9 @@
-import logger from '@infrastructure/logger';
-import {
+import logger from "@infrastructure/logger";
+import type {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
   PopulationApiRepositoryInterface,
-} from './interfaces/repositories';
+} from "./interfaces/repositories";
 
 export interface CountryInformationResult {
   countryDetails: {
@@ -12,6 +12,12 @@ export interface CountryInformationResult {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
+    population: number;
+    timezone: string[];
+    continent: string;
+    drivingSide: {
+      side: string;
+    };
     currency: {
       name: string;
       symbol: string;
@@ -46,37 +52,45 @@ export class ListCountryInformation {
     private readonly populationApiRepository: PopulationApiRepositoryInterface,
   ) {}
 
-  async listCountryInfo(countryName: string): Promise<CountryInformationResult> {
+  async listCountryInfo(
+    countryName: string,
+  ): Promise<CountryInformationResult> {
     logger.info(`Fetching Country facts for country name: ${countryName}`);
-    const countryFacts = await this.countryApiRepository.getCountryFacts(countryName);
-
+    const countryFacts =
+      await this.countryApiRepository.getCountryFacts(countryName);
     if (!countryFacts) {
       throw new Error(`Country Facts not found: ${countryName}`);
     }
 
     const [nationalDish, cityPopulations] = await Promise.all([
       this.countryDatabaseRepository.getNationalDish(countryName),
-      this.populationApiRepository.getTopCityPopulations(countryName),
+      this.countryDatabaseRepository.getCityPopulationsFromDB(countryName),
     ]);
 
     return {
       countryDetails: {
-        countryCode: countryFacts.code,
-        countryName: countryFacts.name,
-        capitalCityName: countryFacts.capital ?? '',
-        flagUrl: countryFacts.flag ?? '',
-        languages: countryFacts.languageList,
+        countryCode: countryFacts.countryCode,
+        countryName: countryFacts.countryName,
+        capitalCityName: countryFacts.capitalCityName ?? "",
+        flagUrl: countryFacts.flagUrl ?? "",
+        languages: countryFacts.languages,
+        population: countryFacts.population,
+        timezone: countryFacts.timezone,
+        continent: countryFacts.continent,
+        drivingSide: {
+          side: countryFacts.drivingSide.side,
+        },
         currency: {
-          name: countryFacts.currencyInfo.name,
-          symbol: countryFacts.currencyInfo.symbol,
+          name: countryFacts.currency.name,
+          symbol: countryFacts.currency.symbol,
         },
         coordinates: {
-          latitude: countryFacts.location.latitude,
-          longitude: countryFacts.location.longitude,
+          latitude: countryFacts.coordinates.latitude,
+          longitude: countryFacts.coordinates.longitude,
         },
         maps: {
-          googleMaps: countryFacts.mapLinks?.googleMaps ?? '',
-          openStreetMaps: countryFacts.mapLinks?.openStreetMaps ?? '',
+          googleMaps: countryFacts.maps?.googleMaps ?? "",
+          openStreetMaps: countryFacts.maps?.openStreetMaps ?? "",
         },
       },
       cityPopulation:

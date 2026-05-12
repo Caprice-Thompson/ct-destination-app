@@ -58,6 +58,8 @@ if [ "$ENVIRONMENT" != "production" ]; then
     fi
 fi
 
+SCHEMA=${DB_SCHEMA:-country}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -100,8 +102,9 @@ validate_sql_file() {
 
 # Function to create migrations table if it doesn't exist
 create_migrations_table() {
-    log "Checking migrations table..."
+    log "Checking migrations table in schema $SCHEMA..."
     PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "
+        SET search_path TO $SCHEMA;
         CREATE TABLE IF NOT EXISTS $MIGRATIONS_TABLE (
             id SERIAL PRIMARY KEY,
             version VARCHAR(255) NOT NULL UNIQUE,
@@ -113,6 +116,7 @@ create_migrations_table() {
 # Function to get applied migrations
 get_applied_migrations() {
     PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -t -c "
+        SET search_path TO $SCHEMA;
         SELECT version FROM $MIGRATIONS_TABLE ORDER BY version;" | tr -d ' ' || echo ""
 }
 
@@ -121,10 +125,11 @@ apply_migration() {
     local file=$1
     local filename=$(basename "$file" .sql)
     
-    log "Applying migration: $filename"
+    log "Applying migration: $filename in schema $SCHEMA"
     
     # Apply migration in a transaction
     PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME << EOF
+    SET search_path TO $SCHEMA;
     BEGIN;
     \i $file
     INSERT INTO $MIGRATIONS_TABLE (version, name) VALUES ('$filename', '$filename');
@@ -140,7 +145,7 @@ EOF
 
 # Main execution
 main() {
-    log "Starting database migrations..."
+    log "Starting database migrations for schema: $SCHEMA..."
     log "Database: $DB_NAME @ $DB_HOST:$DB_PORT"
     
     # Validate database connection

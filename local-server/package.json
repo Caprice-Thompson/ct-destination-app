@@ -1,0 +1,24 @@
+{
+  "name": "local-api-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "prebuild": "cd ../country && npm run build && cd ../tourism && npm run build && cd ../earthquakes && npm run build",
+    "dev": "npm run prebuild && nodemon",
+    "start": "npm run prebuild && tsx --tsconfig ./tsconfig.json server.ts"
+  },
+  "dependencies": {
+    "@sentry/node": "^9.41.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.1",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

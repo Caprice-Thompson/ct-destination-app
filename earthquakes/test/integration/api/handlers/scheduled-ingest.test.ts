@@ -1,9 +1,9 @@
 import { handler } from "@api/handlers/scheduled-ingest";
+import { Earthquake } from "@domain/entities/earthquake";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { Earthquake } from "@domain/entities/earthquake";
 
 jest.mock("@infrastructure/dependencies");
 
@@ -74,7 +74,7 @@ describe("scheduled-ingest integration", () => {
     })).map((props) => new Earthquake(props));
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     (
@@ -106,7 +106,7 @@ describe("scheduled-ingest integration", () => {
     })).map((props) => new Earthquake(props));
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     (

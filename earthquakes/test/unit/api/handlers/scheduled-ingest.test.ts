@@ -1,9 +1,9 @@
 import { handler } from "@api/handlers/scheduled-ingest";
+import { Earthquake } from "@domain/entities/earthquake";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { Earthquake } from "@domain/entities/earthquake";
 
 jest.mock("@infrastructure/dependencies");
 
@@ -87,7 +87,7 @@ describe("scheduled-ingest handler", () => {
     ];
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     (
@@ -103,7 +103,7 @@ describe("scheduled-ingest handler", () => {
     expect(result.body.successfullyWritten).toBe(2);
 
     expect(
-      mockDependencies.earthquakeRepository.getEarthquakeData,
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData,
     ).toHaveBeenCalledWith({
       startTime: "2024-01-15",
       endTime: "2024-02-15",
@@ -127,7 +127,7 @@ describe("scheduled-ingest handler", () => {
 
   it("should return 200 with message when no earthquakes to ingest", async () => {
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue([]);
 
     const result = await handler();
@@ -148,7 +148,7 @@ describe("scheduled-ingest handler", () => {
     const error = new Error("API connection failed");
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockRejectedValue(error);
 
     const result = await handler();
@@ -181,7 +181,7 @@ describe("scheduled-ingest handler", () => {
     ];
 
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockResolvedValue(mockEarthquakes);
 
     const dbError = new Error("DynamoDB write failed");
@@ -207,7 +207,7 @@ describe("scheduled-ingest handler", () => {
 
   it("should handle non-Error exceptions gracefully", async () => {
     (
-      mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
+      mockDependencies.earthquakeRepository.getEarthquakeIngestData as jest.Mock
     ).mockRejectedValue("Unknown error string");
 
     const result = await handler();

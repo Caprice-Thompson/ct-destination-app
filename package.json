@@ -1,0 +1,14 @@
+{
+  "name": "destination-app",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "winston-transport-sentry-node": "^3.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4"
+  }
+}

@@ -36,6 +36,8 @@ async function makeRdsClient(config: ApplicationConfig): Promise<DbClient> {
       useSSl: config.database.useSSL,
     });
   } catch (error) {
-    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Database connection failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }

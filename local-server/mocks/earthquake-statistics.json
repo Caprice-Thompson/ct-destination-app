@@ -1,0 +1,150 @@
+{
+  "Spain": {
+    "1": {
+      "totalEarthquakes": 145,
+      "monthlyEarthquakePercentage": 8.5,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.4
+    },
+    "2": {
+      "totalEarthquakes": 132,
+      "monthlyEarthquakePercentage": 7.8,
+      "avgTsunamiCount": 0.1,
+      "avgMagnitude": 3.3
+    },
+    "3": {
+      "totalEarthquakes": 158,
+      "monthlyEarthquakePercentage": 9.2,
+      "avgTsunamiCount": 0.3,
+      "avgMagnitude": 3.5
+    },
+    "4": {
+      "totalEarthquakes": 140,
+      "monthlyEarthquakePercentage": 8.1,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.4
+    },
+    "5": {
+      "totalEarthquakes": 152,
+      "monthlyEarthquakePercentage": 8.9,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.6
+    },
+    "6": {
+      "totalEarthquakes": 138,
+      "monthlyEarthquakePercentage": 8.0,
+      "avgTsunamiCount": 0.1,
+      "avgMagnitude": 3.3
+    },
+    "7": {
+      "totalEarthquakes": 165,
+      "monthlyEarthquakePercentage": 9.6,
+      "avgTsunamiCount": 0.3,
+      "avgMagnitude": 3.7
+    },
+    "8": {
+      "totalEarthquakes": 148,
+      "monthlyEarthquakePercentage": 8.6,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.5
+    },
+    "9": {
+      "totalEarthquakes": 142,
+      "monthlyEarthquakePercentage": 8.3,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.4
+    },
+    "10": {
+      "totalEarthquakes": 155,
+      "monthlyEarthquakePercentage": 9.0,
+      "avgTsunamiCount": 0.3,
+      "avgMagnitude": 3.6
+    },
+    "11": {
+      "totalEarthquakes": 136,
+      "monthlyEarthquakePercentage": 7.9,
+      "avgTsunamiCount": 0.1,
+      "avgMagnitude": 3.3
+    },
+    "12": {
+      "totalEarthquakes": 149,
+      "monthlyEarthquakePercentage": 8.7,
+      "avgTsunamiCount": 0.2,
+      "avgMagnitude": 3.5
+    }
+  },
+  "Japan": {
+    "1": {
+      "totalEarthquakes": 1245,
+      "monthlyEarthquakePercentage": 8.3,
+      "avgTsunamiCount": 2.5,
+      "avgMagnitude": 4.8
+    },
+    "2": {
+      "totalEarthquakes": 1198,
+      "monthlyEarthquakePercentage": 8.0,
+      "avgTsunamiCount": 2.3,
+      "avgMagnitude": 4.7
+    },
+    "3": {
+      "totalEarthquakes": 1312,
+      "monthlyEarthquakePercentage": 8.7,
+      "avgTsunamiCount": 2.8,
+      "avgMagnitude": 4.9
+    },
+    "4": {
+      "totalEarthquakes": 1276,
+      "monthlyEarthquakePercentage": 8.5,
+      "avgTsunamiCount": 2.6,
+      "avgMagnitude": 4.8
+    },
+    "5": {
+      "totalEarthquakes": 1289,
+      "monthlyEarthquakePercentage": 8.6,
+      "avgTsunamiCount": 2.7,
+      "avgMagnitude": 4.9
+    },
+    "6": {
+      "totalEarthquakes": 1234,
+      "monthlyEarthquakePercentage": 8.2,
+      "avgTsunamiCount": 2.4,
+      "avgMagnitude": 4.7
+    },
+    "7": {
+      "totalEarthquakes": 1356,
+      "monthlyEarthquakePercentage": 9.0,
+      "avgTsunamiCount": 2.9,
+      "avgMagnitude": 5.0
+    },
+    "8": {
+      "totalEarthquakes": 1298,
+      "monthlyEarthquakePercentage": 8.6,
+      "avgTsunamiCount": 2.7,
+      "avgMagnitude": 4.9
+    },
+    "9": {
+      "totalEarthquakes": 1267,
+      "monthlyEarthquakePercentage": 8.4,
+      "avgTsunamiCount": 2.6,
+      "avgMagnitude": 4.8
+    },
+    "10": {
+      "totalEarthquakes": 1324,
+      "monthlyEarthquakePercentage": 8.8,
+      "avgTsunamiCount": 2.8,
+      "avgMagnitude": 4.9
+    },
+    "11": {
+      "totalEarthquakes": 1221,
+      "monthlyEarthquakePercentage": 8.1,
+      "avgTsunamiCount": 2.4,
+      "avgMagnitude": 4.7
+    },
+    "12": {
+      "totalEarthquakes": 1280,
+      "monthlyEarthquakePercentage": 8.5,
+      "avgTsunamiCount": 2.6,
+      "avgMagnitude": 4.8
+    }
+  }
+}

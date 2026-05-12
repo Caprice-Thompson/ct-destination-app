@@ -1,14 +1,14 @@
-import { ListCountryInformation } from '@application/list-country-information';
 import type {
   CountryApiRepositoryInterface,
   CountryDatabaseRepositoryInterface,
   PopulationApiRepositoryInterface,
-} from '@application/interfaces/repositories';
-import { RestCountriesApiRepository } from './repositories/rest-countries-api-repository';
-import { PopulationApiRepository } from './repositories/population-api-repository';
-import { CountryDatabaseBRepository } from './repositories/country-database-repository';
-import { rdsClient, type DbClient } from './repositories/db/rds_client';
-import { makeConfig, type ApplicationConfig } from './config';
+} from "@application/interfaces/repositories";
+import { ListCountryInformation } from "@application/list-country-information";
+import { type ApplicationConfig, makeConfig } from "./config";
+import { CountryDatabaseBRepository } from "./repositories/country-database-repository";
+import { type DbClient, rdsClient } from "./repositories/db/rds_client";
+import { PopulationApiRepository } from "./repositories/population-api-repository";
+import { RestCountriesApiRepository } from "./repositories/rest-countries-api-repository";
 
 export interface Dependencies {
   config: ApplicationConfig;
@@ -51,19 +51,27 @@ async function makeRdsClient(config: ApplicationConfig): Promise<DbClient> {
       useSSl: config.database.useSSL,
     });
   } catch (error) {
-    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Database connection failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
-function makeCountryApiRepository(config: ApplicationConfig): CountryApiRepositoryInterface {
+function makeCountryApiRepository(
+  config: ApplicationConfig,
+): CountryApiRepositoryInterface {
   return new RestCountriesApiRepository(config.api.restCountriesUrl);
 }
 
-function makePopulationApiRepository(config: ApplicationConfig): PopulationApiRepositoryInterface {
+function makePopulationApiRepository(
+  config: ApplicationConfig,
+): PopulationApiRepositoryInterface {
   return new PopulationApiRepository(config.api.populationApiUrl);
 }
 
-function makeCountryDataRepository(dbClient: DbClient): CountryDatabaseRepositoryInterface {
+function makeCountryDataRepository(
+  dbClient: DbClient,
+): CountryDatabaseRepositoryInterface {
   return new CountryDatabaseBRepository(dbClient);
 }
 
@@ -72,5 +80,9 @@ function makeListCountryInformationUseCase(
   countryDataRepository: CountryDatabaseRepositoryInterface,
   populationApiRepository: PopulationApiRepositoryInterface,
 ): ListCountryInformation {
-  return new ListCountryInformation(countryApiRepository, countryDataRepository, populationApiRepository);
+  return new ListCountryInformation(
+    countryApiRepository,
+    countryDataRepository,
+    populationApiRepository,
+  );
 }

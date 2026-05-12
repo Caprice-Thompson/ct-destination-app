@@ -1,6 +1,6 @@
-import { EarthquakeRepository } from "@infrastructure/repositories/earthquake-repository";
 import { Earthquake } from "@domain/entities/earthquake";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
+import { EarthquakeRepository } from "@infrastructure/repositories/earthquake-repository";
 
 describe("EarthquakeRepository", () => {
   let repository: EarthquakeRepository;

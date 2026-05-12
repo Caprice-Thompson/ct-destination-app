@@ -1,6 +1,6 @@
-import { z, ZodError } from "zod";
-import { GetMostRecentEarthquakesByCountryQuery } from "./get-most-recent-eq-query";
-import { GetMonthlyEarthquakeStatisticsQuery } from "./monthly-statistics-query";
+import { ZodError, z } from "zod";
+import type { GetMostRecentEarthquakesByCountryQuery } from "./get-most-recent-eq-query";
+import type { GetMonthlyEarthquakeStatisticsQuery } from "./monthly-statistics-query";
 
 export async function validateMostRecentEqRequest(
   query: GetMostRecentEarthquakesByCountryQuery,
@@ -42,8 +42,7 @@ export async function validateMonthlyEarthquakeStatisticsRequest(
       month: z
         .string()
         .min(1, "Month is required")
-        .regex(/^([1-9]|1[0-2])$/, "Month must be in MM format (1-12)")
-        .regex(/^([1-12])$/, "Month must be a number between 1 and 12"),
+        .regex(/^(1[0-2]|[1-9])$/, "Month must be a number between 1 and 12"),
     });
     return await schema.parseAsync(query);
   } catch (error) {

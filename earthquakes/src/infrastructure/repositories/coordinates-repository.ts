@@ -1,6 +1,6 @@
-import { CoordinatesRepositoryInterface } from "@application/interfaces/repositories";
+import type { CoordinatesRepositoryInterface } from "@application/interfaces/repositories";
 import { Coordinates } from "@domain/entities/coordinates";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
 
 interface RestCountriesApiResponse {
   name: {
@@ -19,7 +19,7 @@ export class CoordinatesRepository implements CoordinatesRepositoryInterface {
 
   async getCoordinatesByCountryName(countryName: string): Promise<Coordinates> {
     try {
-      const url = `${this.dependencies.config.urls.restCountriesApiUrl}/name/${encodeURIComponent(countryName)}`;
+      const url = `${this.dependencies.config.urls.restCountriesApiUrl}/${encodeURIComponent(countryName)}`;
 
       this.dependencies.logger.debug(
         "Fetching coordinates from REST Countries API",

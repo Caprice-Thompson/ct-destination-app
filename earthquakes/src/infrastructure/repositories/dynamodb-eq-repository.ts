@@ -1,24 +1,37 @@
-import { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
+import type { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { findCountryInString } from "@domain/utils/country-extractor";
 import {
+  BatchWriteCommand,
   DynamoDBDocumentClient,
   QueryCommand,
-  BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
-import { Dependencies } from "@infrastructure/dependencies";
+import { findCountryInString } from "@domain/utils/country-extractor";
+import type { Dependencies } from "@infrastructure/dependencies";
 
-export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeRepository {
+export class DynamoDBEarthquakeRepository
+  implements HistoricalEarthquakeRepository
+{
   private readonly docClient: DynamoDBDocumentClient;
   private readonly dependencies: Pick<Dependencies, "config" | "logger">;
 
   constructor(dependencies: Pick<Dependencies, "config" | "logger">) {
     this.dependencies = dependencies;
+    const clientConfig: Record<string, unknown> = {
+      region: dependencies.config.aws.region,
+    };
+
+    const endpointUrl = process.env.AWS_ENDPOINT_URL;
+    if (endpointUrl) {
+      clientConfig.endpoint = endpointUrl;
+      clientConfig.credentials = {
+        accessKeyId: dependencies.config.aws.accessKeyId || "test",
+        secretAccessKey: dependencies.config.aws.secretAccessKey || "test",
+      };
+    }
+
     this.docClient = DynamoDBDocumentClient.from(
-      new DynamoDBClient({
-        region: dependencies.config.aws.region,
-      }),
+      new DynamoDBClient(clientConfig),
     );
   }
 
@@ -26,9 +39,10 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     try {
       const command = new QueryCommand({
         TableName: this.dependencies.config.tables.earthquakes,
-        KeyConditionExpression: "countryName = :countryName",
+        IndexName: "country-type-index", // Use the GSI
+        KeyConditionExpression: "country = :country",
         ExpressionAttributeValues: {
-          ":countryName": countryName,
+          ":country": countryName,
         },
       });
 
@@ -74,20 +88,27 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
       while (unprocessedItems.length > 0 && retryCount <= MAX_RETRIES) {
         try {
           const putRequests = unprocessedItems.map((eq) => {
-            const country = findCountryInString(eq.place);
+            // Use the country from the earthquake object (already fetched from coordinates)
+            // Fall back to extracting from place string, and if still empty, use "Unknown"
+            const country =
+              eq.country || findCountryInString(eq.place) || "Unknown";
+
+            // Ensure all values are properly typed and not null/undefined
+            const item: Record<string, unknown> = {
+              eventId: String(eq.eventId),
+              time: Number(new Date(eq.date).getTime()),
+              name: String(eq.name || "Unknown"),
+              magnitude: Number(eq.magnitude) || 0,
+              date: String(eq.date),
+              type: String(eq.type || "earthquake"),
+              tsunami: Number(eq.tsunami) || 0,
+              place: String(eq.place || "Unknown"),
+              country: String(country),
+            };
+
             return {
               PutRequest: {
-                Item: {
-                  eventId: eq.eventId,
-                  time: new Date(eq.date).getTime(),
-                  name: eq.name,
-                  magnitude: eq.magnitude,
-                  date: eq.date,
-                  type: eq.type,
-                  tsunami: eq.tsunami,
-                  place: eq.place,
-                  country: country,
-                },
+                Item: item,
               },
             };
           });
@@ -102,10 +123,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
           const tableName = this.dependencies.config.tables.earthquakes;
 
-          if (
-            response.UnprocessedItems &&
-            response.UnprocessedItems[tableName]
-          ) {
+          if (response.UnprocessedItems?.[tableName]) {
             const unprocessedCount =
               response.UnprocessedItems[tableName].length;
             successCount += unprocessedItems.length - unprocessedCount;
@@ -139,7 +157,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
             retryCount++;
             if (unprocessedItems.length > 0) {
               await new Promise((resolve) =>
-                setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
+                setTimeout(resolve, DELAY_MS * 2 ** retryCount),
               );
             }
           } else {
@@ -162,7 +180,7 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
 
           if (retryCount <= MAX_RETRIES) {
             await new Promise((resolve) =>
-              setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
+              setTimeout(resolve, DELAY_MS * 2 ** retryCount),
             );
           }
         }
@@ -174,5 +192,65 @@ export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeReposit
     }
 
     return successCount;
+  }
+
+  async checkExistingEarthquakes(
+    eventIds: string[],
+    times: string[],
+  ): Promise<Set<string>> {
+    const existingIds = new Set<string>();
+    const BATCH_SIZE = 100;
+
+    for (let i = 0; i < eventIds.length; i += BATCH_SIZE) {
+      const batch = eventIds.slice(i, i + BATCH_SIZE);
+      const batchTimes = times.slice(i, i + BATCH_SIZE);
+      try {
+        // Use Query with both partition key (eventId) and sort key (time)
+        const checkPromises = batch.map(async (eventId, index) => {
+          try {
+            const command = new QueryCommand({
+              TableName: this.dependencies.config.tables.earthquakes,
+              KeyConditionExpression: "eventId = :eventId AND #time = :time",
+              ExpressionAttributeNames: {
+                "#time": "time",
+              },
+              ExpressionAttributeValues: {
+                ":eventId": eventId,
+                ":time": batchTimes[index],
+              },
+              Limit: 1,
+              Select: "COUNT",
+            });
+
+            const response = await this.docClient.send(command);
+            if (response.Count && response.Count > 0) {
+              return eventId;
+            }
+            return null;
+          } catch (error) {
+            this.dependencies.logger.warn(
+              "Error checking earthquake existence",
+              {
+                eventId,
+                time: batchTimes[index],
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+            );
+            return null;
+          }
+        });
+
+        const results = await Promise.all(checkPromises);
+        for (const id of results) {
+          if (id) existingIds.add(id);
+        }
+      } catch (error) {
+        this.dependencies.logger.error("Error in batch check", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+
+    return existingIds;
   }
 }

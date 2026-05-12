@@ -1,14 +1,26 @@
-import { CountryApiRepositoryInterface } from '@application/interfaces/repositories';
-import { CountryFacts, Currency, Coordinates, MapDetails } from '@domain/entities/country-facts';
-import { logger } from '@infrastructure/logger';
+import type { CountryApiRepositoryInterface } from "@application/interfaces/repositories";
+import {
+  Coordinates,
+  CountryFacts,
+  Currency,
+  DrivingSide,
+  MapDetails,
+} from "@domain/entities/country-facts";
+import { logger } from "@infrastructure/logger";
 
 interface RestCountriesApiResponse {
   name: {
     common: string;
   };
   cca2: string;
-  capital?: string[];
-  languages?: Record<string, string>;
+  capital: string[];
+  languages: Record<string, string>;
+  population: number;
+  timezones: string[];
+  continents: string[];
+  car: {
+    side: string;
+  };
   currencies?: Record<
     string,
     {
@@ -27,7 +39,9 @@ interface RestCountriesApiResponse {
   };
 }
 
-export class RestCountriesApiRepository implements CountryApiRepositoryInterface {
+export class RestCountriesApiRepository
+  implements CountryApiRepositoryInterface
+{
   private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
@@ -36,22 +50,30 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
 
   async getCountryFacts(countryName: string): Promise<CountryFacts | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/${encodeURIComponent(countryName)}`);
+      const url = `${this.baseUrl}/${encodeURIComponent(countryName)}`;
+
+      logger.info("Fetching country facts", { countryName, url });
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       const data: RestCountriesApiResponse[] = await response.json();
-      logger.info('Country facts fetched successfully');
 
       if (!data || data.length === 0) {
         return null;
       }
 
       const countryData = data[0];
-      logger.info('Mapping Country data to CountryFacts entity');
+      logger.info("Mapping Country data to CountryFacts entity");
 
       return this.mapToCountryDetail(countryData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.debug('Error fetching country details from REST Countries API', {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      logger.debug("Error fetching country details from REST Countries API", {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
       });
@@ -60,30 +82,49 @@ export class RestCountriesApiRepository implements CountryApiRepositoryInterface
   }
 
   private mapToCountryDetail(data: RestCountriesApiResponse): CountryFacts {
-    const currencyCode = data.currencies ? Object.keys(data.currencies)[0] : null;
-    const currencyData = currencyCode && data.currencies ? data.currencies[currencyCode] : null;
-    const currency = new Currency(currencyData?.name || 'Unknown', currencyData?.symbol || '');
+    const currencyCode = data.currencies
+      ? Object.keys(data.currencies)[0]
+      : null;
+    const currencyData =
+      currencyCode && data.currencies ? data.currencies[currencyCode] : null;
+    const currency = new Currency(
+      currencyData?.name || "Unknown",
+      currencyData?.symbol || "",
+    );
 
     // Extract languages
     const languages = data.languages ? Object.values(data.languages) : [];
 
     // Extract coordinates
-    const coordinates = new Coordinates(data.latlng?.[0] || 0, data.latlng?.[1] || 0);
+    const coordinates = new Coordinates(
+      data.latlng?.[0] || 0,
+      data.latlng?.[1] || 0,
+    );
     // Extract map details
-    const maps = new MapDetails(data.maps?.googleMaps ?? '', data.maps?.openStreetMaps ?? '');
+    const maps = new MapDetails(
+      data.maps?.googleMaps ?? "",
+      data.maps?.openStreetMaps ?? "",
+    );
 
     const capital = data.capital?.[0];
 
     const flagUrl = data.flags?.svg ?? data.flags?.png ?? null;
-
+    const population = data.population;
+    const timezone = data.timezones;
+    const continent = data.continents ? data.continents[0] : "";
+    const drivingSide = new DrivingSide(data.car.side);
     return new CountryFacts({
       countryCode: data.cca2,
       countryName: data.name.common,
-      capitalCityName: capital ?? null,
+      capitalCityName: capital!,
       flagUrl,
       languages,
       currency,
       coordinates,
+      population,
+      timezone,
+      continent,
+      drivingSide,
       maps,
     });
   }
