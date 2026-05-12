@@ -1,4 +1,4 @@
-import logger from "@infrastructure/logger";
+import { logger } from "@infrastructure/logger";
 import type { TourismInformationRepositoryInterface } from "./interfaces/tourism-repo";
 
 export interface TourismInformationResult {
