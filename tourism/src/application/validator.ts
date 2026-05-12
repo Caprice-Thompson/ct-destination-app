@@ -1,5 +1,5 @@
-import type { GetTourismInformationQuery } from "src/types";
-import { ZodError, z } from "zod";
+import type { GetTourismInformationQuery } from '@application/get-tourism-info/get-tourism-information';
+import { z, ZodError } from 'zod';
 
 const getTourismInformationSchema = z.object({
   countryName: z

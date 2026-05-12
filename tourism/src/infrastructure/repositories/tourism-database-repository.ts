@@ -1,17 +1,9 @@
-import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
-import { UNESCOSites } from "@domain/entities/unesco-sites";
-import logger from "../logger";
-import type { DbClient, QueryResultRow } from "../rds";
+import { UNESCOSites } from '@domain/entities/unesco-sites';
+import { Dependencies } from '@infrastructure/dependencies';
 
-export class TourismDatabaseRepository
-  implements TourismInformationRepositoryInterface
-{
-  constructor(private readonly dbClient: DbClient) {}
-
-  async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
-    try {
-      logger.info(`Querying tourism database for country: ${countryName}`);
-
+export async function makeTourismInformationRepository({ rdsClient }: Pick<Dependencies, 'rdsClient'>) {
+  return {
+    async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
       const query = `
         SELECT 
           country_code,
@@ -24,34 +16,20 @@ export class TourismDatabaseRepository
         ORDER BY site ASC
       `;
 
-      const sites = await this.dbClient.queryMultipleRows<UNESCOSites>({
+      const sites = await rdsClient.queryMultipleRows<UNESCOSites>({
         query,
         bindVariables: [countryName],
-        rowMapper: this.mapRowToUNESCOSite,
+        rowMapper: (row) =>
+          new UNESCOSites(
+            row.country_code as string,
+            row.country_name as string,
+            row.area_name as string,
+            row.site as string,
+            row.description as string | undefined,
+          ),
       });
 
-      logger.info(
-        `Found ${sites.length} UNESCO sites for country: ${countryName}`,
-      );
       return sites;
-    } catch (error) {
-      logger.error("Error fetching tourism information from database", {
-        countryName,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-      throw new Error(
-        `Failed to fetch tourism information: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-    }
-  }
-
-  private mapRowToUNESCOSite(row: QueryResultRow): UNESCOSites {
-    return new UNESCOSites(
-      row.country_code as string,
-      row.country_name as string,
-      row.area_name as string,
-      row.site as string,
-      row.description as string | undefined,
-    );
-  }
+    },
+  };
 }

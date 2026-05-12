@@ -3,6 +3,7 @@ import { AppRoute } from "./common/enums";
 import { useAuth } from "./hooks/useAuth";
 import "./App.css";
 import { Navbar } from "./components/NavBar";
+import type { NavButton } from "./components/NavBar";
 
 function App() {
   const { user } = useAuth();
@@ -10,28 +11,34 @@ function App() {
   const routerState = useRouterState();
   const isLandingPage = routerState.location.pathname === AppRoute.Landing;
 
-  const navButtons = user
+  const navButtons: NavButton[] = user
     ? [
         {
-          label: user.email,
+          label: user.email ?? "Account",
           onClick: () => {},
           variant: "secondary" as const,
         },
         {
           label: "Logout",
-          onClick: () => navigate({ to: "/logout" }),
+          onClick: () => {
+            void navigate({ to: "/logout" });
+          },
           variant: "accent" as const,
         },
       ]
     : [
         {
           label: "Login",
-          onClick: () => navigate({ to: AppRoute.Login }),
+          onClick: () => {
+            void navigate({ to: AppRoute.Login });
+          },
           variant: "primary" as const,
         },
         {
           label: "Sign Up",
-          onClick: () => navigate({ to: AppRoute.Signup }),
+          onClick: () => {
+            void navigate({ to: AppRoute.Signup });
+          },
           variant: "secondary" as const,
         },
       ];

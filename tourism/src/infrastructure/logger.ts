@@ -1,83 +1,13 @@
-import winston from "winston";
+import { createLogger, format, type LoggerOptions, transports } from 'winston';
 
-const isDev = process.env.NODE_ENV === "dev";
-
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-  winston.format.errors({ stack: true }),
-  winston.format.splat(),
-  winston.format.json(),
-);
-
-const winstonLogger = winston.createLogger({
-  level: process.env.LOG_LEVEL || (isDev ? "debug" : "info"),
-  format: logFormat,
-  defaultMeta: { service: "tourism-service" },
-  transports: [
-    new winston.transports.Console({
-      format: isDev
-        ? winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple(),
-          )
-        : logFormat,
-    }),
-  ],
-  exitOnError: false,
-});
-
-let Sentry: any = null;
-const getSentry = () => {
-  if (!Sentry && process.env.SENTRY_DSN) {
-    try {
-      Sentry = require("@sentry/node");
-      Sentry.init({
-        dsn: process.env.SENTRY_DSN,
-        environment: process.env.NODE_ENV ?? "development",
-        enableLogs: true,
-      });
-    } catch (e) {}
-  }
-  return Sentry;
+export const makeLogger = (options: LoggerOptions) => {
+  return createLogger({
+    ...options,
+    defaultMeta: {},
+    level: 'debug',
+    format: format.json(),
+    transports: [new transports.Console()],
+  });
 };
 
-const logToSentry = (level: string, message: string, context?: any) => {
-  const sentry = getSentry();
-  if (sentry?.logger) {
-    const attributes = {
-      service: "tourism-service",
-      ...context,
-    };
-
-    switch (level) {
-      case "info":
-        sentry.logger.info(message, attributes);
-        break;
-      case "warn":
-        sentry.logger.warn(message, attributes);
-        break;
-      case "error":
-        sentry.logger.error(message, attributes);
-        break;
-    }
-  }
-};
-
-export const logger = {
-  debug: (message: string, context?: any) =>
-    winstonLogger.debug(message, context),
-  info: (message: string, context?: any) => {
-    winstonLogger.info(message, context);
-    logToSentry("info", message, context);
-  },
-  warn: (message: string, context?: any) => {
-    winstonLogger.warn(message, context);
-    logToSentry("warn", message, context);
-  },
-  error: (message: string, context?: any) => {
-    winstonLogger.error(message, context);
-    logToSentry("error", message, context);
-  },
-};
-
-export default logger;
+export const logger = makeLogger({});

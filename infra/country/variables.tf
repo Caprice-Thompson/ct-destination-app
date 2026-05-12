@@ -78,6 +78,3 @@ variable "log_retention_days" {
   type        = number
   default     = 3
 }
-
-# VPC and Security Group IDs are retrieved from SSM Parameter Store
-# No hardcoded defaults - must exist in SSM

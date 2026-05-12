@@ -1,24 +1,18 @@
-import { UNESCOSites } from "@domain/entities/unesco-sites";
-import type { DbClient } from "@infrastructure/rds";
-import { TourismDatabaseRepository } from "@infrastructure/repositories/tourism-database-repository";
+import { UNESCOSites } from '@domain/entities/unesco-sites';
+import type { DbClient } from '@infrastructure/rds';
+import { makeTourismInformationRepository } from '@infrastructure/repositories/tourism-database-repository';
+import { mockDeep } from 'jest-mock-extended';
 
-describe("TourismDatabaseRepository", () => {
-  let mockDbClient: jest.Mocked<DbClient>;
-  let repository: TourismDatabaseRepository;
+jest.mock('@aws-sdk/client-dynamodb');
+jest.mock('@aws-sdk/lib-dynamodb');
 
-  beforeEach(() => {
-    mockDbClient = {
-      queryMultipleRows: jest.fn(),
-      querySingleRow: jest.fn(),
-      querySingleRowOptional: jest.fn(),
-      update: jest.fn(),
-      closeConnection: jest.fn(),
-      beginTransaction: jest.fn(),
-      commitTransaction: jest.fn(),
-      rollbackTransaction: jest.fn(),
-    };
+describe('TourismDatabaseRepository', () => {
+  let rdsClient: ReturnType<typeof mockDeep<DbClient>>;
+  let repository: Awaited<ReturnType<typeof makeTourismInformationRepository>>;
 
-    repository = new TourismDatabaseRepository(mockDbClient);
+  beforeEach(async () => {
+    rdsClient = mockDeep<DbClient>();
+    repository = await makeTourismInformationRepository({ rdsClient });
   });
 
   describe("getTourismInformation", () => {
@@ -39,8 +33,7 @@ describe("TourismDatabaseRepository", () => {
           description: "A large unfinished church",
         },
       ];
-
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) =>
             new UNESCOSites(
@@ -61,20 +54,20 @@ describe("TourismDatabaseRepository", () => {
       expect(result[0].site).toBe("Alhambra");
       expect(result[1].site).toBe("Sagrada Familia");
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
-        query: expect.stringContaining("WHERE LOWER(country_name) = LOWER($1)"),
-        bindVariables: ["Spain"],
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
+        query: expect.stringContaining('WHERE LOWER(country_name) = LOWER($1)'),
+        bindVariables: ['Spain'],
         rowMapper: expect.any(Function),
       });
     });
 
-    it("should return empty array when no sites found", async () => {
-      mockDbClient.queryMultipleRows.mockResolvedValue([]);
+    it('should return empty array when no sites found', async () => {
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue([]);
 
       const result = await repository.getTourismInformation("UnknownCountry");
 
       expect(result).toEqual([]);
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
         query: expect.any(String),
         bindVariables: ["UnknownCountry"],
         rowMapper: expect.any(Function),
@@ -91,8 +84,7 @@ describe("TourismDatabaseRepository", () => {
           description: "Royal château",
         },
       ];
-
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      rdsClient.queryMultipleRows.mockResolvedValue(
         mockRows.map(
           (row) =>
             new UNESCOSites(
@@ -107,9 +99,9 @@ describe("TourismDatabaseRepository", () => {
 
       await repository.getTourismInformation("FRANCE");
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
-        query: expect.stringContaining("LOWER(country_name) = LOWER($1)"),
-        bindVariables: ["FRANCE"],
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
+        query: expect.stringContaining('LOWER(country_name) = LOWER($1)'),
+        bindVariables: ['FRANCE'],
         rowMapper: expect.any(Function),
       });
     });
@@ -125,7 +117,7 @@ describe("TourismDatabaseRepository", () => {
         },
       ];
 
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) =>
             new UNESCOSites(
@@ -144,18 +136,14 @@ describe("TourismDatabaseRepository", () => {
       expect(result[0].description).toBeUndefined();
     });
 
-    it("should throw error when database query fails", async () => {
-      mockDbClient.queryMultipleRows.mockRejectedValue(
-        new Error("Database connection failed"),
-      );
+    it('should throw error when database query fails', async () => {
+      (rdsClient.queryMultipleRows as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(repository.getTourismInformation("Spain")).rejects.toThrow(
-        "Failed to fetch tourism information: Database connection failed",
-      );
+      await expect(repository.getTourismInformation('Spain')).rejects.toThrow('Database connection failed');
     });
 
-    it("should order results by site name", async () => {
-      expect(mockDbClient.queryMultipleRows).toBeDefined();
+    it('should order results by site name', async () => {
+      expect(rdsClient.queryMultipleRows).toBeDefined();
 
       const mockRows = [
         {
@@ -167,7 +155,7 @@ describe("TourismDatabaseRepository", () => {
         },
       ];
 
-      mockDbClient.queryMultipleRows.mockResolvedValue(
+      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
         mockRows.map(
           (row) =>
             new UNESCOSites(
@@ -182,9 +170,9 @@ describe("TourismDatabaseRepository", () => {
 
       await repository.getTourismInformation("United Kingdom");
 
-      expect(mockDbClient.queryMultipleRows).toHaveBeenCalledWith({
-        query: expect.stringContaining("ORDER BY site ASC"),
-        bindVariables: ["United Kingdom"],
+      expect(rdsClient.queryMultipleRows).toHaveBeenCalledWith({
+        query: expect.stringContaining('ORDER BY site ASC'),
+        bindVariables: ['United Kingdom'],
         rowMapper: expect.any(Function),
       });
     });

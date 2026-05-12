@@ -238,8 +238,13 @@ describe("Validator Integration Tests", () => {
       const input = { countryName: "Spain", extraField: "ignored" };
       const result = await validateGetTourismInformationRequest(input);
 
+<<<<<<< HEAD:tourism/test/integration/application/validator.test.ts
       expect(result.countryName).toBe("Spain");
       expect((result as any).extraField).toBeUndefined();
+=======
+      expect(result.countryName).toBe('Spain');
+      expect((result as unknown as { extraField?: string }).extraField).toBeUndefined();
+>>>>>>> main:tourism/test/unit/application/validator.test.ts
     });
   });
 });

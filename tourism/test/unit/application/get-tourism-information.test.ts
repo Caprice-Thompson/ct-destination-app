@@ -1,42 +1,23 @@
-import { GetTourismInformation } from "@application/get-tourism-information";
-import type { TourismInformationRepositoryInterface } from "@application/interfaces/tourism-repo";
-import { UNESCOSites } from "@domain/entities/unesco-sites";
+import { getTourismInfo } from '@application/get-tourism-info/get-tourism-information';
+import { UNESCOSites } from '@domain/entities/unesco-sites';
+import { Dependencies } from '@infrastructure/dependencies';
+import { mockDeep } from 'jest-mock-extended';
 
-describe("GetTourismInformation", () => {
-  let mockRepository: jest.Mocked<TourismInformationRepositoryInterface>;
-  let useCase: GetTourismInformation;
-
+describe('GetTourismInformation', () => {
+  let dependencies: Dependencies;
   beforeEach(() => {
-    mockRepository = {
-      getTourismInformation: jest.fn(),
-    };
-
-    useCase = new GetTourismInformation(mockRepository);
+    dependencies = mockDeep<Dependencies>();
   });
 
-  describe("getTourismInfo", () => {
-    it("should return tourism information when sites are found", async () => {
-      const mockSites = [
-        new UNESCOSites(
-          "ES",
-          "Spain",
-          "Andalusia",
-          "Alhambra",
-          "A palace and fortress complex",
-        ),
-        new UNESCOSites(
-          "ES",
-          "Spain",
-          "Catalonia",
-          "Sagrada Familia",
-          "A large unfinished church",
-        ),
-      ];
+  describe('getTourismInfo', () => {
+    const mockSites = [
+      new UNESCOSites('ES', 'Spain', 'Andalusia', 'Alhambra', 'A palace and fortress complex'),
+      new UNESCOSites('ES', 'Spain', 'Catalonia', 'Sagrada Familia', 'A large unfinished church'),
+    ];
 
-      mockRepository.getTourismInformation.mockResolvedValue(mockSites);
-
-      const result = await useCase.getTourismInfo("Spain");
-
+    it('should return tourism information when sites are found', async () => {
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
+      const result = await getTourismInfo({ countryName: 'Spain' }, dependencies);
       expect(result.unescoSites).toHaveLength(2);
       expect(result.unescoSites[0]).toEqual({
         countryCode: "ES",
@@ -52,27 +33,23 @@ describe("GetTourismInformation", () => {
         site: "Sagrada Familia",
         description: "A large unfinished church",
       });
-
-      expect(mockRepository.getTourismInformation).toHaveBeenCalledWith(
-        "Spain",
-      );
     });
 
-    it("should return empty array when no sites are found", async () => {
-      mockRepository.getTourismInformation.mockResolvedValue([]);
+    it('should return empty array when no sites are found', async () => {
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue([]);
 
-      const result = await useCase.getTourismInfo("UnknownCountry");
+      const result = await getTourismInfo({ countryName: 'UnknownCountry' }, dependencies);
 
       expect(result.unescoSites).toEqual([]);
-      expect(mockRepository.getTourismInformation).toHaveBeenCalledWith(
-        "UnknownCountry",
-      );
+      expect(dependencies.tourismInformationRepository.getTourismInformation).toHaveBeenCalledWith('UnknownCountry');
     });
 
-    it("should return empty array when repository returns null", async () => {
-      mockRepository.getTourismInformation.mockResolvedValue(null as any);
+    it('should return empty array when repository returns null', async () => {
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(
+        null as unknown as UNESCOSites[],
+      );
 
-      const result = await useCase.getTourismInfo("SomeCountry");
+      const result = await getTourismInfo({ countryName: 'SomeCountry' }, dependencies);
 
       expect(result.unescoSites).toEqual([]);
     });
@@ -82,21 +59,21 @@ describe("GetTourismInformation", () => {
         new UNESCOSites("IT", "Italy", "Lazio", "Colosseum", undefined),
       ];
 
-      mockRepository.getTourismInformation.mockResolvedValue(mockSites);
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
 
-      const result = await useCase.getTourismInfo("Italy");
+      const result = await getTourismInfo({ countryName: 'Italy' }, dependencies);
 
       expect(result.unescoSites).toHaveLength(1);
       expect(result.unescoSites[0].description).toBeUndefined();
     });
 
-    it("should propagate repository errors", async () => {
-      mockRepository.getTourismInformation.mockRejectedValue(
-        new Error("Database connection failed"),
+    it('should propagate repository errors', async () => {
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockRejectedValue(
+        new Error('Database connection failed'),
       );
 
-      await expect(useCase.getTourismInfo("Spain")).rejects.toThrow(
-        "Database connection failed",
+      await expect(getTourismInfo({ countryName: 'Spain' }, dependencies)).rejects.toThrow(
+        'Database connection failed',
       );
     });
 
@@ -125,9 +102,9 @@ describe("GetTourismInformation", () => {
         ),
       ];
 
-      mockRepository.getTourismInformation.mockResolvedValue(mockSites);
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
 
-      const result = await useCase.getTourismInfo("France");
+      const result = await getTourismInfo({ countryName: 'France' }, dependencies);
 
       expect(result.unescoSites).toHaveLength(3);
       expect(
@@ -146,9 +123,9 @@ describe("GetTourismInformation", () => {
         ),
       ];
 
-      mockRepository.getTourismInformation.mockResolvedValue(mockSites);
+      (dependencies.tourismInformationRepository.getTourismInformation as jest.Mock).mockResolvedValue(mockSites);
 
-      const result = await useCase.getTourismInfo("Côte d'Ivoire");
+      const result = await getTourismInfo({ countryName: "Côte d'Ivoire" }, dependencies);
 
       expect(result.unescoSites).toHaveLength(1);
       expect(result.unescoSites[0].countryName).toBe("Côte d'Ivoire");

@@ -2,7 +2,7 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from "./Button";
 
-interface NavButton {
+export interface NavButton {
   label: string;
   onClick: () => void;
   variant?: "primary" | "secondary" | "accent";
