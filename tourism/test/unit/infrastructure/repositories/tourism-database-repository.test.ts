@@ -77,8 +77,7 @@ describe('TourismDatabaseRepository', () => {
           description: 'Royal château',
         },
       ];
-
-      (rdsClient.queryMultipleRows as jest.Mock).mockResolvedValue(
+      mockDbClient.queryMultipleRows.mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
         ),
