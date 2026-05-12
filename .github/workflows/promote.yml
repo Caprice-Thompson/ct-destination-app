@@ -1,6 +1,14 @@
 name: Promote Deployment Pipeline
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "country/**"
+      - "earthquakes/**"
+      - "tourism/**"
+      - "infra/**"
+      - ".github/workflows/promote.yml"
   push:
     branches: [main]
     paths:
@@ -11,16 +19,10 @@ on:
       - ".github/workflows/promote.yml"
   workflow_dispatch:
 
-env:
-  AWS_REGION: ${{ secrets.AWS_REGION || 'eu-west-2' }}
-  PROJECT_NAME: ${{ secrets.PROJECT_NAME || 'destination-app' }}
-  ENVIRONMENT: ${{ secrets.ENVIRONMENT || 'production' }}
-
 jobs:
   test-country:
     name: Test Country Service
     runs-on: ubuntu-latest
-    if: github.event.inputs.skip_tests != 'true'
 
     steps:
       - name: Checkout code
@@ -60,7 +62,6 @@ jobs:
   test-earthquakes:
     name: Test Earthquakes Service
     runs-on: ubuntu-latest
-    if: github.event.inputs.skip_tests != 'true'
 
     steps:
       - name: Checkout code
@@ -100,7 +101,6 @@ jobs:
   test-tourism:
     name: Test Tourism Service
     runs-on: ubuntu-latest
-    if: github.event.inputs.skip_tests != 'true'
 
     steps:
       - name: Checkout code
