@@ -3,6 +3,3 @@ dist
 coverage/
 .env
 .env.local
-.env.*.local
-migration-lambda/
-migration-lambda.zip

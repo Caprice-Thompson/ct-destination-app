@@ -1,11 +1,12 @@
-import {
-  EarthquakeRepositoryInterface,
+import type {
   EarthquakeQueryParams,
+  EarthquakeRepository,
 } from "@application/interfaces/repositories";
 import { Earthquake } from "@domain/entities/earthquake";
-import { findCountryInString } from "@domain/utils/country-extractor";
-import { Dependencies } from "@infrastructure/dependencies";
-
+import { findCountryInString } from "@application/common/country-extractor";
+import type { Dependencies } from "@infrastructure/dependencies";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+// some of this needs to be moved to domain then delete file
 interface EqFeatureProperties {
   mag: number;
   place: string;
@@ -38,7 +39,55 @@ export type EarthquakeStatistics = {
   avgTsunamiCount: number;
   avgMagnitude: number;
 };
-export class EarthquakeRepository implements EarthquakeRepositoryInterface {
+
+export function makeEarthquakeRepository(dependencies: Dependencies): EarthquakeRepository {
+  const dynamoDBClient = new DynamoDBClient();
+  return {
+    async listLatestEarthquakesByCountry(
+      params: EarthquakeQueryParams,
+    ): Promise<Earthquake[]> {
+      try {
+        const url = buildUrlForCountry(params);
+  
+        dependencies.logger.debug("Fetching earthquakes from EQ API", {
+          url,
+        });
+  
+        const response = await fetch(url);
+  
+        if (!response.ok) {
+          throw new Error(
+            `EQ API returned status ${response.status}: ${response.statusText}`,
+          );
+        }
+  
+        const data = (await response.json()) as EqGeoJSONResponse;
+  
+        this.dependencies.logger.info(
+          "Earthquakes fetched successfully from EQ API",
+          {
+            count: data.features.length,
+            status: data.metadata.status,
+          },
+        );
+  
+        return this.mapResponseToEarthquakes(data.features);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        this.dependencies.logger.error("Error fetching earthquakes from EQ API", {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+          params,
+        });
+        throw new Error(
+          `Failed to fetch most recent earthquakes: ${errorMessage}`,
+        );
+      }
+    }
+  }
+}
+export class EarthquakeRepository implements EarthquakeRepository {
   private readonly dependencies: Pick<
     Dependencies,
     "config" | "logger" | "historicalEarthquakeRepository"
@@ -53,7 +102,7 @@ export class EarthquakeRepository implements EarthquakeRepositoryInterface {
     this.dependencies = dependencies;
   }
 
-  async getMostRecentEarthquakesByCountry(
+  async listLatestEarthquakesByCountry(
     params: EarthquakeQueryParams,
   ): Promise<Earthquake[]> {
     try {

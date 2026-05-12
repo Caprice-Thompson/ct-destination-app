@@ -1,7 +1,4 @@
-type LogMethod = (
-  message: { [key: string]: unknown } | string,
-  context?: { [key: string]: unknown },
-) => void;
+type LogMethod = (message: { [key: string]: unknown } | string, context?: { [key: string]: unknown }) => void;
 
 export interface Logger {
   debug: LogMethod;

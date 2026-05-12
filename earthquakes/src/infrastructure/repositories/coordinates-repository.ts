@@ -1,6 +1,6 @@
-import { CoordinatesRepositoryInterface } from "@application/interfaces/repositories";
+import type { CoordinatesRepository } from "@application/interfaces/repositories";
 import { Coordinates } from "@domain/entities/coordinates";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
 
 interface RestCountriesApiResponse {
   name: {
@@ -10,7 +10,7 @@ interface RestCountriesApiResponse {
   latlng?: [number, number];
 }
 
-export class CoordinatesRepository implements CoordinatesRepositoryInterface {
+export class CoordinatesRepository implements CoordinatesRepository {
   private readonly dependencies: Pick<Dependencies, "config" | "logger">;
 
   constructor(dependencies: Pick<Dependencies, "config" | "logger">) {

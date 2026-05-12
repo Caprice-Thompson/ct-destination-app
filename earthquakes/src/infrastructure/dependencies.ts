@@ -1,38 +1,27 @@
-import type { ApplicationConfig } from "./config";
+
+import type * as Interfaces from "@application/interfaces";
+
 import { makeConfig } from "./config";
 import { makeLogger } from "./logger";
-import type { Logger } from "@application/interfaces/logger";
 import { CoordinatesRepository } from "./repositories/coordinates-repository";
-import { EarthquakeRepository } from "./repositories/earthquake-repository";
-import { DynamoDBEarthquakeRepository } from "./repositories/dynamodb-eq-repository";
+import { EarthquakeRepository, makeEarthquakeRepository } from "./repositories/earthquake-repository";
 
 export type Dependencies = {
-  config: ApplicationConfig;
-  logger: Logger;
-  earthquakeRepository: EarthquakeRepository;
-  coordinatesRepository: CoordinatesRepository;
-  historicalEarthquakeRepository: DynamoDBEarthquakeRepository;
+  logger: Interfaces.Logger;
+  config: Interfaces.ApplicationConfig;
+  earthquakeRepository: Interfaces.EarthquakeRepository;
+  coordinatesRepository: Interfaces.CoordinatesRepository;
 };
 
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
-  const logger = makeLogger(config);
-  const historicalEarthquakeRepository = new DynamoDBEarthquakeRepository({
-    config,
-    logger,
-  });
-  const earthquakeRepository = new EarthquakeRepository({
-    config,
-    logger,
-    historicalEarthquakeRepository,
-  });
-  const coordinatesRepository = new CoordinatesRepository({ config, logger });
+  const logger = makeLogger({});
+  const earthquakeRepository = makeEarthquakeRepository({ logger, config });
+  const coordinatesRepository = new CoordinatesRepository({ logger });
 
   return {
-    config,
     logger,
     earthquakeRepository,
     coordinatesRepository,
-    historicalEarthquakeRepository,
   };
 }

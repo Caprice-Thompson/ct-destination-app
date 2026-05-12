@@ -1,5 +1,5 @@
-import { Earthquake } from "@domain/entities/earthquake";
-import { Coordinates } from "@domain/entities/coordinates";
+import type { Coordinates } from "@domain/entities/coordinates";
+import type { Earthquake } from "@domain/entities/earthquake";
 
 export interface EarthquakeQueryParams {
   latitude: number;
@@ -11,20 +11,18 @@ export interface EarthquakeQueryParams {
   limit?: number;
 }
 
-export interface EarthquakeRepositoryInterface {
-  getMostRecentEarthquakesByCountry(
+export interface EarthquakeRepository {
+  listLatestEarthquakesByCountry(
     params: EarthquakeQueryParams,
   ): Promise<Earthquake[]>;
   getEarthquakeData(
     params: Pick<EarthquakeQueryParams, "startTime" | "endTime">,
   ): Promise<Earthquake[]>;
-}
-
-export interface CoordinatesRepositoryInterface {
-  getCoordinatesByCountryName(countryName: string): Promise<Coordinates>;
-}
-
-export interface HistoricalEarthquakeRepository {
   getEarthquakesByCountry(countryName: string): Promise<Earthquake[]>;
   batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number>;
 }
+
+export interface CoordinatesRepository {
+  getCoordinatesByCountryName(countryName: string): Promise<Coordinates>;
+}
+

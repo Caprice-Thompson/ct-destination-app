@@ -1,7 +1,7 @@
-import { getMostRecentEarthquakesByCountry } from "@application/get-most-recent-eq-query";
-import { Earthquake } from "@domain/entities/earthquake";
+import { getMostRecentEarthquakesByCountry } from "@application/list-latest-earthquakes/list-latest-earthquakes-query";
 import { Coordinates } from "@domain/entities/coordinates";
-import { Dependencies } from "@infrastructure/dependencies";
+import { Earthquake } from "@domain/entities/earthquake";
+import type { Dependencies } from "@infrastructure/dependencies";
 
 describe("getMostRecentEarthquakesQuery", () => {
   let mockDependencies: Dependencies;

@@ -1,178 +1,145 @@
-import { HistoricalEarthquakeRepository } from "@application/interfaces/repositories";
+import type { EarthquakeRepository } from "@application/interfaces/repositories";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { findCountryInString } from "@domain/utils/country-extractor";
 import {
+  BatchWriteCommand,
   DynamoDBDocumentClient,
   QueryCommand,
-  BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
-import { Dependencies } from "@infrastructure/dependencies";
+import { findCountryInString } from "@application/common/country-extractor";
+import type { Dependencies } from "@infrastructure/dependencies";
 
-export class DynamoDBEarthquakeRepository implements HistoricalEarthquakeRepository {
-  private readonly docClient: DynamoDBDocumentClient;
-  private readonly dependencies: Pick<Dependencies, "config" | "logger">;
+// remove and just have dynanamdb item
+type EarthquakeBatchPutRequest = {
+  PutRequest: {
+    Item: {
+      eventId: string;
+      time: number;
+      name: string;
+      magnitude: number;
+      date: string;
+      type: string;
+      tsunami: number;
+      place: string;
+      country: string;
+    };
+  };
+};
 
-  constructor(dependencies: Pick<Dependencies, "config" | "logger">) {
-    this.dependencies = dependencies;
-    this.docClient = DynamoDBDocumentClient.from(
-      new DynamoDBClient({
-        region: dependencies.config.aws.region,
-      }),
-    );
-  }
+export function makeEarthquakeRepository(dependencies: Dependencies): EarthquakeRepository {
 
-  async getEarthquakesByCountry(countryName: string): Promise<Earthquake[]> {
-    try {
-      const command = new QueryCommand({
-        TableName: this.dependencies.config.tables.earthquakes,
-        KeyConditionExpression: "countryName = :countryName",
-        ExpressionAttributeValues: {
-          ":countryName": countryName,
-        },
-      });
+  const ddbClient = new DynamoDBClient({});
+  const docClient = DynamoDBDocumentClient.from(ddbClient);
 
-      const response = await this.docClient.send(command);
+  const getEarthquakesByCountry = async (countryName: string): Promise<Earthquake[]> => {
+    const tableName = dependencies.config.tables.earthquakes;
 
-      if (!response.Items) {
-        return [];
-      }
+    const command = new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: "countryName = :countryName",
+      ExpressionAttributeValues: {
+        ":countryName": countryName,
+      },
+    });
 
-      return response.Items.map(
-        (item) =>
-          new Earthquake({
-            eventId: item.eventId,
-            name: item.name,
-            magnitude: item.magnitude,
-            date: item.date,
-            type: item.type,
-            tsunami: item.tsunami,
-            place: item.place,
-            country: item.country,
-          }),
-      );
-    } catch (error) {
-      this.dependencies.logger.error(
-        "Error fetching earthquakes from DynamoDB:",
-        { error: error instanceof Error ? error.message : "Unknown error" },
-      );
-      throw new Error("Failed to fetch earthquake data from database");
+    const response = await docClient.send(command);
+
+    if (!response.Items) {
+      return [];
     }
-  }
 
-  async batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number> {
+    return response.Items.map(
+      (item) =>
+        new Earthquake({
+          eventId: item.eventId,
+          name: item.name,
+          magnitude: item.magnitude,
+          date: item.date,
+          type: item.type,
+          tsunami: item.tsunami,
+          place: item.place,
+          country: item.country,
+        }),
+    );
+  };
+
+  const batchSaveEarthquakes = async (earthquakes: Earthquake[]): Promise<number> => {
     const BATCH_SIZE = 25;
-    const DELAY_MS = 1000;
-    const MAX_RETRIES = 3;
+    const BATCH_DELAY_MS = 1000;
+    const MAX_ATTEMPTS = 5;
+    const tableName = dependencies.config.tables.earthquakes;
     let successCount = 0;
 
     for (let i = 0; i < earthquakes.length; i += BATCH_SIZE) {
       const batch = earthquakes.slice(i, i + BATCH_SIZE);
-      let unprocessedItems = batch;
-      let retryCount = 0;
+      const putRequests: EarthquakeBatchPutRequest[] = batch.map((eq) => ({
+        PutRequest: {
+          Item: {
+            eventId: eq.eventId,
+            time: new Date(eq.date).getTime(),
+            name: eq.name,
+            magnitude: eq.magnitude,
+            date: eq.date,
+            type: eq.type,
+            tsunami: eq.tsunami,
+            place: eq.place,
+            country: findCountryInString(eq.place),
+          },
+        },
+      }));
 
-      while (unprocessedItems.length > 0 && retryCount <= MAX_RETRIES) {
-        try {
-          const putRequests = unprocessedItems.map((eq) => {
-            const country = findCountryInString(eq.place);
-            return {
-              PutRequest: {
-                Item: {
-                  eventId: eq.eventId,
-                  time: new Date(eq.date).getTime(),
-                  name: eq.name,
-                  magnitude: eq.magnitude,
-                  date: eq.date,
-                  type: eq.type,
-                  tsunami: eq.tsunami,
-                  place: eq.place,
-                  country: country,
-                },
-              },
-            };
-          });
+      let requestItems: Record<string, EarthquakeBatchPutRequest[]> = {
+        [tableName]: putRequests,
+      };
 
-          const command = new BatchWriteCommand({
-            RequestItems: {
-              [this.dependencies.config.tables.earthquakes]: putRequests,
-            },
-          });
+      let attempts = 0;
 
-          const response = await this.docClient.send(command);
+      while (Object.keys(requestItems).length > 0 && attempts < MAX_ATTEMPTS) {
+        const batchWriteCommand = new BatchWriteCommand({
+          RequestItems: requestItems,
+        });
 
-          const tableName = this.dependencies.config.tables.earthquakes;
+        const response = await docClient.send(batchWriteCommand);
 
-          if (
-            response.UnprocessedItems &&
-            response.UnprocessedItems[tableName]
-          ) {
-            const unprocessedCount =
-              response.UnprocessedItems[tableName].length;
-            successCount += unprocessedItems.length - unprocessedCount;
+        const unprocessedItems = response.UnprocessedItems?.[tableName] ?? [];
+        const currentBatchSize = requestItems[tableName]?.length ?? 0;
+        const processedCount = currentBatchSize - unprocessedItems.length;
 
-            this.dependencies.logger.warn("Partial batch write success", {
-              batchNumber: Math.floor(i / BATCH_SIZE) + 1,
-              processed: unprocessedItems.length - unprocessedCount,
-              unprocessed: unprocessedCount,
-              retryCount,
-            });
+        successCount += processedCount;
 
-            unprocessedItems = response.UnprocessedItems[tableName].map(
-              (item) => {
-                const earthquakeItem = item.PutRequest?.Item as Record<
-                  string,
-                  unknown
-                >;
-                return new Earthquake({
-                  eventId: earthquakeItem.eventId as string,
-                  name: earthquakeItem.name as string,
-                  magnitude: earthquakeItem.magnitude as number,
-                  date: earthquakeItem.date as string,
-                  type: earthquakeItem.type as string,
-                  tsunami: earthquakeItem.tsunami as number,
-                  place: earthquakeItem.place as string,
-                  country: earthquakeItem.country as string,
-                });
-              },
-            );
-
-            retryCount++;
-            if (unprocessedItems.length > 0) {
-              await new Promise((resolve) =>
-                setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
-              );
-            }
-          } else {
-            successCount += unprocessedItems.length;
-            unprocessedItems = [];
-
-            this.dependencies.logger.info("Batch write successful", {
-              batchNumber: Math.floor(i / BATCH_SIZE) + 1,
-              itemsWritten: batch.length,
-              totalProcessed: successCount,
-            });
-          }
-        } catch (error) {
-          this.dependencies.logger.error("Error in batch write", {
-            error: error instanceof Error ? error.message : "Unknown error",
+        if (unprocessedItems.length > 0) {
+          dependencies.logger.warn("Partial batch write success", {
             batchNumber: Math.floor(i / BATCH_SIZE) + 1,
-            retryCount,
+            processed: processedCount,
+            unprocessed: unprocessedItems.length,
+            attempt: attempts + 1,
           });
-          retryCount++;
 
-          if (retryCount <= MAX_RETRIES) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, DELAY_MS * Math.pow(2, retryCount)),
-            );
-          }
+          requestItems = {
+            [tableName]: unprocessedItems as EarthquakeBatchPutRequest[],
+          };
+          attempts++;
+          await new Promise((resolve) => setTimeout(resolve, Math.min(100 * 2 ** attempts, 1000)));
+        } else {
+          dependencies.logger.info("Batch write successful", {
+            batchNumber: Math.floor(i / BATCH_SIZE) + 1,
+            itemsWritten: processedCount,
+            totalProcessed: successCount,
+          });
+          break;
         }
       }
 
       if (i + BATCH_SIZE < earthquakes.length) {
-        await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
       }
     }
 
     return successCount;
-  }
+  };
+
+  return {
+    getEarthquakesByCountry,
+    batchSaveEarthquakes,
+  } as EarthquakeRepository;
 }
