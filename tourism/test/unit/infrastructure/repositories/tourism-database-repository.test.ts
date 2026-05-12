@@ -84,7 +84,6 @@ describe('TourismDatabaseRepository', () => {
           description: 'Royal château',
         },
       ];
-
       mockDbClient.queryMultipleRows.mockResolvedValue(
         mockRows.map(
           (row) => new UNESCOSites(row.country_code, row.country_name, row.area_name, row.site, row.description),
