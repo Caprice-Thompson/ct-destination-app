@@ -1,3 +1,4 @@
+import { findCountryInString } from "@application/common/country-extractor";
 import type { EarthquakeRepository } from "@application/interfaces/repositories";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
@@ -6,33 +7,31 @@ import {
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
-import { findCountryInString } from "@application/common/country-extractor";
 import type { Dependencies } from "@infrastructure/dependencies";
 
-// remove and just have dynanamdb item
-type EarthquakeBatchPutRequest = {
-  PutRequest: {
-    Item: {
-      eventId: string;
-      time: number;
-      name: string;
-      magnitude: number;
-      date: string;
-      type: string;
-      tsunami: number;
-      place: string;
-      country: string;
-    };
-  };
+type EarthquakeDBItem = {
+  eventId: string;
+  time: number;
+  name: string;
+  magnitude: number;
+  date: string;
+  type: string;
+  tsunami: number;
+  place: string;
+  country: string;
 };
 
-export function makeEarthquakeRepository(dependencies: Dependencies): EarthquakeRepository {
-
+export function makeEarthquakeRepository({
+  config,
+  logger,
+}: Pick<Dependencies, "config" | "logger">): EarthquakeRepository {
   const ddbClient = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(ddbClient);
 
-  const getEarthquakesByCountry = async (countryName: string): Promise<Earthquake[]> => {
-    const tableName = dependencies.config.tables.earthquakes;
+  const getEarthquakesByCountry = async (
+    countryName: string,
+  ): Promise<Earthquake[]> => {
+    const tableName = config.tables.earthquakes;
 
     const command = new QueryCommand({
       TableName: tableName,
@@ -63,32 +62,30 @@ export function makeEarthquakeRepository(dependencies: Dependencies): Earthquake
     );
   };
 
-  const batchSaveEarthquakes = async (earthquakes: Earthquake[]): Promise<number> => {
+  const batchSaveEarthquakes = async (
+    earthquakes: Earthquake[],
+  ): Promise<number> => {
     const BATCH_SIZE = 25;
     const BATCH_DELAY_MS = 1000;
     const MAX_ATTEMPTS = 5;
-    const tableName = dependencies.config.tables.earthquakes;
+    const tableName = config.tables.earthquakes;
     let successCount = 0;
 
     for (let i = 0; i < earthquakes.length; i += BATCH_SIZE) {
       const batch = earthquakes.slice(i, i + BATCH_SIZE);
-      const putRequests: EarthquakeBatchPutRequest[] = batch.map((eq) => ({
-        PutRequest: {
-          Item: {
-            eventId: eq.eventId,
-            time: new Date(eq.date).getTime(),
-            name: eq.name,
-            magnitude: eq.magnitude,
-            date: eq.date,
-            type: eq.type,
-            tsunami: eq.tsunami,
-            place: eq.place,
-            country: findCountryInString(eq.place),
-          },
-        },
+      const putRequests: EarthquakeDBItem[] = batch.map((eq) => ({
+        eventId: eq.eventId,
+        time: new Date(eq.date).getTime(),
+        name: eq.name,
+        magnitude: eq.magnitude,
+        date: eq.date,
+        type: eq.type,
+        tsunami: eq.tsunami,
+        place: eq.place,
+        country: findCountryInString(eq.place),
       }));
 
-      let requestItems: Record<string, EarthquakeBatchPutRequest[]> = {
+      let requestItems: Record<string, EarthquakeDBItem[]> = {
         [tableName]: putRequests,
       };
 
@@ -108,7 +105,7 @@ export function makeEarthquakeRepository(dependencies: Dependencies): Earthquake
         successCount += processedCount;
 
         if (unprocessedItems.length > 0) {
-          dependencies.logger.warn("Partial batch write success", {
+          logger.warn("Partial batch write success", {
             batchNumber: Math.floor(i / BATCH_SIZE) + 1,
             processed: processedCount,
             unprocessed: unprocessedItems.length,
@@ -116,12 +113,14 @@ export function makeEarthquakeRepository(dependencies: Dependencies): Earthquake
           });
 
           requestItems = {
-            [tableName]: unprocessedItems as EarthquakeBatchPutRequest[],
+            [tableName]: unprocessedItems as EarthquakeDBItem[],
           };
           attempts++;
-          await new Promise((resolve) => setTimeout(resolve, Math.min(100 * 2 ** attempts, 1000)));
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.min(100 * 2 ** attempts, 1000)),
+          );
         } else {
-          dependencies.logger.info("Batch write successful", {
+          logger.info("Batch write successful", {
             batchNumber: Math.floor(i / BATCH_SIZE) + 1,
             itemsWritten: processedCount,
             totalProcessed: successCount,

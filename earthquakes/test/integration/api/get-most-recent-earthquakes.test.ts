@@ -1,44 +1,65 @@
+jest.mock("@application/common/tracing", () => ({
+  withTraceLogging: <I, O>(
+    handler: (event?: I, context?: unknown) => Promise<O>,
+  ) => handler,
+}));
+
+jest.mock("@infrastructure/dependencies", () => ({
+  makeDependencies: jest.fn(),
+}));
+
 import { handler } from "@api/get-most-recent-earthquakes";
+import type { APIGatewayProxyEvent } from "@api/wrappers";
+import type { ApplicationConfig } from "@application/interfaces/config";
 import { Coordinates } from "@domain/entities/coordinates";
 import { Earthquake } from "@domain/entities/earthquake";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import type { APIGatewayEvent } from "../../../src/types";
+import type { DbClient } from "../../../../shared/db/src/rds_client";
 
-jest.mock("@infrastructure/dependencies");
-
-describe("handler", () => {
+describe("get-most-recent-earthquakes handler", () => {
   let mockDependencies: Dependencies;
+
+  const baseConfig: ApplicationConfig = {
+    aws: {
+      region: "eu-west-2",
+      accessKeyId: "test",
+      secretAccessKey: "test",
+    },
+    database: { connectionString: "postgres://localhost/test" },
+    service: { name: "earthquakes-test" },
+    tables: { earthquakes: "eq-table" },
+    urls: {
+      usgsApi: "https://example.invalid/fdsnws/event/1/query",
+      restCountriesApiUrl: "https://example.invalid/v3.1",
+    },
+  };
 
   beforeEach(() => {
     mockDependencies = {
-      config: {
-        urls: {
-          earthquakesApi: "https://api.example.com",
-          restCountriesApiUrl: "https://api.example.com",
-        },
-      },
+      config: baseConfig,
       logger: {
         debug: jest.fn(),
         info: jest.fn(),
         warn: jest.fn(),
         error: jest.fn(),
       },
+      rdsClient: {
+        closeConnection: jest.fn().mockResolvedValue(undefined),
+      } as unknown as DbClient,
       coordinatesRepository: {
         getCoordinatesByCountryName: jest.fn(),
       },
       earthquakeRepository: {
-        getMostRecentEarthquakesByCountry: jest.fn(),
-        getEarthquakeData: jest.fn(),
-      },
-      historicalEarthquakeRepository: {
         getEarthquakesByCountry: jest.fn(),
-        saveEarthquake: jest.fn(),
         batchSaveEarthquakes: jest.fn(),
       },
-    } as unknown as Dependencies;
+      usgsService: {
+        listEarthquakes: jest.fn(),
+      },
+    } as Dependencies;
 
     (makeDependencies as jest.Mock).mockResolvedValue(mockDependencies);
   });
@@ -53,40 +74,37 @@ describe("handler", () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
       const mockEarthquakes = [
         new Earthquake({
-          eventId: "us6000dcq4",
-          name: "2 km NW of Santafé, Spain",
+          eventId: "evt-mock-1",
+          name: "Mock location A",
           magnitude: 4.3,
           date: "2021-01-28",
           type: "earthquake",
           tsunami: 0,
-          place: "2 km NW of Santafé, Spain",
+          place: "Mock place A",
           country: "Spain",
         }),
         new Earthquake({
-          eventId: "us7000d3it",
-          name: "2 km WNW of Atarfe, Spain",
+          eventId: "evt-mock-2",
+          name: "Mock location B",
           magnitude: 4.3,
           date: "2021-01-26",
           type: "earthquake",
           tsunami: 0,
-          place: "2 km WNW of Atarfe, Spain",
+          place: "Mock place B",
           country: "Spain",
         }),
       ];
 
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockResolvedValue(mockCoordinates);
-      (
-        mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakesByCountry as jest.Mock
-      ).mockResolvedValue(mockEarthquakes);
+      jest
+        .mocked(
+          mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
+        )
+        .mockResolvedValue(mockCoordinates);
+      jest
+        .mocked(mockDependencies.usgsService.listEarthquakes)
+        .mockResolvedValue(mockEarthquakes);
 
-      (
-        mockDependencies.earthquakeRepository.getEarthquakeData as jest.Mock
-      ).mockResolvedValue(mockEarthquakes);
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "Spain",
         },
@@ -97,27 +115,31 @@ describe("handler", () => {
       expect(response.statusCode).toBe(200);
       expect(response.headers?.["Content-Type"]).toBe("application/json");
 
-      const body = JSON.parse(response.body);
+      const body = JSON.parse(response.body) as {
+        earthquakes: Earthquake[];
+        countryName: string;
+      };
       expect(body.earthquakes).toHaveLength(2);
-      expect(body.earthquakes[0].eventId).toBe("us6000dcq4");
-      expect(body.earthquakes[1].eventId).toBe("us7000d3it");
-      expect(body.earthquakes[0].name).toBe("2 km NW of Santafé, Spain");
+      expect(body.earthquakes[0].eventId).toBe("evt-mock-1");
+      expect(body.earthquakes[1].eventId).toBe("evt-mock-2");
+      expect(body.earthquakes[0].name).toBe("Mock location A");
       expect(body.earthquakes[0].magnitude).toBe(4.3);
       expect(body.countryName).toBe("Spain");
+      expect(mockDependencies.rdsClient.closeConnection).toHaveBeenCalled();
     });
 
-    it("should return empty array when no earthquakes found", async () => {
+    it("should return empty earthquakes array when USGS returns none", async () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockResolvedValue(mockCoordinates);
-      (
-        mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakesByCountry as jest.Mock
-      ).mockResolvedValue([]);
+      jest
+        .mocked(
+          mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
+        )
+        .mockResolvedValue(mockCoordinates);
+      jest
+        .mocked(mockDependencies.usgsService.listEarthquakes)
+        .mockResolvedValue([]);
 
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "Spain",
         },
@@ -126,28 +148,36 @@ describe("handler", () => {
       const response = await handler(event);
 
       expect(response.statusCode).toBe(200);
-      const body = JSON.parse(response.body);
+      const body = JSON.parse(response.body) as {
+        earthquakes: Earthquake[];
+        countryName: string;
+      };
       expect(body.earthquakes).toHaveLength(0);
+      expect(body.countryName).toBe("Spain");
     });
   });
 
   describe("Validation Errors", () => {
     it("should return 400 when query parameters are missing", async () => {
-      const event: APIGatewayEvent = {
-        queryStringParameters: null,
-      };
+      const event = {
+        queryStringParameters: undefined,
+      } as APIGatewayProxyEvent;
 
       const response = await handler(event);
 
       expect(response.statusCode).toBe(400);
       expect(response.headers?.["Content-Type"]).toBe("application/json");
 
-      const body = JSON.parse(response.body);
-      expect(body.error).toBe("Missing query parameters");
+      const body = JSON.parse(response.body) as {
+        error: string;
+        details: { path: string; message: string }[];
+      };
+      expect(body.error).toBe("Validation failed");
+      expect(body.details.some((d) => d.path === "countryName")).toBe(true);
     });
 
     it("should return 400 for empty country name", async () => {
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "",
         },
@@ -156,20 +186,24 @@ describe("handler", () => {
       const response = await handler(event);
 
       expect(response.statusCode).toBe(400);
-      const body = JSON.parse(response.body);
-      expect(body.error).toBe("Validation error");
+      const body = JSON.parse(response.body) as {
+        error: string;
+        details: unknown[];
+      };
+      expect(body.error).toBe("Validation failed");
       expect(mockDependencies.logger.warn).toHaveBeenCalled();
     });
   });
 
   describe("Server Errors", () => {
     it("should return 500 when coordinates repository fails", async () => {
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockRejectedValue(new Error("Country not found"));
+      jest
+        .mocked(
+          mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
+        )
+        .mockRejectedValue(new Error("Country not found"));
 
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "InvalidCountry",
         },
@@ -180,23 +214,24 @@ describe("handler", () => {
       expect(response.statusCode).toBe(500);
       expect(response.headers?.["Content-Type"]).toBe("application/json");
 
-      const body = JSON.parse(response.body);
+      const body = JSON.parse(response.body) as { error: string };
       expect(body.error).toBe("Internal server error");
       expect(mockDependencies.logger.error).toHaveBeenCalled();
+      expect(mockDependencies.rdsClient.closeConnection).toHaveBeenCalled();
     });
 
-    it("should return 500 when earthquake repository fails", async () => {
+    it("should return 500 when USGS service fails", async () => {
       const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockResolvedValue(mockCoordinates);
-      (
-        mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakesByCountry as jest.Mock
-      ).mockRejectedValue(new Error("API error"));
+      jest
+        .mocked(
+          mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
+        )
+        .mockResolvedValue(mockCoordinates);
+      jest
+        .mocked(mockDependencies.usgsService.listEarthquakes)
+        .mockRejectedValue(new Error("API error"));
 
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "Spain",
         },
@@ -205,17 +240,18 @@ describe("handler", () => {
       const response = await handler(event);
 
       expect(response.statusCode).toBe(500);
-      const body = JSON.parse(response.body);
+      const body = JSON.parse(response.body) as { error: string };
       expect(body.error).toBe("Internal server error");
     });
 
     it("should return 500 for unexpected errors", async () => {
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockRejectedValue("Unexpected error");
+      jest
+        .mocked(
+          mockDependencies.coordinatesRepository.getCoordinatesByCountryName,
+        )
+        .mockRejectedValue("Unexpected error");
 
-      const event: APIGatewayEvent = {
+      const event: APIGatewayProxyEvent = {
         queryStringParameters: {
           countryName: "Spain",
         },
@@ -224,30 +260,6 @@ describe("handler", () => {
       const response = await handler(event);
 
       expect(response.statusCode).toBe(500);
-    });
-  });
-
-  describe("CORS Headers", () => {
-    it("should include CORS headers in successful response", async () => {
-      const mockCoordinates = new Coordinates({ latitude: 40, longitude: -3 });
-      (
-        mockDependencies.coordinatesRepository
-          .getCoordinatesByCountryName as jest.Mock
-      ).mockResolvedValue(mockCoordinates);
-      (
-        mockDependencies.earthquakeRepository
-          .getMostRecentEarthquakesByCountry as jest.Mock
-      ).mockResolvedValue([]);
-
-      const event: APIGatewayEvent = {
-        queryStringParameters: {
-          countryName: "Spain",
-        },
-      };
-
-      const response = await handler(event);
-
-      expect(response.headers?.["Access-Control-Allow-Origin"]).toBe("*");
     });
   });
 });

@@ -1,6 +1,6 @@
-import { ZodError, z } from "zod";
-import type { ListLatestEarthquakesByCountryQuery } from "./list-latest-earthquakes-query";
 import { ValidationException } from "@application/common/exceptions";
+import { type ZodError, z } from "zod";
+import type { ListLatestEarthquakesByCountryQuery } from "./list-latest-earthquakes-query";
 
 export async function validateLatestEarthquakesRequest(
   query: ListLatestEarthquakesByCountryQuery,
@@ -20,5 +20,3 @@ export async function validateLatestEarthquakesRequest(
     throw new ValidationException(error as ZodError);
   }
 }
-
-

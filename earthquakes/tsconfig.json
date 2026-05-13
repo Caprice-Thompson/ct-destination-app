@@ -17,7 +17,8 @@
       "@application/*": ["application/*"],
       "@domain/*": ["domain/*"],
       "@infrastructure/*": ["infrastructure/*"],
-      "@api/*": ["api/*"]
+      "@api/*": ["api/*"],
+      "@shared/*": ["../shared/*"]
     }
   },
   "include": ["src", "test"],

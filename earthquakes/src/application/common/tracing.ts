@@ -1,7 +1,7 @@
-import { logger } from '@infrastructure/logger';
+import { logger } from "@infrastructure/logger";
 
 export enum TracedProperties {
-  amazonTraceId = 'amazonTraceId',
+  amazonTraceId = "amazonTraceId",
 }
 export type TracingInfo = Record<TracedProperties, string>;
 
@@ -10,7 +10,9 @@ export interface HackedLambdaContext {
   invokedFunctionArn: string;
 }
 
-export const initializeTracingInfo = (tracingInfo?: Record<string, Partial<TracingInfo>>) => {
+export const initializeTracingInfo = (
+  tracingInfo?: Record<string, Partial<TracingInfo>>,
+) => {
   logger.defaultMeta.tracingInfo = tracingInfo;
 };
 /**

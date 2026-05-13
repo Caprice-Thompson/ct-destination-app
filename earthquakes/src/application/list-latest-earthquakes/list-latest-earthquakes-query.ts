@@ -1,7 +1,13 @@
+import {
+  formattedEndDate,
+  formattedStartDate,
+  limit,
+  maxRadiusKm,
+  minMagnitude,
+} from "@application/common/constants";
 import type { Earthquake } from "@domain/entities/earthquake";
 import type { Dependencies } from "@infrastructure/dependencies";
 import { validateLatestEarthquakesRequest } from "./list-latest-earthquakes-query-validator";
-import { formattedEndDate, formattedStartDate, limit, maxRadiusKm } from "@application/common/constants";
 
 export type ListLatestEarthquakesByCountryQuery = Readonly<{
   countryName: string;
@@ -13,8 +19,8 @@ export type ListLatestEarthquakesByCountryQuery = Readonly<{
 export async function listLatestEarthquakesByCountry(
   query: ListLatestEarthquakesByCountryQuery,
   dependencies: Dependencies,
-): Promise<Earthquake[]> {
-  const { earthquakeRepository, coordinatesRepository, logger } = dependencies;
+): Promise<{ earthquakes: Earthquake[]; countryName: string }> {
+  const { usgsService, coordinatesRepository, logger } = dependencies;
 
   logger.info("Starting list latest earthquakes query", { query });
 
@@ -22,25 +28,29 @@ export async function listLatestEarthquakesByCountry(
 
   logger.debug(`Fetching coordinates for country: ${countryName}`);
 
-  const coordinates = await coordinatesRepository.getCoordinatesByCountryName(
-    countryName,
+  const coordinates =
+    await coordinatesRepository.getCoordinatesByCountryName(countryName);
+
+  logger.debug(
+    `Coordinates retrieved for country: ${countryName}, latitude: ${coordinates.latitude}, longitude: ${coordinates.longitude}`,
   );
 
-  logger.debug(`Coordinates retrieved for country: ${countryName}, latitude: ${coordinates.latitude}, longitude: ${coordinates.longitude}`);
-
-  const latestEarthquakes =
-    await earthquakeRepository.listLatestEarthquakesByCountry({
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
-      startTime: formattedStartDate,
-      endTime: formattedEndDate,
-      maxRadiusKm: maxRadiusKm,
-      limit: limit,
-    });
-
-  logger.info(`List latest earthquakes query completed successfully for country: ${countryName}, earthquakes count: ${latestEarthquakes.length}`, {
-    countryName,
-    earthquakesCount: latestEarthquakes.length,
+  const latestEarthquakes = await usgsService.listEarthquakes({
+    latitude: coordinates.latitude,
+    longitude: coordinates.longitude,
+    startTime: formattedStartDate,
+    endTime: formattedEndDate,
+    maxRadiusKm: maxRadiusKm,
+    minMagnitude: minMagnitude,
+    limit: limit,
   });
-  return latestEarthquakes;
+
+  logger.info(
+    `List latest earthquakes query completed successfully for country: ${countryName}, earthquakes count: ${latestEarthquakes.length}`,
+    {
+      countryName,
+      earthquakesCount: latestEarthquakes.length,
+    },
+  );
+  return { earthquakes: latestEarthquakes, countryName };
 }

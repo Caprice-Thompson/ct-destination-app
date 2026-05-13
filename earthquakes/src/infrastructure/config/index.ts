@@ -8,6 +8,9 @@ export interface ApplicationConfig {
     secretAccessKey: string;
     sessionToken?: string;
   };
+  database: {
+    connectionString: string;
+  };
   service: {
     name: string;
   };
@@ -15,7 +18,7 @@ export interface ApplicationConfig {
     earthquakes: string;
   };
   urls: {
-    earthquakesApi: string;
+    usgsApi: string;
     restCountriesApiUrl: string;
   };
 }
@@ -26,6 +29,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     AWS_ACCESS_KEY_ID: z.string().default(""),
     AWS_SECRET_ACCESS_KEY: z.string().default(""),
     AWS_SESSION_TOKEN: z.string().optional(),
+    DATABASE_URL: z.string().default(""),
     DYNAMODB_EARTHQUAKES_TABLE: z.string().default(""),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
@@ -33,6 +37,10 @@ export async function makeConfig(): Promise<ApplicationConfig> {
   });
 
   const parsedEnv = schema.parse(process.env);
+  let connectionString: string;
+
+  const encodedPGPassword = encodeURIComponent(process.env.PGPASSWORD ?? "");
+  connectionString = `postgresql://${process.env.PGUSER}:${encodedPGPassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
 
   return {
     aws: {
@@ -41,6 +49,9 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       secretAccessKey: parsedEnv.AWS_SECRET_ACCESS_KEY,
       sessionToken: parsedEnv.AWS_SESSION_TOKEN ?? "",
     },
+    database: {
+      connectionString: parsedEnv.DATABASE_URL ?? "",
+    },
     service: {
       name: parsedEnv.SERVICE_NAME,
     },
@@ -48,7 +59,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       earthquakes: parsedEnv.DYNAMODB_EARTHQUAKES_TABLE,
     },
     urls: {
-      earthquakesApi: parsedEnv.EARTHQUAKES_API_URL,
+      usgsApi: parsedEnv.EARTHQUAKES_API_URL,
       restCountriesApiUrl: parsedEnv.REST_COUNTRIES_API_URL,
     },
   };
