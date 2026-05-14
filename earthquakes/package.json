@@ -10,7 +10,7 @@
     "lint:fix": "biome check --write .",
     "lint": "biome lint --write .",
     "format": "biome format --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit --exclude ../shared"
   },
   "keywords": [],
   "author": "",
