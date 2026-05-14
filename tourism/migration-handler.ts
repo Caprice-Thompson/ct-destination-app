@@ -1,5 +1,5 @@
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
-import logger from '@infrastructure/logger';
+import { logger } from '@infrastructure/logger';
 import { Client } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
