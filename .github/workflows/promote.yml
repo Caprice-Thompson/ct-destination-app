@@ -39,13 +39,9 @@ jobs:
         working-directory: ./country
         run: npm ci --legacy-peer-deps
 
-      - name: Run type check
-        working-directory: ./country
-        run: npm run type-check
-
       - name: Run linter
         working-directory: ./country
-        run: npm run lint:check
+        run: npm run lint
 
       - name: Run tests
         working-directory: ./country
@@ -78,13 +74,9 @@ jobs:
         working-directory: ./earthquakes
         run: npm ci --legacy-peer-deps
 
-      - name: Run type check
-        working-directory: ./earthquakes
-        run: npm run type-check
-
       - name: Run linter
         working-directory: ./earthquakes
-        run: npm run lint:check
+        run: npm run lint
 
       - name: Run tests
         working-directory: ./earthquakes
@@ -117,13 +109,9 @@ jobs:
         working-directory: ./tourism
         run: npm ci --legacy-peer-deps
 
-      - name: Run type check
-        working-directory: ./tourism
-        run: npm run type-check
-
       - name: Run linter
         working-directory: ./tourism
-        run: npm run lint:check
+        run: npm run lint
 
       - name: Run tests
         working-directory: ./tourism
