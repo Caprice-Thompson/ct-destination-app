@@ -1,5 +1,5 @@
 import { makeDependencies } from "@infrastructure/dependencies";
-
+// move when refactoring - not supposed to be here
 export const handler = async () => {
   const dependencies = await makeDependencies();
   const { earthquakeRepository, logger } =
