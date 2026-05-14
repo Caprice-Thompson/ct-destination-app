@@ -18,9 +18,9 @@
       "@domain/*": ["domain/*"],
       "@infrastructure/*": ["infrastructure/*"],
       "@api/*": ["api/*"],
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": ["src", "test"],
-  "exclude": ["**/*/node_modules", "**/*/dist", "**/*/coverage", "../shared"]
+  "exclude": ["**/*/node_modules", "**/*/dist", "**/*/coverage"]
 }

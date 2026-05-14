@@ -1,4 +1,4 @@
-jest.mock("@application/common/tracing", () => ({
+jest.mock("@shared/utils/src/tracing", () => ({
   withTraceLogging: <I, O>(
     handler: (event?: I, context?: unknown) => Promise<O>,
   ) => handler,

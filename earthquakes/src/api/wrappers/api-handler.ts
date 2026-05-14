@@ -2,9 +2,11 @@ import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { ValidationException } from "../../application/common/exceptions";
-import type { HackedLambdaContext } from "../../application/common/tracing";
-import { withTraceLogging } from "../../application/common/tracing";
+import { ValidationException } from "@application/common/exceptions";
+import {
+  type HackedLambdaContext,
+  withTraceLogging,
+} from "@shared/utils/src/tracing";
 
 type StatusCode =
   | 200

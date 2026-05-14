@@ -1,7 +1,9 @@
-import { UNESCOSites } from '@domain/entities/unesco-sites';
-import { Dependencies } from '@infrastructure/dependencies';
+import { UNESCOSites } from "@domain/entities/unesco-sites";
+import type { Dependencies } from "@infrastructure/dependencies";
 
-export async function makeTourismInformationRepository({ rdsClient }: Pick<Dependencies, 'rdsClient'>) {
+export async function makeTourismInformationRepository({
+  rdsClient,
+}: Pick<Dependencies, "rdsClient">) {
   return {
     async getTourismInformation(countryName: string): Promise<UNESCOSites[]> {
       const query = `
