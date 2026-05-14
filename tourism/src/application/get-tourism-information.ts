@@ -12,7 +12,7 @@ export interface TourismInformationResult {
 }
 
 export class GetTourismInformation {
-  constructor(private readonly tourismRepository: TourismInformationRepositoryInterface) {}
+  constructor(private readonly tourismRepository: TourismInformationRepositoryInterface) { }
 
   async getTourismInfo(countryName: string): Promise<TourismInformationResult> {
     logger.info(`Fetching tourism information for country: ${countryName}`);
