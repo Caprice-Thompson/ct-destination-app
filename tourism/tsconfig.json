@@ -23,5 +23,5 @@
     "removeComments": true,
     "noStrictGenericChecks": false
   },
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": ["node_modules", "dist", "coverage", "../shared"]
 }
