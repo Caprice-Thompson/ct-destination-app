@@ -2,7 +2,7 @@ import { makeDependencies } from "@infrastructure/dependencies";
 
 export const handler = async () => {
   const dependencies = await makeDependencies();
-  const { earthquakeRepository, historicalEarthquakeRepository, logger } =
+  const { earthquakeRepository, logger } =
     dependencies;
 
   try {
@@ -19,10 +19,8 @@ export const handler = async () => {
 
     logger.info("Fetching earthquake data", { startTime, endTime });
 
-    const earthquakes = await earthquakeRepository.getEarthquakeData({
-      startTime,
-      endTime,
-    });
+    const earthquakes = await earthquakeRepository.getEarthquakesByCountry("Greece"
+    );
 
     logger.info("Earthquake data fetched", { count: earthquakes.length });
 
@@ -32,7 +30,7 @@ export const handler = async () => {
     }
 
     const successCount =
-      await historicalEarthquakeRepository.batchSaveEarthquakes(earthquakes);
+      await earthquakeRepository.batchSaveEarthquakes(earthquakes);
 
     logger.info("Scheduled ingestion completed", {
       totalFetched: earthquakes.length,

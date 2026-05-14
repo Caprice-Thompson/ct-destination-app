@@ -1,4 +1,5 @@
-import { logger } from "@infrastructure/logger";
+import { logger } from "../../../../shared/logger";
+
 
 export enum TracedProperties {
   amazonTraceId = "amazonTraceId",
