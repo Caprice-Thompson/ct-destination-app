@@ -15,7 +15,6 @@ jest.mock("@aws-sdk/lib-dynamodb", () => ({
 import type { ApplicationConfig } from "@application/interfaces/config";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
-import type { Dependencies } from "@infrastructure/dependencies";
 import { makeEarthquakeRepository } from "@infrastructure/repositories/eq-repo";
 
 describe("makeEarthquakeRepository", () => {
