@@ -8,7 +8,6 @@ export interface EarthquakeProperties {
   place: string;
   country: string;
 }
-
 export class Earthquake {
   public readonly eventId: string;
   public readonly name: string;

@@ -1,38 +1,35 @@
-import type { ApplicationConfig } from "./config";
+import type * as Interfaces from "@application/interfaces";
+import type { DbClient } from "../../../shared/db/src/rds_client";
 import { makeConfig } from "./config";
 import { makeLogger } from "./logger";
-import type { Logger } from "@application/interfaces/logger";
-import { CoordinatesRepository } from "./repositories/coordinates-repository";
-import { EarthquakeRepository } from "./repositories/earthquake-repository";
-import { DynamoDBEarthquakeRepository } from "./repositories/dynamodb-eq-repository";
+import { makeRdsClient } from "./rds";
+import { makeCoordinatesRepository } from "./repositories/coordinates-repository";
+import { makeEarthquakeRepository } from "./repositories/eq-repo";
+import { makeUsgsService } from "./services/usgs-service";
 
 export type Dependencies = {
-  config: ApplicationConfig;
-  logger: Logger;
-  earthquakeRepository: EarthquakeRepository;
-  coordinatesRepository: CoordinatesRepository;
-  historicalEarthquakeRepository: DynamoDBEarthquakeRepository;
+  logger: Interfaces.Logger;
+  config: Interfaces.ApplicationConfig;
+  rdsClient: DbClient;
+  usgsService: Interfaces.UsgsService;
+  earthquakeRepository: Interfaces.EarthquakeRepository;
+  coordinatesRepository: Interfaces.CoordinatesRepository;
 };
 
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
   const logger = makeLogger(config);
-  const historicalEarthquakeRepository = new DynamoDBEarthquakeRepository({
-    config,
-    logger,
-  });
-  const earthquakeRepository = new EarthquakeRepository({
-    config,
-    logger,
-    historicalEarthquakeRepository,
-  });
-  const coordinatesRepository = new CoordinatesRepository({ config, logger });
+  const rdsClient = await makeRdsClient(config);
+  const usgsService = makeUsgsService({ config, logger });
+  const earthquakeRepository = makeEarthquakeRepository({ config, logger });
+  const coordinatesRepository = makeCoordinatesRepository({ config, logger });
 
   return {
-    config,
     logger,
+    config,
+    rdsClient,
+    usgsService,
     earthquakeRepository,
     coordinatesRepository,
-    historicalEarthquakeRepository,
   };
 }

@@ -1,5 +1,5 @@
 {
-  "include": ["src", "test", "migration-handler.ts"],
+  "include": ["src", "test"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -23,5 +23,5 @@
     "removeComments": true,
     "noStrictGenericChecks": false
   },
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": ["node_modules", "dist", "coverage", "../shared"]
 }

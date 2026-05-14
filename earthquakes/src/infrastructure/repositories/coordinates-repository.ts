@@ -1,8 +1,8 @@
-import { CoordinatesRepositoryInterface } from "@application/interfaces/repositories";
+import type { CoordinatesRepository } from "@application/interfaces/repositories";
 import { Coordinates } from "@domain/entities/coordinates";
-import { Dependencies } from "@infrastructure/dependencies";
+import type { Dependencies } from "@infrastructure/dependencies";
 
-interface RestCountriesApiResponse {
+interface CoordinatesResponse {
   name: {
     common: string;
     official: string;
@@ -10,67 +10,60 @@ interface RestCountriesApiResponse {
   latlng?: [number, number];
 }
 
-export class CoordinatesRepository implements CoordinatesRepositoryInterface {
-  private readonly dependencies: Pick<Dependencies, "config" | "logger">;
-
-  constructor(dependencies: Pick<Dependencies, "config" | "logger">) {
-    this.dependencies = dependencies;
-  }
-
-  async getCoordinatesByCountryName(countryName: string): Promise<Coordinates> {
-    try {
-      const url = `${this.dependencies.config.urls.restCountriesApiUrl}/name/${encodeURIComponent(countryName)}`;
-
-      this.dependencies.logger.debug(
-        "Fetching coordinates from REST Countries API",
-        {
+export function makeCoordinatesRepository({
+  config,
+  logger,
+}: Pick<Dependencies, "config" | "logger">): CoordinatesRepository {
+  return {
+    async getCoordinatesByCountryName(
+      countryName: string,
+    ): Promise<Coordinates> {
+      try {
+        const url = `${config.urls.restCountriesApiUrl}/name/${encodeURIComponent(countryName)}`;
+        logger.debug("Starting to fetch coordinates from REST Countries API", {
           countryName,
           url,
-        },
-      );
+        });
 
-      const response = await fetch(url);
+        const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error! status: ${response.status} ${response.statusText}`,
-        );
-      }
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch coordinates from REST Countries API: ${response.status} ${response.statusText}`,
+          );
+        }
 
-      const data = (await response.json()) as RestCountriesApiResponse[];
+        const data = (await response.json()) as CoordinatesResponse[];
 
-      const countryData = data[0];
+        const countryData = data[0];
 
-      if (!countryData.latlng) {
-        throw new Error(`No coordinates available for country: ${countryName}`);
-      }
+        if (!countryData.latlng) {
+          throw new Error(
+            `No coordinates available for country: ${countryName}`,
+          );
+        }
 
-      const coordinates = new Coordinates({
-        latitude: countryData.latlng[0],
-        longitude: countryData.latlng[1],
-      });
+        const coordinates = new Coordinates({
+          latitude: countryData.latlng[0],
+          longitude: countryData.latlng[1],
+        });
 
-      this.dependencies.logger.info("Coordinates fetched successfully", {
-        countryName,
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-      });
-
-      return coordinates;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      this.dependencies.logger.error(
-        "Error fetching coordinates from REST Countries API",
-        {
-          error: errorMessage,
-          stack: error instanceof Error ? error.stack : undefined,
+        logger.info("Coordinates fetched successfully", {
           countryName,
-        },
-      );
-      throw new Error(
-        `Failed to fetch coordinates for country "${countryName}": ${errorMessage}`,
-      );
-    }
-  }
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+        });
+
+        return coordinates;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        logger.error("Error fetching coordinates from REST Countries API", {
+          countryName,
+          error: errorMessage,
+        });
+        throw error;
+      }
+    },
+  };
 }
