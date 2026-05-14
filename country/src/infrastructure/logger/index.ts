@@ -1,7 +1,6 @@
+import type { Logger } from "@application/interfaces";
+import { makeLogger as makeBaseLogger } from "../../../../shared/logger";
 
-
-export function makeLogger(config: ApplicationConfig): Logger {
-  return makeBaseLogger({
-    silent: config.isTestEnv,
-  });
+export function makeLogger(): Logger {
+  return makeBaseLogger({});
 }

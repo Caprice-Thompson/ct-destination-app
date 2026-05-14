@@ -1,4 +1,5 @@
 import type { GetTourismInformationQuery } from "@application/get-tourism-info/get-tourism-information";
+import { ValidationException } from "@application/common/exceptions";
 import { ZodError, z } from "zod";
 
 const getTourismInformationSchema = z.object({
@@ -13,17 +14,11 @@ const getTourismInformationSchema = z.object({
 });
 
 export async function validateGetTourismInformationRequest(
-  query: unknown,
-): Promise<GetTourismInformationQuery> {
+  query: GetTourismInformationQuery,
+) {
   try {
     return await getTourismInformationSchema.parseAsync(query);
   } catch (error) {
-    if (error instanceof ZodError) {
-      const messages = error.issues
-        .map((err) => `${err.path.join(".")}: ${err.message}`)
-        .join(", ");
-      throw new Error(`Validation error: ${messages}`);
-    }
-    throw new Error("Validation error: Invalid request");
+    throw new ValidationException(error as ZodError);
   }
 }
