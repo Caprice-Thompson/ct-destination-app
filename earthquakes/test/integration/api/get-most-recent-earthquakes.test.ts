@@ -1,13 +1,3 @@
-jest.mock("@shared/utils/src/tracing", () => ({
-  withTraceLogging: <I, O>(
-    handler: (event?: I, context?: unknown) => Promise<O>,
-  ) => handler,
-}));
-
-jest.mock("@infrastructure/dependencies", () => ({
-  makeDependencies: jest.fn(),
-}));
-
 import { handler } from "@api/get-most-recent-earthquakes";
 import type { APIGatewayProxyEvent } from "@api/wrappers";
 import type { ApplicationConfig } from "@application/interfaces/config";
@@ -18,6 +8,16 @@ import {
   makeDependencies,
 } from "@infrastructure/dependencies";
 import type { DbClient } from "../../../../shared/db/src/rds_client";
+
+jest.mock("@shared/utils/src/tracing", () => ({
+  withTraceLogging: <I, O>(
+    handler: (event?: I, context?: unknown) => Promise<O>,
+  ) => handler,
+}));
+
+jest.mock("@infrastructure/dependencies", () => ({
+  makeDependencies: jest.fn(),
+}));
 
 describe("get-most-recent-earthquakes handler", () => {
   let mockDependencies: Dependencies;

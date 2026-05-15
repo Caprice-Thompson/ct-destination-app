@@ -10,6 +10,16 @@ import { listCountryInformationHandler } from "@infrastructure/../api/list-count
 import type { Dependencies } from "@infrastructure/dependencies";
 import { mockDeep } from "jest-mock-extended";
 
+jest.mock("@shared/utils/src/tracing", () => ({
+  withTraceLogging: <I, O>(
+    handler: (event?: I, context?: unknown) => Promise<O>,
+  ) => handler,
+}));
+
+jest.mock("@infrastructure/dependencies", () => ({
+  makeDependencies: jest.fn(),
+}));
+
 describe("listCountryInformationHandler", () => {
   let dependencies: Dependencies;
 
