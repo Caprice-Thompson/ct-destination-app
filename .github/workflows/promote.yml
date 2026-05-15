@@ -7,6 +7,7 @@ on:
       - "country/**"
       - "earthquakes/**"
       - "tourism/**"
+      - "weather/**"
       - "infra/**"
       - ".github/workflows/promote.yml"
   push:
@@ -15,6 +16,7 @@ on:
       - "country/**"
       - "earthquakes/**"
       - "tourism/**"
+      - "weather/**"
       - "infra/**"
       - ".github/workflows/promote.yml"
   workflow_dispatch:
@@ -124,3 +126,38 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           flags: tourism
+
+  test-weather:
+    name: Test Weather Service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: weather/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./weather
+        run: npm ci --legacy-peer-deps
+
+      - name: Run linter
+        working-directory: ./weather
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./weather
+        run: npm test -- --coverage --ci
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./weather/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          flags: weather
