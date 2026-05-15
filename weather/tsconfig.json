@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "rootDir": "..",
+    "paths": {
+      "@application/*": ["./src/application/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@api/*": ["./src/api/*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    "module": "Node16",
+    "outDir": "./dist",
+    "types": ["node", "jest"],
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "removeComments": true,
+    "noStrictGenericChecks": false
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist", "coverage", "../shared"]
+}

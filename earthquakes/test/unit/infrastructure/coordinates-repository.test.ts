@@ -1,7 +1,7 @@
 import type { ApplicationConfig } from "@application/interfaces/config";
 import { Coordinates } from "@domain/entities/coordinates";
 import type { Dependencies } from "@infrastructure/dependencies";
-import { makeCoordinatesRepository } from "@infrastructure/repositories/coordinates-repository";
+import { makeCoordinatesRepository } from "@infrastructure/services/coordinates-service";
 
 describe("makeCoordinatesRepository", () => {
   const baseConfig: ApplicationConfig = {
