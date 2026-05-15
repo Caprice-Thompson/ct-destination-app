@@ -1,0 +1,59 @@
+{
+  "Spain": {
+    "unescoSites": [
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Catalonia",
+        "site": "Works of Antoni Gaudí",
+        "description": "Seven properties in Barcelona that are exceptional examples of Gaudí's architectural genius"
+      },
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Andalusia",
+        "site": "Alhambra, Generalife and Albayzín, Granada",
+        "description": "Magnificent medieval Islamic architecture and gardens"
+      },
+      {
+        "countryCode": "ES",
+        "countryName": "Spain",
+        "areaName": "Madrid",
+        "site": "Monastery and Site of the Escurial, Madrid",
+        "description": "Royal monastery built in the 16th century"
+      }
+    ]
+  },
+  "Japan": {
+    "unescoSites": [
+      {
+        "countryCode": "JP",
+        "countryName": "Japan",
+        "areaName": "Kyoto",
+        "site": "Historic Monuments of Ancient Kyoto",
+        "description": "Built in A.D. 794 on the model of the capitals of ancient China"
+      },
+      {
+        "countryCode": "JP",
+        "countryName": "Japan",
+        "areaName": "Nara",
+        "site": "Historic Monuments of Ancient Nara",
+        "description": "Nara was the capital of Japan from 710 to 784"
+      },
+      {
+        "countryCode": "JP",
+        "countryName": "Japan",
+        "areaName": "Hiroshima",
+        "site": "Hiroshima Peace Memorial (Genbaku Dome)",
+        "description": "Symbol of peace and the abolition of nuclear weapons"
+      },
+      {
+        "countryCode": "JP",
+        "countryName": "Japan",
+        "areaName": "Mount Fuji",
+        "site": "Fujisan, sacred place and source of artistic inspiration",
+        "description": "Sacred mountain and iconic symbol of Japan"
+      }
+    ]
+  }
+}
