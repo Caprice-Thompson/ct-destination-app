@@ -1,15 +1,50 @@
 # Tourism Service
 
-Lambda API service for retrieving tourism information by country name from a PostgreSQL database.
+Lambda service for retrieving UNESCO World Heritage Sites information by country name.
 
 ## API
 
-**Handler**: `getTourismInformationHandler`
+**Endpoint:** `GET /tourism`
 
-**Query Parameter**: `countryName` (string, required)
+**Query Parameters:**
 
-**Response**: Returns UNESCO World Heritage Sites for the specified country.
+- `countryName` (required): Country name
+
+**Example:**
+
+```bash
+GET /tourism?countryName=Spain
+```
+
+**Response:**
+
+```json
+{
+  "unescoSites": [
+    {
+      "countryCode": "ES",
+      "countryName": "Spain",
+      "areaName": "Andalusia",
+      "site": "Alhambra, Generalife and Albayzín, Granada",
+      "description": "Rising above the modern lower town, the Alhambra and the Albayzín..."
+    }
+  ]
+}
+```
 
 ## Architecture
 
-Clean architecture with layers: API → Application (Use Cases) → Domain (Entities) → Infrastructure (Repositories, Database).
+The service follows Clean Architecture with four layers:
+
+- **API Layer**: Lambda handlers
+- **Application Layer**: Use cases and validation
+- **Domain Layer**: Business entities
+- **Infrastructure Layer**: Database repositories (PostgreSQL)
+
+## Development
+
+```bash
+npm install
+npm run build
+npm test
+```

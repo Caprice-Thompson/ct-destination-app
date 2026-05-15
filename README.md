@@ -1,61 +1,96 @@
 # ct-destination-app
 
-Tool designed for traveler's and researchers
+A microservices platform designed for travelers and researchers to compile comprehensive information about various destinations in Europe, including country details, earthquake data, UNESCO World Heritage Sites, and weather summaries.
 
-It compiles comprehensive information about various destinations in Europe, including activities, largest cities, UNESCO World Heritage Sites, and climate data. Destination-App provides up-to-date and detailed information to help users plan their travels.
+## Services
+
+The application consists of four Lambda microservices:
+
+### Country Service
+Retrieves comprehensive country information from REST Countries API and local database.
+- Endpoint: `GET /country`
+- Parameters: `countryName`
+- Returns: Country details, capital population, national dish
+
+[Read more](./country/README.md)
+
+### Earthquakes Service
+Retrieves earthquake data by country name from USGS API.
+- Endpoint: `GET /earthquakes`
+- Parameters: `countryName`, `startTime`, `endTime`, `maxRadiusKm`, `minMagnitude`, `limit`
+- Returns: Earthquake history with magnitude, location, and tsunami data
+
+[Read more](./earthquakes/README.md)
+
+### Tourism Service
+Retrieves UNESCO World Heritage Sites information by country.
+- Endpoint: `GET /tourism`
+- Parameters: `countryName`
+- Returns: UNESCO sites with descriptions
+
+[Read more](./tourism/README.md)
+
+### Weather Service
+Retrieves monthly weather summaries by country.
+- Endpoint: `GET /weather`
+- Parameters: `countryName`, `month`
+- Returns: Average min/max temperatures for the specified month
+
+[Read more](./weather/README.md)
+
+## Architecture
+
+Each service follows Clean Architecture principles with four layers:
+- **API Layer**: Lambda handlers
+- **Application Layer**: Use cases and validation
+- **Domain Layer**: Business entities
+- **Infrastructure Layer**: External API integrations and database repositories
 
 ## Prerequisites
-NVM (Node Version Manager) - to manage Node.js versions
-Docker Desktop
-BiomeJS - for code formatting and linting in your editor
+
+- NVM (Node Version Manager) - to manage Node.js versions
+- Docker Desktop
+- BiomeJS - for code formatting and linting
 
 ## Setup
+
 Install the required Node.js version using NVM:
 
+```bash
 nvm install
-
-Set the Node.js version for the project:
-
 nvm use
+```
 
 Install project dependencies:
 
+```bash
 npm install
+```
 
-Compose docker:
+Start Docker services:
 
-docker compose up 
+```bash
+docker compose up
+```
 
-Start up backend:
+Start the backend:
 
-cd local-server 
-
+```bash
+cd local-server
 npm run dev
+```
 
-Run frontend:
+Run the frontend:
 
-cd frontend 
-
+```bash
+cd frontend
 npm run dev
-
-## Scripts
-Run Integration Tests
-Open a database tunnel to RDS
-
-./dev-tools/scripts/db_connect.sh
-Navigate to the lambda directory
-
-cd lambda/publish-orchestrator
-Run the integration tests
-
-npm run test:integration
-Unit Tests
-To run unit tests, use:
-
-npm run test-all
+```
 
 ## Linting and Formatting
 
-To lint and format the code, run:
+Lint and format the code:
 
+```bash
 npm run lint:fix
+```

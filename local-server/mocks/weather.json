@@ -1,0 +1,50 @@
+{
+  "Spain": {
+    "1": {
+      "countryName": "Spain",
+      "month": "1",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 6.2,
+      "averageMaxTemperature": 14.1
+    },
+    "3": {
+      "countryName": "Spain",
+      "month": "3",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 9.1,
+      "averageMaxTemperature": 18.4
+    }
+  },
+  "Japan": {
+    "1": {
+      "countryName": "Japan",
+      "month": "1",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 2.4,
+      "averageMaxTemperature": 10.3
+    },
+    "3": {
+      "countryName": "Japan",
+      "month": "3",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 6.8,
+      "averageMaxTemperature": 15.2
+    }
+  },
+  "Italy": {
+    "1": {
+      "countryName": "Italy",
+      "month": "1",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 4.1,
+      "averageMaxTemperature": 12.5
+    },
+    "3": {
+      "countryName": "Italy",
+      "month": "3",
+      "totalWeatherRecords": 31,
+      "averageMinTemperature": 8.2,
+      "averageMaxTemperature": 17.3
+    }
+  }
+}
