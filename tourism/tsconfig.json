@@ -5,7 +5,8 @@
     "paths": {
       "@application/*": ["src/application/*"],
       "@domain/*": ["src/domain/*"],
-      "@infrastructure/*": ["src/infrastructure/*"]
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@shared/*": ["../shared/*"]
     },
     "target": "esnext",
     "lib": ["esnext", "dom"],

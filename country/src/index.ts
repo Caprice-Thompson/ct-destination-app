@@ -1,39 +1,36 @@
 // Domain
-export { CountryFacts as CountryDetail, Currency, Coordinates, MapDetails } from './domain/entities/country-facts';
-export { CityPopulation } from './domain/entities/city-population';
-export { NationalDish } from './domain/entities/national-dish';
 
-// Application
-export { ListCountryInformation as ListCountryInformationUseCase } from './application/list-country-information';
-export type { CountryInformationResult } from './application/list-country-information';
-export { validateCountryInformationRequest } from './application/validator';
-
+export type { ApplicationConfig } from "@application/interfaces/config";
+// API Layer
+export { listCountryInformationHandler } from "./api/list-country-information";
 // Application Interfaces
 export type {
-  CountryApiRepositoryInterface as CountryApiRepository,
-  CountryDatabaseRepositoryInterface as CountryDataRepository,
-  PopulationApiRepositoryInterface,
-} from './application/interfaces/repositories';
+  CityPopulationRepository as PopulationApiRepository,
+  NationalDishRepository as CountryDataRepository,
+} from "./application/interfaces/repositories";
 
+// Application
+export {
+  type CountryInformationResult,
+  type ListCountryInformationQuery as ListCountryQuery,
+  listCountryInformationQuery,
+} from "./application/list-country-information/list-country-information-query";
+export { validateCountryInformationRequest } from "./application/list-country-information/list-country-information-query-validator";
+export { CityPopulation } from "./domain/entities/city-population";
+export {
+  Coordinates,
+  CountryFacts as CountryDetail,
+  Currency,
+  MapDetails,
+} from "./domain/entities/country-facts";
+export { NationalDish } from "./domain/entities/national-dish";
+export { makeConfig } from "./infrastructure/config";
+export type { Dependencies } from "./infrastructure/dependencies";
+export { makeDependencies } from "./infrastructure/dependencies";
+export { makeLogger } from "./infrastructure/logger";
+export type { RdsClient } from "./infrastructure/rds";
+export { makeRdsClient } from "./infrastructure/rds";
+export { makeNationalDishRepository } from "./infrastructure/repositories/national-dish-repository";
 // Infrastructure
-export { RestCountriesApiRepository } from './infrastructure/repositories/rest-countries-api-repository';
-export { PopulationApiRepository } from './infrastructure/repositories/population-api-repository';
-export { CountryDatabaseBRepository as PostgresCountryDataRepository } from './infrastructure/repositories/country-database-repository';
-export { makeDependencies } from './infrastructure/dependencies';
-export type { Dependencies } from './infrastructure/dependencies';
-export { makeConfig } from './infrastructure/config';
-export type { ApplicationConfig } from './infrastructure/config';
-export { rdsClient } from './infrastructure/repositories/db/rds_client';
-export type { DbClient } from './infrastructure/repositories/db/rds_client';
-
-// API Layer
-export { listCountryInformationHandler } from './api/list-country-information';
-
-// Types
-export type {
-  APIGatewayEvent,
-  APIGatewayProxyResult,
-  ListCountryInformationQuery,
-  CountryInformationResponse,
-  ErrorResponse,
-} from './types';
+export { makeCountryRestApiService } from "./infrastructure/services/country-rest-api-service";
+export { makePopulationApiService } from "./infrastructure/services/population-api-service";

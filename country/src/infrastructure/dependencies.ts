@@ -1,76 +1,44 @@
-import { ListCountryInformation } from '@application/list-country-information';
-import type {
-  CountryApiRepositoryInterface,
-  CountryDatabaseRepositoryInterface,
-  PopulationApiRepositoryInterface,
-} from '@application/interfaces/repositories';
-import { RestCountriesApiRepository } from './repositories/rest-countries-api-repository';
-import { PopulationApiRepository } from './repositories/population-api-repository';
-import { CountryDatabaseBRepository } from './repositories/country-database-repository';
-import { rdsClient, type DbClient } from './repositories/db/rds_client';
-import { makeConfig, type ApplicationConfig } from './config';
+import type * as Interfaces from "@application/interfaces";
+import { makeConfig } from "./config";
+import { makeLogger } from "./logger";
+import type { RdsClient } from "./rds";
+import { makeRdsClient } from "./rds";
+import { makeNationalDishRepository } from "./repositories/national-dish-repository";
+import { makeCountryRestApiService } from "./services/country-rest-api-service";
+import { makePopulationApiService } from "./services/population-api-service";
 
-export interface Dependencies {
-  config: ApplicationConfig;
-  rdsClient: DbClient;
-  countryApiRepository: CountryApiRepositoryInterface;
-  populationApiRepository: PopulationApiRepositoryInterface;
-  countryDataRepository: CountryDatabaseRepositoryInterface;
-  listCountryInformationUseCase: ListCountryInformation;
-}
+export type Dependencies = {
+  logger: Interfaces.Logger;
+  config: Interfaces.ApplicationConfig;
+  rdsClient: RdsClient;
+  countryApiRepository: Interfaces.CountryRestApiService;
+  populationApiRepository: Interfaces.PopulationApiService;
+  countryDataRepository: Interfaces.NationalDishRepository;
+};
 
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
-  const dbClient = await makeRdsClient(config);
-  const countryApiRepository = makeCountryApiRepository(config);
-  const populationApiRepository = makePopulationApiRepository(config);
-  const countryDataRepository = makeCountryDataRepository(dbClient);
-  const listCountryInformationUseCase = makeListCountryInformationUseCase(
-    countryApiRepository,
-    countryDataRepository,
-    populationApiRepository,
-  );
+  const logger = makeLogger();
+  const rdsClient = await makeRdsClient(config);
+  const countryApiRepository = makeCountryRestApiService({
+    config,
+    logger,
+  });
+  const populationApiRepository = makePopulationApiService({
+    config,
+    logger,
+  });
+  const countryDataRepository = makeNationalDishRepository({
+    rdsClient,
+    logger,
+  });
 
   return {
+    logger,
     config,
-    rdsClient: dbClient,
+    rdsClient,
     countryApiRepository,
     populationApiRepository,
     countryDataRepository,
-    listCountryInformationUseCase,
   };
-}
-
-async function makeRdsClient(config: ApplicationConfig): Promise<DbClient> {
-  try {
-    return await rdsClient({
-      applicationName: config.service.name,
-      connectionString: config.database.connectionString,
-      queryTimeout: config.database.queryTimeout,
-      connectionTimeout: config.database.connectionTimeout,
-      useSSl: config.database.useSSL,
-    });
-  } catch (error) {
-    throw new Error(`Database connection failed: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-function makeCountryApiRepository(config: ApplicationConfig): CountryApiRepositoryInterface {
-  return new RestCountriesApiRepository(config.api.restCountriesUrl);
-}
-
-function makePopulationApiRepository(config: ApplicationConfig): PopulationApiRepositoryInterface {
-  return new PopulationApiRepository(config.api.populationApiUrl);
-}
-
-function makeCountryDataRepository(dbClient: DbClient): CountryDatabaseRepositoryInterface {
-  return new CountryDatabaseBRepository(dbClient);
-}
-
-function makeListCountryInformationUseCase(
-  countryApiRepository: CountryApiRepositoryInterface,
-  countryDataRepository: CountryDatabaseRepositoryInterface,
-  populationApiRepository: PopulationApiRepositoryInterface,
-): ListCountryInformation {
-  return new ListCountryInformation(countryApiRepository, countryDataRepository, populationApiRepository);
 }

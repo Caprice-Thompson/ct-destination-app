@@ -18,7 +18,7 @@ export type Dependencies = {
 
 export async function makeDependencies(): Promise<Dependencies> {
   const config = await makeConfig();
-  const logger = makeLogger(config);
+  const logger = makeLogger();
   const rdsClient = await makeRdsClient(config);
   const usgsService = makeUsgsService({ config, logger });
   const earthquakeRepository = makeEarthquakeRepository({ config, logger });

@@ -1,14 +1,10 @@
-import { CountryFacts } from '@domain/entities/country-facts';
-import { CityPopulation } from '@domain/entities/city-population';
-import { NationalDish } from '@domain/entities/national-dish';
+import type { CityPopulation } from "@domain/entities/city-population";
+import type { NationalDish } from "@domain/entities/national-dish";
 
-export interface CountryApiRepositoryInterface {
-  getCountryFacts(countryName: string): Promise<CountryFacts | null>;
-}
-
-export interface CountryDatabaseRepositoryInterface {
+export interface NationalDishRepository {
   getNationalDish(countryName: string): Promise<NationalDish | null>;
 }
-export interface PopulationApiRepositoryInterface {
-  getTopCityPopulations(countryName: string): Promise<CityPopulation[]>;
+
+export interface CityPopulationRepository {
+  getCityPopulations(countryName: string): Promise<CityPopulation[]>;
 }
