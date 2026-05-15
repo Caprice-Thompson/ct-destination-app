@@ -7,6 +7,16 @@ import {
   createApiHandler,
 } from "../../../src/api/wrappers/api-handler";
 
+jest.mock("@shared/utils/src/tracing", () => ({
+  withTraceLogging: <I, O>(
+    handler: (event?: I, context?: unknown) => Promise<O>,
+  ) => handler,
+}));
+
+jest.mock("@infrastructure/dependencies", () => ({
+  makeDependencies: jest.fn(),
+}));
+
 function buildTestDependencies(): Dependencies {
   return {
     tourismInformationRepository: {
