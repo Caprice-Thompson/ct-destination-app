@@ -3,8 +3,8 @@ import type { DbClient } from "../../../shared/db/src/rds_client";
 import { makeConfig } from "./config";
 import { makeLogger } from "./logger";
 import { makeRdsClient } from "./rds";
-import { makeCoordinatesRepository } from "./services/coordinates-service";
 import { makeEarthquakeRepository } from "./repositories/eq-repo";
+import { makeCoordinatesRepository } from "./services/coordinates-service";
 import { makeUsgsService } from "./services/usgs-service";
 
 export type Dependencies = {

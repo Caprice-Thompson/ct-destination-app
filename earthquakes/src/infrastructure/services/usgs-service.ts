@@ -11,6 +11,7 @@ interface UsgsApiEarthquakeProperties {
   time: number;
   type: string;
   tsunami: number;
+  title: string;
 }
 
 interface UsgsApiEarthquakeFeature {
@@ -36,8 +37,11 @@ export function makeUsgsService({
   logger,
 }: Pick<Dependencies, "config" | "logger">): UsgsService {
   const buildUrl = (params: {
+    latitude: number;
+    longitude: number;
     startTime: string;
     endTime: string;
+    maxRadiusKm?: number;
     minMagnitude?: number;
     limit?: number;
   }): string => {
@@ -46,6 +50,10 @@ export function makeUsgsService({
     url.searchParams.set("format", "geojson");
     url.searchParams.set("starttime", params.startTime);
     url.searchParams.set("endtime", params.endTime);
+    url.searchParams.set("latitude", `${params.latitude}`);
+    url.searchParams.set("longitude", `${params.longitude}`);
+    if (params.maxRadiusKm)
+      url.searchParams.set("maxradiuskm", `${params.maxRadiusKm}`);
     if (params.minMagnitude)
       url.searchParams.set("minmagnitude", `${params.minMagnitude}`);
     if (params.limit) url.searchParams.set("limit", `${params.limit}`);
@@ -54,8 +62,11 @@ export function makeUsgsService({
   };
 
   const fetchEarthquakes = async (params: {
+    latitude: number;
+    longitude: number;
     startTime: string;
     endTime: string;
+    maxRadiusKm?: number;
     minMagnitude?: number;
     limit?: number;
   }): Promise<Earthquake[]> => {
@@ -85,7 +96,7 @@ export function makeUsgsService({
       const p = feature.properties;
       const eqProps: EarthquakeProperties = {
         eventId: feature.id,
-        name: p.place,
+        name: p.title,
         magnitude: p.mag,
         date: new Date(p.time).toISOString(),
         type: p.type,
@@ -102,8 +113,11 @@ export function makeUsgsService({
 
   return {
     async listEarthquakes(params: {
+      latitude: number;
+      longitude: number;
       startTime: string;
       endTime: string;
+      maxRadiusKm?: number;
       minMagnitude?: number;
       limit?: number;
     }): Promise<Earthquake[]> {
