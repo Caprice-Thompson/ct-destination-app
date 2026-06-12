@@ -42,20 +42,147 @@ const europeanCountries: string[] = [
   "Spain",
   "Sweden",
   "Switzerland",
+  "Turkey",
   "Ukraine",
   "United Kingdom",
   "Vatican City",
 ];
 
+const usStateAbbreviations = new Set([
+  "AL",
+  "AK",
+  "AZ",
+  "AR",
+  "CA",
+  "CO",
+  "CT",
+  "DE",
+  "FL",
+  "GA",
+  "HI",
+  "ID",
+  "IL",
+  "IN",
+  "IA",
+  "KS",
+  "KY",
+  "LA",
+  "ME",
+  "MD",
+  "MA",
+  "MI",
+  "MN",
+  "MS",
+  "MO",
+  "MT",
+  "NE",
+  "NV",
+  "NH",
+  "NJ",
+  "NM",
+  "NY",
+  "NC",
+  "ND",
+  "OH",
+  "OK",
+  "OR",
+  "PA",
+  "RI",
+  "SC",
+  "SD",
+  "TN",
+  "TX",
+  "UT",
+  "VT",
+  "VA",
+  "WA",
+  "WV",
+  "WI",
+  "WY",
+  "DC",
+  "PR",
+  "VI",
+  "GU",
+  "AS",
+  "MP",
+]);
+
+const usStateNames = new Set([
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "New York",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
+]);
+
 export function findCountryInString(place: string): string {
-  const normalizedPlace = place.toLowerCase();
+  const lastCommaIndex = place.lastIndexOf(",");
+
+  if (lastCommaIndex !== -1) {
+    const suffix = place.slice(lastCommaIndex + 1).trim();
+
+    if (usStateAbbreviations.has(suffix) || usStateNames.has(suffix)) {
+      return "United States";
+    }
+
+    for (const country of europeanCountries) {
+      if (country.toLowerCase() === suffix.toLowerCase()) {
+        return country;
+      }
+    }
+  }
 
   for (const country of europeanCountries) {
     const regex = new RegExp(`\\b${country}\\b`, "i");
-
-    if (regex.test(normalizedPlace)) {
+    if (regex.test(place)) {
       return country;
     }
   }
+
   return "";
 }

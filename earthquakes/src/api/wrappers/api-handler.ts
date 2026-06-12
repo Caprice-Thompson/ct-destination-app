@@ -1,8 +1,8 @@
+import { ValidationException } from "@application/common/exceptions";
 import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { ValidationException } from "@application/common/exceptions";
 import {
   type HackedLambdaContext,
   withTraceLogging,
