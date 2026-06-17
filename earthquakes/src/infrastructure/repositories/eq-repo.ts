@@ -21,6 +21,19 @@ type EarthquakeDBItem = {
   country: string;
 };
 
+function mapDbItemToEarthquake(item: EarthquakeDBItem): Earthquake {
+  return new Earthquake({
+    eventId: item.eventId,
+    name: item.name,
+    magnitude: item.magnitude,
+    date: item.date,
+    type: item.type,
+    tsunami: item.tsunami,
+    place: item.place,
+    country: item.country,
+  });
+}
+
 export function makeEarthquakeRepository({
   config,
   logger,
@@ -47,19 +60,7 @@ export function makeEarthquakeRepository({
       return [];
     }
 
-    return response.Items.map(
-      (item) =>
-        new Earthquake({
-          eventId: item.eventId,
-          name: item.name,
-          magnitude: item.magnitude,
-          date: item.date,
-          type: item.type,
-          tsunami: item.tsunami,
-          place: item.place,
-          country: item.country,
-        }),
-    );
+    return (response.Items as EarthquakeDBItem[]).map(mapDbItemToEarthquake);
   };
 
   const batchSaveEarthquakes = async (

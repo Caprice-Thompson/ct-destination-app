@@ -22,6 +22,7 @@ const USE_MOCK_DATA = process.env.USE_MOCK_DATA === "true";
 
 type LambdaEvent = {
   queryStringParameters: Record<string, string>;
+  headers?: Record<string, string>;
 };
 
 type LambdaResponse = {
@@ -229,6 +230,42 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/api/notifications", async (req: Request, res: Response) => {
+  try {
+    const authorization = req.header("authorization");
+
+    if (!authorization) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    if (USE_MOCK_DATA && mockData) {
+      return res.status(200).json({
+        newEvents: [],
+        lastChecked: new Date().toISOString(),
+      });
+    }
+
+    const handler = await importBuiltHandler(
+      "../notifications/dist/get-notifications.js",
+    );
+
+    const event = {
+      queryStringParameters: {},
+      headers: { authorization },
+    };
+
+    const result = await handler(event);
+
+    res.status(result.statusCode).json(JSON.parse(result.body));
+  } catch (error) {
+    console.error("Error in /api/notifications:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
 app.get("/api/weather", async (req: Request, res: Response) => {
   try {
     const { countryName, month } = req.query;
@@ -287,6 +324,7 @@ app.listen(PORT, () => {
   console.log(`   - GET /api/tourism?countryName=Spain`);
   console.log(`   - GET /api/earthquakes?countryName=Spain`);
   console.log(`   - GET /api/earthquakes/statistics?countryName=Spain&month=1`);
+  console.log(`   - GET /api/notifications`);
   console.log(`   - GET /api/weather?countryName=Spain&month=1`);
   console.log(`   - GET /health`);
 });
