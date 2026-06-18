@@ -4,7 +4,7 @@ import type {
   UserRepository,
 } from "@application/interfaces/repositories";
 import type { NotificationResponse } from "@domain/entities/notification-response";
-import { validateGetNewEarthquakesRequest } from "./get-new-earthquakes-validator";
+import { validateGetNewEarthquakesRequest } from "./get-real-time-earthquakes-validator";
 
 export type GetNewEarthquakesQuery = Readonly<{
   userId: string;
@@ -26,7 +26,8 @@ export async function getNewEarthquakesUseCase(
 
   logger.info("Starting get new earthquakes notification query", { userId });
 
-  const lastChecked = await userRepository.getLastNotificationsCheckedAt(userId);
+  const lastChecked =
+    await userRepository.getLastNotificationsCheckedAt(userId);
   const baseline = lastChecked ?? now;
   const newEvents = await earthquakeEventsRepository.findSince(baseline);
 

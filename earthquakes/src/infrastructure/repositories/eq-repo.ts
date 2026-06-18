@@ -5,6 +5,7 @@ import {
   BatchWriteCommand,
   DynamoDBDocumentClient,
   QueryCommand,
+  ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Earthquake } from "@domain/entities/earthquake";
 import type { Dependencies } from "@infrastructure/dependencies";
@@ -61,6 +62,40 @@ export function makeEarthquakeRepository({
     }
 
     return (response.Items as EarthquakeDBItem[]).map(mapDbItemToEarthquake);
+  };
+
+  const findSince = async (timestamp: Date): Promise<Earthquake[]> => {
+    const tableName = config.tables.earthquakes;
+    const since = timestamp.getTime();
+    const items: EarthquakeDBItem[] = [];
+    let exclusiveStartKey: Record<string, unknown> | undefined;
+
+    do {
+      const command = new ScanCommand({
+        TableName: tableName,
+        FilterExpression: "#time > :since AND #type = :earthquake",
+        ExpressionAttributeNames: {
+          "#time": "time",
+          "#type": "type",
+        },
+        ExpressionAttributeValues: {
+          ":since": since,
+          ":earthquake": "earthquake",
+        },
+        ExclusiveStartKey: exclusiveStartKey,
+      });
+
+      const response = await docClient.send(command);
+      items.push(...((response.Items ?? []) as EarthquakeDBItem[]));
+      exclusiveStartKey = response.LastEvaluatedKey;
+    } while (exclusiveStartKey);
+
+    logger.debug("Found earthquakes since timestamp", {
+      since: timestamp.toISOString(),
+      count: items.length,
+    });
+
+    return items.sort((a, b) => a.time - b.time).map(mapDbItemToEarthquake);
   };
 
   const batchSaveEarthquakes = async (
@@ -140,6 +175,7 @@ export function makeEarthquakeRepository({
 
   return {
     getEarthquakesByCountry,
+    findSince,
     batchSaveEarthquakes,
   } as EarthquakeRepository;
 }

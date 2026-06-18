@@ -1,4 +1,4 @@
-import { getNewEarthquakesUseCase } from "@application/get-new-earthquakes/get-new-earthquakes-use-case";
+import { getNewEarthquakesUseCase } from "@application/get-new-earthquakes/get-real-time-earthquakes";
 import type { EarthquakeEvent } from "@domain/entities/earthquake-event";
 
 describe("getNewEarthquakesUseCase", () => {
@@ -61,7 +61,7 @@ describe("getNewEarthquakesUseCase", () => {
     });
   });
 
-  it("initializes first-time users without returning historical events", async () => {
+  it("initialises first-time users without returning historical events", async () => {
     const dependencies = buildDependencies();
     const now = new Date("2026-06-17T12:00:00.000Z");
 

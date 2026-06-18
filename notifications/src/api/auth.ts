@@ -15,8 +15,10 @@ function readAuthorizationHeader(event: APIGatewayProxyEvent): string | null {
     null
   );
 }
-
-export function resolveAuthenticatedUserId(event: APIGatewayProxyEvent): string {
+// does not verify signature with supabase secrets or JWKS
+export function resolveAuthenticatedUserId(
+  event: APIGatewayProxyEvent,
+): string {
   const authorization = readAuthorizationHeader(event);
 
   if (!authorization?.startsWith("Bearer ")) {

@@ -184,6 +184,37 @@ app.get("/api/earthquakes", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/api/earthquakes/since", async (req: Request, res: Response) => {
+  try {
+    const { since } = req.query;
+
+    if (!since || typeof since !== "string") {
+      return res.status(400).json({
+        error: "Missing query parameter",
+        message: "since is required",
+      });
+    }
+
+    const handler = await importBuiltHandler(
+      "../earthquakes/dist/get-earthquakes-since.js",
+    );
+
+    const event = {
+      queryStringParameters: { since },
+    };
+
+    const result = await handler(event);
+
+    res.status(result.statusCode).json(JSON.parse(result.body));
+  } catch (error) {
+    console.error("Error in /api/earthquakes/since:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
 app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
   try {
     const { countryName, month } = req.query;
@@ -246,7 +277,7 @@ app.get("/api/notifications", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../notifications/dist/get-notifications.js",
+      "../notifications/dist/get-eq-notifications.js",
     );
 
     const event = {
@@ -323,6 +354,7 @@ app.listen(PORT, () => {
   console.log(`   - GET /api/countries?countryName=Spain`);
   console.log(`   - GET /api/tourism?countryName=Spain`);
   console.log(`   - GET /api/earthquakes?countryName=Spain`);
+  console.log(`   - GET /api/earthquakes/since?since=<ISO-8601-timestamp>`);
   console.log(`   - GET /api/earthquakes/statistics?countryName=Spain&month=1`);
   console.log(`   - GET /api/notifications`);
   console.log(`   - GET /api/weather?countryName=Spain&month=1`);
