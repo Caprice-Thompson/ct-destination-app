@@ -68,12 +68,9 @@ export interface EarthquakeAPIResponse {
 
 export interface EarthquakeNotificationData {
   id: string;
-  eventId: string;
   magnitude: number;
-  location?: string;
+  location: string;
   occurredAt: string;
-  date: string;
-  place: string;
 }
 
 export interface NotificationResponse {

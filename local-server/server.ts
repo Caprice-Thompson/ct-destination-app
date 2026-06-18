@@ -63,6 +63,12 @@ const mockData = USE_MOCK_DATA
       weather: JSON.parse(
         fs.readFileSync(path.join(__dirname, "mocks/weather.json"), "utf-8"),
       ),
+      notifications: JSON.parse(
+        fs.readFileSync(
+          path.join(__dirname, "mocks/notifications.json"),
+          "utf-8",
+        ),
+      ),
     }
   : null;
 
@@ -270,10 +276,7 @@ app.get("/api/notifications", async (req: Request, res: Response) => {
     }
 
     if (USE_MOCK_DATA && mockData) {
-      return res.status(200).json({
-        newEvents: [],
-        lastChecked: new Date().toISOString(),
-      });
+      return res.status(200).json(mockData.notifications);
     }
 
     const handler = await importBuiltHandler(

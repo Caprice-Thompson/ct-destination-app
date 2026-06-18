@@ -3,41 +3,28 @@ import { useEffect, useState } from "react";
 import { AppRoute } from "./common/enums";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabase";
-import { fetchEarthquakeNotifications } from "./pages/api";
+import {
+  fetchEarthquakeNotifications,
+  type EarthquakeNotificationData,
+} from "./pages/api";
 import { Navbar } from "./components/NavBar";
 import type { NavButton } from "./components/NavBar";
 
 const NOTIFICATION_POLL_INTERVAL_MS = 60_000;
-const TOAST_VISIBLE_MS = 8_000;
-
-type EarthquakeToast = {
-  id: string;
-  message: string;
-};
 
 function App() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const routerState = useRouterState();
   const isLandingPage = routerState.location.pathname === AppRoute.Landing;
-  const [toasts, setToasts] = useState<EarthquakeToast[]>([]);
+  const [notifications, setNotifications] = useState<
+    EarthquakeNotificationData[]
+  >([]);
 
   useEffect(() => {
-    if (!user) {
-      setToasts([]);
-      return;
-    }
+    if (!user) return;
 
     let isActive = true;
-
-    const enqueueToast = (toast: EarthquakeToast) => {
-      setToasts((current) => [...current, toast]);
-      window.setTimeout(() => {
-        setToasts((current) =>
-          current.filter((currentToast) => currentToast.id !== toast.id),
-        );
-      }, TOAST_VISIBLE_MS);
-    };
 
     const fetchNewAlerts = async () => {
       try {
@@ -52,17 +39,14 @@ function App() {
 
         const { newEvents } = await fetchEarthquakeNotifications(accessToken);
 
-        if (!isActive) {
+        if (!isActive || newEvents.length === 0) {
           return;
         }
 
-        newEvents.forEach((earthquake) => {
-          enqueueToast({
-            id: `${earthquake.id}-${Date.now()}`,
-            message: `New Earthquake: M${earthquake.magnitude}${
-              earthquake.location ? ` near ${earthquake.location}` : ""
-            }`,
-          });
+        setNotifications((current) => {
+          const existingIds = new Set(current.map((n) => n.id));
+          const fresh = newEvents.filter((e) => !existingIds.has(e.id));
+          return fresh.length > 0 ? [...fresh, ...current] : current;
         });
       } catch (error) {
         console.error("Failed to fetch earthquake notifications", error);
@@ -77,8 +61,17 @@ function App() {
     return () => {
       isActive = false;
       window.clearInterval(interval);
+      setNotifications([]);
     };
   }, [user]);
+
+  const dismissNotification = (id: string) => {
+    setNotifications((current) => current.filter((n) => n.id !== id));
+  };
+
+  const dismissAllNotifications = () => {
+    setNotifications([]);
+  };
 
   const navButtons: NavButton[] = user
     ? [
@@ -119,22 +112,14 @@ function App() {
           buttons={navButtons}
           logoText="Destination App"
           onLogoClick={() => navigate({ to: AppRoute.Landing })}
+          notifications={user ? notifications : undefined}
+          onDismissNotification={user ? dismissNotification : undefined}
+          onDismissAllNotifications={user ? dismissAllNotifications : undefined}
         />
       )}
       <main>
         <Outlet />
       </main>
-      <div className="fixed right-4 top-24 z-50 space-y-3">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="max-w-sm rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900 shadow-lg dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-100"
-            role="status"
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
