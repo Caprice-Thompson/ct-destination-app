@@ -14,6 +14,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     DB_CONNECTION_TIMEOUT: z.string().optional(),
     DB_USE_SSL: z.string().optional(),
     REST_COUNTRIES_API_URL: z.string().optional(),
+    REST_COUNTRIES_AUTHORIZATION: z.string().optional(),
     POPULATION_API_URL: z.string().optional(),
     SERVICE_NAME: z.string().optional(),
   });
@@ -29,6 +30,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     },
     api: {
       restCountriesUrl: parsedEnv.REST_COUNTRIES_API_URL ?? "",
+      restCountriesAuthorization: parsedEnv.REST_COUNTRIES_AUTHORIZATION ?? "",
       populationApiUrl: parsedEnv.POPULATION_API_URL ?? "",
     },
   };

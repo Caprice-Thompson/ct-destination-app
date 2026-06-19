@@ -12,6 +12,7 @@ export interface CountryInformationResult {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
+    timezone: string[];
     currency: {
       name: string;
       symbol: string;
@@ -83,6 +84,7 @@ export async function listCountryInformationQuery(
       capitalCityName: countryFacts.capital ?? "",
       flagUrl: countryFacts.flag ?? "",
       languages: countryFacts.languageList,
+      timezone: countryFacts.timezones,
       currency: {
         name: countryFacts.currencyInfo.name,
         symbol: countryFacts.currencyInfo.symbol,

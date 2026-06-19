@@ -20,6 +20,7 @@ export interface ApplicationConfig {
   urls: {
     usgsApi: string;
     restCountriesApiUrl: string;
+    restCountriesAuthorization: string;
   };
 }
 
@@ -33,6 +34,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     DYNAMODB_EARTHQUAKES_TABLE: z.string().default(""),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
+    REST_COUNTRIES_AUTHORIZATION: z.string(),
     SERVICE_NAME: z.string(),
   });
 
@@ -60,6 +62,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     urls: {
       usgsApi: parsedEnv.EARTHQUAKES_API_URL,
       restCountriesApiUrl: parsedEnv.REST_COUNTRIES_API_URL,
+      restCountriesAuthorization: parsedEnv.REST_COUNTRIES_AUTHORIZATION,
     },
   };
 }

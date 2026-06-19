@@ -39,7 +39,14 @@ export function makeEarthquakeRepository({
   config,
   logger,
 }: Pick<Dependencies, "config" | "logger">): EarthquakeRepository {
-  const ddbClient = new DynamoDBClient({});
+  const ddbClient = new DynamoDBClient({
+    region: config.aws.region,
+    credentials: {
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+    },
+    ...(process.env.AWS_ENDPOINT_URL && { endpoint: process.env.AWS_ENDPOINT_URL }),
+  });
   const docClient = DynamoDBDocumentClient.from(ddbClient);
 
   const getEarthquakesByCountry = async (

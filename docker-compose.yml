@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: destination_db
+      POSTGRES_USER: destination-user
+      POSTGRES_PASSWORD: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U destination-user -d destination_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+
+  dynamodb-setup:
+    image: amazon/aws-cli:latest
+    depends_on:
+      - dynamodb-local
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: eu-west-2
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for DynamoDB Local to be ready..."
+        until aws dynamodb list-tables --endpoint-url http://dynamodb-local:8000 > /dev/null 2>&1; do
+          sleep 2
+        done
+        echo "DynamoDB Local is ready. Creating tables..."
+        aws dynamodb create-table \
+          --table-name historical_earthquakes \
+          --attribute-definitions \
+            AttributeName=countryName,AttributeType=S \
+            AttributeName=time,AttributeType=N \
+          --key-schema \
+            AttributeName=countryName,KeyType=HASH \
+            AttributeName=time,KeyType=RANGE \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --endpoint-url http://dynamodb-local:8000 2>&1 || echo "historical_earthquakes already exists, skipping"
+        aws dynamodb create-table \
+          --table-name weather_data \
+          --attribute-definitions \
+            AttributeName=countryName,AttributeType=S \
+            AttributeName=month,AttributeType=S \
+          --key-schema \
+            AttributeName=countryName,KeyType=HASH \
+            AttributeName=month,KeyType=RANGE \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --endpoint-url http://dynamodb-local:8000 2>&1 || echo "weather_data already exists, skipping"
+        echo "DynamoDB setup complete"
+    restart: on-failure
+
+volumes:
+  postgres_data:

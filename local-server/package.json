@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "cd ../country && npm run build && cd ../tourism && npm run build && cd ../earthquakes && npm run build && cd ../weather && npm run build",
+    "build": "cd ../country && npm run build && cd ../tourism && npm run build && cd ../earthquakes && npm run build && cd ../weather && npm run build && cd ../notifications && npm run build",
     "dev": "npm run build && nodemon",
     "start": "npm run build && tsx --tsconfig ./tsconfig.json server.ts",
     "typecheck": "tsc --noEmit"

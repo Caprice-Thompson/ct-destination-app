@@ -30,6 +30,7 @@ export class CountryFacts {
   private readonly currency: Currency;
   private readonly coordinates: Coordinates;
   private readonly maps: MapDetails | null;
+  private readonly timezone: string[];
 
   constructor(details: {
     countryCode: string;
@@ -40,6 +41,7 @@ export class CountryFacts {
     currency: Currency;
     coordinates: Coordinates;
     maps: MapDetails | null;
+    timezone: string[];
   }) {
     this.countryCode = details.countryCode;
     this.countryName = details.countryName;
@@ -49,6 +51,7 @@ export class CountryFacts {
     this.currency = details.currency;
     this.coordinates = details.coordinates;
     this.maps = details.maps;
+    this.timezone = details.timezone;
   }
 
   get code(): string {
@@ -83,6 +86,10 @@ export class CountryFacts {
     return this.maps;
   }
 
+  get timezones(): string[] {
+    return [...this.timezone];
+  }
+
   toJSON() {
     return {
       countryCode: this.countryCode,
@@ -102,6 +109,7 @@ export class CountryFacts {
         googleMaps: this.maps?.googleMaps,
         openStreetMaps: this.maps?.openStreetMaps,
       },
+      timezone: this.timezone,
     };
   }
 }

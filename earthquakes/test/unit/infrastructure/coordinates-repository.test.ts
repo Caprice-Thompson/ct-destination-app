@@ -16,6 +16,7 @@ describe("makeCoordinatesRepository", () => {
     urls: {
       usgsApi: "https://example.invalid/fdsnws/event/1/query",
       restCountriesApiUrl: "https://example.invalid/v3.1",
+      restCountriesAuthorization: "test",
     },
   };
 

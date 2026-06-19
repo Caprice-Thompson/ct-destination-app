@@ -12,6 +12,8 @@ import express, {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables from .env.local file
+
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 dotenv.config();
 

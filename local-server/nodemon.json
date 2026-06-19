@@ -4,7 +4,8 @@
     "../country/src/**/*.ts",
     "../tourism/src/**/*.ts",
     "../earthquakes/src/**/*.ts",
-    "../weather/src/**/*.ts"
+    "../weather/src/**/*.ts",
+    "../notifications/src/**/*.ts"
   ],
   "ext": "ts",
   "ignore": [

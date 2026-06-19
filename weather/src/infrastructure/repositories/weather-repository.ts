@@ -27,6 +27,7 @@ export function makeWeatherRepository({
       secretAccessKey: config.aws.secretAccessKey,
       sessionToken: config.aws.sessionToken,
     },
+    ...(process.env.AWS_ENDPOINT_URL && { endpoint: process.env.AWS_ENDPOINT_URL }),
   });
   const docClient = DynamoDBDocumentClient.from(ddbClient);
 

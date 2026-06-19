@@ -17,5 +17,6 @@ export interface ApplicationConfig {
   urls: {
     usgsApi: string;
     restCountriesApiUrl: string;
+    restCountriesAuthorization: string;
   };
 }
