@@ -1,4 +1,4 @@
-import { getNewEarthquakesUseCase } from "@application/get-new-earthquakes/get-real-time-earthquakes";
+import { getNewEarthquakes } from "@application/get-new-earthquakes/get-real-time-earthquakes";
 import type { Dependencies } from "@infrastructure/dependencies";
 import { resolveAuthenticatedUserId } from "./auth";
 import { type APIGatewayProxyEvent, createApiHandler } from "./wrappers";
@@ -9,7 +9,7 @@ export function getNotificationsHandler(
 ) {
   const userId = resolveAuthenticatedUserId(event);
 
-  return getNewEarthquakesUseCase(
+  return getNewEarthquakes(
     { userId },
     {
       earthquakeEventsRepository: dependencies.earthquakeEventsRepository,

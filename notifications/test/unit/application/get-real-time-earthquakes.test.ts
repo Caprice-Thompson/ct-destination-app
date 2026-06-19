@@ -1,4 +1,4 @@
-import { getNewEarthquakesUseCase } from "@application/get-new-earthquakes/get-real-time-earthquakes";
+import { getNewEarthquakes } from "@application/get-new-earthquakes/get-real-time-earthquakes";
 import type { EarthquakeEvent } from "@domain/entities/earthquake-event";
 
 describe("getNewEarthquakesUseCase", () => {
@@ -44,7 +44,7 @@ describe("getNewEarthquakesUseCase", () => {
     );
     dependencies.earthquakeEventsRepository.findSince.mockResolvedValue(events);
 
-    const result = await getNewEarthquakesUseCase(
+    const result = await getNewEarthquakes(
       { userId: "user-1" },
       dependencies,
     );
@@ -70,7 +70,7 @@ describe("getNewEarthquakesUseCase", () => {
     );
     dependencies.earthquakeEventsRepository.findSince.mockResolvedValue([]);
 
-    const result = await getNewEarthquakesUseCase(
+    const result = await getNewEarthquakes(
       { userId: "user-2" },
       dependencies,
     );

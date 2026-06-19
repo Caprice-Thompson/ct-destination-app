@@ -16,7 +16,7 @@ export type GetNewEarthquakesDependencies = Readonly<{
   logger: Logger;
 }>;
 
-export async function getNewEarthquakesUseCase(
+export async function getNewEarthquakes(
   query: GetNewEarthquakesQuery,
   dependencies: GetNewEarthquakesDependencies,
 ): Promise<NotificationResponse> {
