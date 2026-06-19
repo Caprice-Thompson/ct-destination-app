@@ -54,6 +54,7 @@ describe("get-most-recent-earthquakes handler", () => {
       },
       earthquakeRepository: {
         getEarthquakesByCountry: jest.fn(),
+        findSince: jest.fn(),
         batchSaveEarthquakes: jest.fn(),
       },
       usgsService: {

@@ -66,6 +66,18 @@ export interface EarthquakeAPIResponse {
   countryName: string;
 }
 
+export interface EarthquakeNotificationData {
+  id: string;
+  magnitude: number;
+  location: string;
+  occurredAt: string;
+}
+
+export interface NotificationResponse {
+  newEvents: EarthquakeNotificationData[];
+  lastChecked: string;
+}
+
 export interface EarthquakeStatisticsResponse {
   totalEarthquakes: number;
   monthlyEarthquakePercentage: number;
@@ -122,6 +134,22 @@ export const fetchEarthquakeStatistics = async (
   return getJson<EarthquakeStatisticsResponse>(
     `/api/earthquakes/statistics?countryName=${encodeURIComponent(countryName)}&month=${encodeURIComponent(month)}`,
   );
+};
+
+export const fetchEarthquakeNotifications = async (
+  accessToken: string,
+): Promise<NotificationResponse> => {
+  const response = await fetch("/api/notifications", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json() as Promise<NotificationResponse>;
 };
 
 export const fetchWeatherSummary = async (

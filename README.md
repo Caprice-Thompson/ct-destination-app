@@ -10,7 +10,7 @@ The application consists of four Lambda microservices:
 Retrieves comprehensive country information from REST Countries API and local database.
 - Endpoint: `GET /country`
 - Parameters: `countryName`
-- Returns: Country details, capital population, national dish
+- Returns: Country details, city populations, national dish details
 
 [Read more](./country/README.md)
 

@@ -1,0 +1,32 @@
+{
+  "name": "notifications",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "esbuild src/api/*.ts --minify --bundle --target=es2020 --platform=node --sourcemap --outdir=dist --external:pg-native",
+    "lint:fix": "biome check --write .",
+    "lint": "biome lint --write .",
+    "format": "biome format --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "pg": "^8.16.3",
+    "winston": "^3.19.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.15",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.5",
+    "@types/pg": "^8.16.0",
+    "esbuild": "^0.27.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -13,6 +13,7 @@ export interface EarthquakeQueryParams {
 
 export interface EarthquakeRepository {
   getEarthquakesByCountry(countryName: string): Promise<Earthquake[]>;
+  findSince(timestamp: Date): Promise<Earthquake[]>;
   batchSaveEarthquakes(earthquakes: Earthquake[]): Promise<number>;
 }
 
