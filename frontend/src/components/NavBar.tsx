@@ -3,6 +3,8 @@ import { useRef, useEffect, useState } from "react";
 import { Button } from "./Button";
 import { NotificationPanel } from "./NotificationPanel";
 import type { EarthquakeNotificationData } from "../pages/api";
+import { FaRegFolder } from "react-icons/fa";
+import { BookmarksBar } from "./BookmarkBar";
 
 export interface NavButton {
   label: string;
@@ -30,18 +32,28 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  const bookmarksRef = useRef<HTMLDivElement>(null);
 
-  // Close panel when clicking outside
+  const handleFolderClick = () => {
+    setBookmarksOpen(!bookmarksOpen);
+  };
+  // Close panels when clicking outside
   useEffect(() => {
-    if (!panelOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         setPanelOpen(false);
       }
+      if (
+        bookmarksRef.current &&
+        !bookmarksRef.current.contains(e.target as Node)
+      ) {
+        setBookmarksOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [panelOpen]);
+  }, []);
 
   const getButtonStyles = (
     variant: NavButton["variant"] = "primary",
@@ -135,6 +147,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {button.label}
               </Button>
             ))}
+            <div className="relative" ref={bookmarksRef}>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={() => {
+                  handleFolderClick();
+                }}
+              >
+                <FaRegFolder />
+              </Button>
+              <BookmarksBar
+                isOpen={bookmarksOpen}
+                onClose={() => setBookmarksOpen(false)}
+              />
+            </div>
           </div>
         </div>
       </div>

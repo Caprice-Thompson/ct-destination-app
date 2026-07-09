@@ -76,11 +76,6 @@ function App() {
   const navButtons: NavButton[] = user
     ? [
         {
-          label: user.email ?? "Account",
-          onClick: () => {},
-          variant: "secondary" as const,
-        },
-        {
           label: "Logout",
           onClick: () => {
             void navigate({ to: "/logout" });

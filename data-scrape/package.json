@@ -1,0 +1,22 @@
+{
+  "name": "migration",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "migrate": "npm run migrate:all",
+    "migrate:all": "npm run migrate:city && npm run migrate:national-dishes && npm run migrate:unesco && npm run migrate:countries",
+    "migrate:city": "tsx migration_city.ts",
+    "migrate:national-dishes": "tsx migration.ts",
+    "migrate:unesco": "tsx unesco_migration.ts",
+    "migrate:countries": "tsx migration_countries.ts"
+  },
+  "dependencies": {
+    "postgres": "^3.4.5",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,25 +1,29 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useSearch } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
 import { dashboardRoute } from "../routes/dashboard";
-import { type SearchResult, searchAPI, searchQueryKeys } from "./api";
+import {
+  type SearchResult,
+  searchAPI,
+  searchQueryKeys,
+  fetchAIWeatherInsight,
+  aiWeatherQueryKeys,
+} from "./api";
 import { Button } from "../components/Button";
 import { InfoCard } from "../components/InfoCard";
 import { StatCard } from "../components/StatCard";
 import { DataRow } from "../components/DataRow";
 import { SubTitle } from "../components/SubTitle";
 import { DescriptionText } from "../components/DescriptionText";
-import { LuChartNoAxesColumnIncreasing } from "react-icons/lu";
-import { FaPassport, FaPeopleGroup } from "react-icons/fa6";
-import { FaGlobeAmericas } from "react-icons/fa";
-import { CiLocationOn } from "react-icons/ci";
+import { FaGlobeAmericas, FaRegBookmark } from "react-icons/fa";
 import { BsBuildings } from "react-icons/bs";
 import { WiDaySunny, WiEarthquake } from "react-icons/wi";
-import { IoLocationOutline } from "react-icons/io5";
 import { DashboardFooter } from "../components/DashboardFooter";
 import { GiKnifeFork } from "react-icons/gi";
 import { convertMonthValue } from "../common/helper";
+import { addCurrentPageToBookmarks } from "../helpers/addBookmarks";
 
 export function Dashboard() {
   const { country, month } = useSearch({ from: dashboardRoute.id });
@@ -28,6 +32,16 @@ export function Dashboard() {
     queryFn: () => searchAPI({ country, month }),
     enabled: Boolean(country && month),
   });
+
+  const { data: aiWeather, isLoading: isAILoading } = useQuery({
+    queryKey: aiWeatherQueryKeys.detail({ country, month }),
+    queryFn: () => fetchAIWeatherInsight(country, month),
+    enabled: Boolean(country && month),
+    retry: false,
+    staleTime: Infinity,
+  });
+
+  const [bookmarkSaved, setBookmarkSaved] = useState(false);
 
   if (!country || !month) {
     return (
@@ -123,10 +137,6 @@ export function Dashboard() {
   } = data;
   const { countryDetails } = countryData;
 
-  const population = countryData.cityPopulation?.reduce(
-    (sum, city) => sum + city.population,
-    0,
-  );
   const topCities =
     countryData.cityPopulation
       ?.sort((a, b) => b.population - a.population)
@@ -139,7 +149,7 @@ export function Dashboard() {
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-linear-to-tr from-purple-300/20 to-pink-300/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <Link to={AppRoute.Home}>
             <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm hover:shadow-md">
               <svg
@@ -158,9 +168,38 @@ export function Dashboard() {
               Explore the World
             </button>
           </Link>
+          <div className="flex flex-col items-end gap-1 relative">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => {
+                setBookmarkSaved(true);
+                addCurrentPageToBookmarks();
+                setTimeout(() => setBookmarkSaved(false), 3000);
+              }}
+            >
+              <FaRegBookmark />
+            </Button>
+            <span
+              className={`absolute top-full mt-1 whitespace-nowrap text-sm font-medium text-green-600 transition-opacity ${
+                bookmarkSaved ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              Bookmark saved!
+            </span>
+          </div>
         </div>
 
-        <div className="mb-12">
+        <div className="mb-12 relative">
+          {countryDetails.flagUrl && (
+            <div className="absolute top-0 right-0 bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-4">
+              <img
+                src={countryDetails.flagUrl}
+                alt={`${countryDetails.countryName} flag`}
+                className="w-32 h-24 object-cover rounded-xl"
+              />
+            </div>
+          )}
           <h1 className="text-5xl lg:text-6xl font-black text-gray-900 mb-4">
             Discover
           </h1>
@@ -168,59 +207,15 @@ export function Dashboard() {
             {countryDetails.countryName}
           </h2>
           <h3 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6">
-            Like Never Before
+            In {convertMonthValue(month)}
           </h3>
           <p className="text-gray-600 text-lg max-w-2xl leading-relaxed">
             Explore comprehensive travel data, cultural insights, and essential
-            facts about any country—all in one beautifully designed platform.
+            facts about any european country.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-12">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 relative overflow-hidden">
-            <div className="absolute top-4 right-4">
-              <span className="px-4 py-1.5 bg-linear-to-r from-orange-400 to-red-500 text-white text-xs font-bold rounded-full shadow-lg">
-                Live Data
-              </span>
-            </div>
-            <div className="flex items-start gap-4 mb-6">
-              <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-md shrink-0">
-                <IoLocationOutline />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 font-medium mb-1">
-                  Population
-                </p>
-                <p className="text-sm text-gray-500">Live statistics</p>
-              </div>
-            </div>
-            <div className="mb-3">
-              <p className="text-5xl font-black text-gray-900">
-                {population
-                  ? `${(population / 1000000).toFixed(1)}M`
-                  : "125.8M"}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                />
-              </svg>
-              <span className="text-sm font-semibold text-green-600">
-                +0.3% growth
-              </span>
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-6">
             <StatCard
               label="Capital City"
@@ -253,60 +248,11 @@ export function Dashboard() {
           <div className="text-center mb-8">
             <SubTitle>Complete Country Overview</SubTitle>
             <DescriptionText>
-              All essential travel data and country facts displayed at a
-              glance—no clicking required
+              All essential travel data and country facts displayed at a glance
             </DescriptionText>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <InfoCard
-              title="Economic Data"
-              icon={<LuChartNoAxesColumnIncreasing />}
-              iconBg="bg-linear-to-br from-blue-500 to-indigo-600"
-            >
-              <div className="space-y-3">
-                <DataRow label="GDP" value="$4.9 Trillion" bold />
-                <DataRow label="GDP per Capita" value="$39,048" />
-                <DataRow label="Unemployment Rate" value="2.6%" />
-                <DataRow label="Inflation Rate" value="3.2%" />
-              </div>
-            </InfoCard>
-
-            <InfoCard
-              title="Demographics"
-              icon={<FaPeopleGroup />}
-              iconBg="bg-linear-to-br from-green-500 to-emerald-600"
-            >
-              <div className="space-y-3">
-                <DataRow
-                  label="Population"
-                  value={`${(population || 125800000) / 1000000}M`}
-                  bold
-                />
-                <DataRow label="Median Age" value="48.4 years" />
-                <DataRow label="Urban Population" value="91.8%" />
-                <DataRow label="Life Expectancy" value="84.6 years" />
-              </div>
-            </InfoCard>
-
-            <InfoCard
-              title="Geography"
-              icon={<CiLocationOn />}
-              iconBg="bg-linear-to-br from-orange-500 to-red-600"
-            >
-              <div className="space-y-3">
-                <DataRow label="Area" value="377,975 km²" bold />
-                <DataRow
-                  label="Capital City"
-                  value={countryDetails.capitalCityName}
-                />
-                <DataRow
-                  label="Popular Cities"
-                  value={topCities.join(", ") || "N/A"}
-                />
-              </div>
-            </InfoCard>
-
             <InfoCard
               title="General Info"
               icon={<FaGlobeAmericas />}
@@ -324,19 +270,14 @@ export function Dashboard() {
                 />
                 <DataRow label="Time Zone" value="JST (UTC+9)" />
                 <DataRow label="Driving Side" value="Left" />
-              </div>
-            </InfoCard>
-
-            <InfoCard
-              title="Travel Requirements"
-              icon={<FaPassport />}
-              iconBg="bg-linear-to-br from-teal-500 to-cyan-600"
-            >
-              <div className="space-y-3">
-                <DataRow label="Visa Required" value="Varies by country" bold />
-                <DataRow label="Major Airport" value="Narita, Haneda" />
-                <DataRow label="Tourist Visa" value="Up to 90 days" />
-                <DataRow label="Vaccination" value="None required" />
+                <DataRow
+                  label="Capital City"
+                  value={countryDetails.capitalCityName}
+                />
+                <DataRow
+                  label="Popular Cities"
+                  value={topCities.join(", ") || "N/A"}
+                />
               </div>
             </InfoCard>
 
@@ -413,6 +354,20 @@ export function Dashboard() {
             <p className="text-sm text-gray-500 mt-4">
               Based on {weatherSummary.totalWeatherRecords} weather records.
             </p>
+            {isAILoading && (
+              <div className="mt-3 p-4 bg-linear-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100 animate-pulse">
+                <div className="h-8 bg-purple-100 rounded w-20 mb-1" />
+                <div className="h-4 bg-purple-100 rounded w-32" />
+              </div>
+            )}
+            {aiWeather && (
+              <div className="mt-3 p-4 bg-linear-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100">
+                <p className="text-3xl font-black text-gray-900 mb-1">
+                  {aiWeather.temperature}°C
+                </p>
+                <p className="text-sm text-gray-600">AI estimated average</p>
+              </div>
+            )}
           </InfoCard>
 
           {earthquakeStatistics && (

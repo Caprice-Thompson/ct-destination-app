@@ -62,6 +62,36 @@ CREATE TABLE IF NOT EXISTS unesco_sites (
 CREATE INDEX IF NOT EXISTS idx_unesco_sites_country_name ON unesco_sites(LOWER(country_name));
 
 -- ============================================================
+-- country: country_information
+-- ============================================================
+CREATE TABLE IF NOT EXISTS country_information (
+    id SERIAL PRIMARY KEY,
+    country_code VARCHAR(2) NOT NULL UNIQUE,
+    country_name VARCHAR(255) NOT NULL,
+    capital VARCHAR(255),
+    languages JSONB,
+    currencies JSONB,
+    flag_svg TEXT,
+    flag_png TEXT,
+    lat NUMERIC,
+    lng NUMERIC,
+    google_maps_url TEXT,
+    open_street_maps_url TEXT,
+    timezones TEXT[],
+    calling_codes TEXT[],
+    driving_side VARCHAR(10),
+    is_schengen BOOLEAN DEFAULT false,
+    is_eu BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_country_information_country_name ON country_information(LOWER(country_name));
+CREATE INDEX IF NOT EXISTS idx_country_information_country_code ON country_information(country_code);
+CREATE INDEX IF NOT EXISTS idx_country_information_schengen ON country_information(is_schengen);
+CREATE INDEX IF NOT EXISTS idx_country_information_eu ON country_information(is_eu);
+
+-- ============================================================
 -- notifications: users
 -- ============================================================
 CREATE TABLE IF NOT EXISTS users (

@@ -347,6 +347,57 @@ app.get("/api/weather", async (req: Request, res: Response) => {
   }
 });
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+app.get("/api/ai/weather", async (req: Request, res: Response) => {
+  try {
+    const { countryName, month } = req.query;
+
+    if (!countryName || typeof countryName !== "string") {
+      return res.status(400).json({ error: "countryName is required" });
+    }
+
+    if (!month || typeof month !== "string") {
+      return res.status(400).json({ error: "month is required" });
+    }
+
+    const monthIndex = parseInt(month, 10) - 1;
+    const monthName = MONTH_NAMES[monthIndex] ?? month;
+
+    const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434";
+    const prompt = `Give me a single number in degrees Celsius for the average temperature in ${countryName} in ${monthName}. Reply with only the number, nothing else.`;
+
+    const ollamaResponse = await fetch(`${ollamaUrl}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "llama3.2:1b", prompt, stream: false }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!ollamaResponse.ok) {
+      return res.status(503).json({ error: "AI service unavailable" });
+    }
+
+    const ollamaData = (await ollamaResponse.json()) as { response: string };
+    const parsed = parseFloat(ollamaData.response?.trim());
+
+    if (isNaN(parsed)) {
+      return res.status(422).json({ error: "Could not parse AI response" });
+    }
+
+    res.json({ temperature: parsed });
+  } catch (error) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return res.status(503).json({ error: "AI service timed out" });
+    }
+    console.error("Error in /api/ai/weather:", error);
+    res.status(503).json({ error: "AI service unavailable" });
+  }
+});
+
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Unhandled local server error:", err);
   res.status(500).json({ error: "Internal server error" });

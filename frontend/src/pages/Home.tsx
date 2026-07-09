@@ -61,20 +61,6 @@ export function Home() {
             <div className="space-y-8 mt-10">
               <div className="space-y-3">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
-                  Select the month you want to explore
-                </p>
-                <Dropdown
-                  name="month"
-                  className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  options={months}
-                  label="Choose a month..."
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  value={selectedMonth}
-                />
-              </div>
-
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
                   Select the country you want to travel to
                 </p>
                 <Dropdown
@@ -84,6 +70,19 @@ export function Home() {
                   label="Choose a country..."
                   onChange={(e) => setSelectedCountry(e.target.value)}
                   value={selectedCountry}
+                />
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
+                  Select the month you want to explore
+                </p>
+                <Dropdown
+                  name="month"
+                  className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  options={months}
+                  label="Choose a month..."
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  value={selectedMonth}
                 />
               </div>
             </div>

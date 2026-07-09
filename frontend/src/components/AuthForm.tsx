@@ -57,43 +57,39 @@ export const AuthForm = ({ mode = "login" }: AuthFormProps) => {
           className="font-extrabold"
         />
         <FormContainer onSubmit={handleAuth}>
-          <div>
-            <div>
-              {isSignUp && (
-                <Input
-                  label="Display Name"
-                  type="text"
-                  placeholder="Enter a display name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  required={true}
-                  dataTestId="displayName"
-                />
-              )}
+          <div className="space-y-4">
+            {isSignUp && (
               <Input
-                label="Email address"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="Display Name"
+                type="text"
+                placeholder="Enter a display name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
                 required={true}
-                dataTestId="email"
+                dataTestId="displayName"
               />
-            </div>
-            <div>
-              <Input
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required={true}
-                dataTestId="password"
-              />
-            </div>
+            )}
+            <Input
+              label="Email address"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required={true}
+              dataTestId="email"
+            />
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required={true}
+              dataTestId="password"
+            />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full py-2 px-4">
+          <Button type="submit" disabled={loading} className="w-full py-2 px-4 mt-4">
             {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
 
