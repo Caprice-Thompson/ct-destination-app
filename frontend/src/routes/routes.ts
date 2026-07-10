@@ -6,8 +6,8 @@ import {
 } from "@tanstack/react-router";
 import App from "../App";
 import { AppRoute } from "../common/enums";
-import { DefaultCatchBoundary } from "../components/DefaultCatchBoundary";
-import { Home } from "../pages/Home";
+import { DefaultCatchBoundary } from "../components/Errors/DefaultCatchBoundary";
+import { Home } from "../pages/Home/Home";
 import { dashboardRoute } from "./dashboard";
 import { landingRoute } from "./landing";
 import { loginRoute } from "./login";

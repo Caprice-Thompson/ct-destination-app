@@ -1,9 +1,10 @@
 import type React from "react";
-import { useRef, useEffect, useState } from "react";
-import { Button } from "./Button";
-import { NotificationPanel } from "./NotificationPanel";
-import type { EarthquakeNotificationData } from "../pages/api";
+import { useEffect, useRef, useState } from "react";
 import { FaRegFolder } from "react-icons/fa";
+import { GoBell } from "react-icons/go";
+import type { EarthquakeNotificationData } from "../../api/api";
+import { NotificationPanel } from "../Notification/NotificationPanel";
+import { Button } from "../UI/Button";
 import { BookmarksBar } from "./BookmarkBar";
 
 export interface NavButton {
@@ -78,14 +79,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="relative w-full px-4 sm:px-6 lg:px-12">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div
-            className="flex items-center space-x-3 group cursor-pointer"
+          <button
+            type="button"
+            className="flex items-center space-x-3 group cursor-pointer appearance-none bg-transparent border-none p-0 outline-none"
             onClick={onLogoClick}
           >
             <span className="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-200 via-cyan-200 to-indigo-200 tracking-tight">
               {logoText}
             </span>
-          </div>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
@@ -98,19 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="relative p-2 rounded-full text-blue-200 hover:text-white hover:bg-white/10 transition-all duration-200"
                   aria-label="Notifications"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.75}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
+                  <GoBell className="w-6 h-6" />
                   {notifications.length > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4.5 h-4.5 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold leading-none">
                       {notifications.length > 99 ? "99+" : notifications.length}
@@ -150,16 +140,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
 
-            {buttons.map((button, index) => (
+            {buttons.map((button) => (
               <Button
-                key={index}
+                key={button.label}
                 onClick={() => {
-                  setActiveIndex(index);
+                  setActiveIndex(buttons.indexOf(button));
                   button.onClick();
                 }}
                 className={getButtonStyles(
                   button.variant,
-                  activeIndex === index,
+                  activeIndex === buttons.indexOf(button),
                 )}
                 type="submit"
                 variant={button.variant as "primary" | "secondary" | "accent"}

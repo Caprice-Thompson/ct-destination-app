@@ -1,14 +1,14 @@
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  type EarthquakeNotificationData,
+  fetchEarthquakeNotifications,
+} from "./api/api";
 import { AppRoute } from "./common/enums";
+import type { NavButton } from "./components/NavBar/NavBar";
+import { Navbar } from "./components/NavBar/NavBar";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabase";
-import {
-  fetchEarthquakeNotifications,
-  type EarthquakeNotificationData,
-} from "./pages/api";
-import { Navbar } from "./components/NavBar";
-import type { NavButton } from "./components/NavBar";
 
 const NOTIFICATION_POLL_INTERVAL_MS = 60_000;
 

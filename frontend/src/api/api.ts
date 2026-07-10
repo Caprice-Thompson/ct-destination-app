@@ -177,20 +177,6 @@ export interface AIWeatherResponse {
   temperature: number;
 }
 
-export const fetchAIWeatherInsight = async (
-  countryName: string,
-  month: string,
-): Promise<AIWeatherResponse> => {
-  return getJson<AIWeatherResponse>(
-    `/api/ai/weather?countryName=${encodeURIComponent(countryName)}&month=${encodeURIComponent(month)}`,
-  );
-};
-
-export const aiWeatherQueryKeys = {
-  detail: (params: SearchParams) =>
-    ["ai-weather", params.country, params.month] as const,
-};
-
 export const searchQueryKeys = {
   all: ["search"] as const,
   detail: (params: SearchParams) =>

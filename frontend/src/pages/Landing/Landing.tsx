@@ -1,8 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
-import { europeanCountries } from "../common/constants";
-import { AppRoute } from "../common/enums";
-import { Button } from "../components/Button";
-import { FormHeader } from "../components/FormHeader";
+import { europeanCountries } from "../../common/constants";
+import { AppRoute } from "../../common/enums";
+import { FormHeader } from "../../components/Auth/FormHeader";
+import { Button } from "../../components/UI/Button";
 
 export function Landing() {
   const router = useRouter();
@@ -117,7 +117,8 @@ export function Landing() {
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center leading-relaxed">
-                Save favourite destinations and get exclusive data by creating an account. No credit card required.
+                Save favourite destinations and get exclusive data by creating
+                an account. No credit card required.
               </p>
             </div>
           </div>

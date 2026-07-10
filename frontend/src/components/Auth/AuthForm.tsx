@@ -1,12 +1,12 @@
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { AppRoute } from "../common/enums";
-import { supabase } from "../lib/supabase";
+import { AppRoute } from "../../common/enums";
+import { supabase } from "../../lib/supabase";
+import { Button } from "../UI/Button";
+import { Input } from "../UI/Input";
 import { AuthFormFooter } from "./AuthFormFooter";
-import { Button } from "./Button";
 import { FormContainer } from "./FormContainer";
 import { FormHeader } from "./FormHeader";
-import { Input } from "./Input";
 
 interface AuthFormProps {
   mode?: "login" | "signup";
@@ -89,7 +89,11 @@ export const AuthForm = ({ mode = "login" }: AuthFormProps) => {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full py-2 px-4 mt-4">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 mt-4"
+          >
             {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
 

@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { europeanCountries, months } from "../common/constants";
-import { AppRoute } from "../common/enums";
-import { Button } from "../components/Button";
-import Dropdown from "../components/Dropdown";
-import { useAuth } from "../hooks/useAuth";
-import { searchAPI, searchQueryKeys } from "./api";
-import { FormContainer } from "../components/FormContainer";
-import { FormHeader } from "../components/FormHeader";
+import { searchAPI, searchQueryKeys } from "../../api/api";
+import { europeanCountries, months } from "../../common/constants";
+import { AppRoute } from "../../common/enums";
+import { FormContainer } from "../../components/Auth/FormContainer";
+import { FormHeader } from "../../components/Auth/FormHeader";
+import { Button } from "../../components/UI/Button";
+import Dropdown from "../../components/UI/Dropdown";
+import { useAuth } from "../../hooks/useAuth";
 
 export function Home() {
   const { user } = useAuth();
@@ -45,15 +45,14 @@ export function Home() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="space-y-8">
         <FormContainer onSubmit={handleSearch}>
-          <FormHeader title="Start exploring destinations around Europe!"/>
+          <FormHeader title="Start exploring destinations around Europe!" />
           <div className="text-gray-600 dark:text-gray-300">
-
             {!user && (
               <div className="mt-8 mb-10 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl border border-blue-100 dark:border-blue-800/50 shadow-sm">
                 <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
                   <strong className="font-semibold">Tip:</strong> Create an
-                  account to save your favourite destinations and get
-                  exclusive data!
+                  account to save your favourite destinations and get exclusive
+                  data!
                 </p>
               </div>
             )}

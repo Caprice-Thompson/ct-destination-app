@@ -1,4 +1,4 @@
-import type { DropdownOption } from "../components/Dropdown";
+import type { DropdownOption } from "../components/UI/Dropdown";
 
 export const months: DropdownOption[] = [
   { value: 1, label: "January" },

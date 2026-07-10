@@ -6,9 +6,7 @@ export const DescriptionText = ({
   className?: string;
 }) => {
   return (
-    <p
-      className={`text-gray-600 text-lg leading-relaxed ${className || ""}`}
-    >
+    <p className={`text-gray-600 text-lg leading-relaxed ${className || ""}`}>
       {children}
     </p>
   );

@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
 import { AppRoute } from "../common/enums";
-import { Dashboard } from "../pages/Dashboard";
+import { Dashboard } from "../pages/Dashboard/Dashboard";
 import { rootRoute } from "./routes";
 
 export const dashboardRoute = createRoute({

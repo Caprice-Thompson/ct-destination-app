@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  Bookmark,
+  type Bookmark,
   getBookmarks,
   removeBookmark,
-} from "../helpers/getBookmarks";
+} from "../../utils/getBookmarks";
 
 export function BookmarksBar({
   isOpen,
@@ -47,6 +47,7 @@ export function BookmarksBar({
               {bookmark.title}
             </a>
             <button
+              type="button"
               onClick={() => handleRemove(bookmark.id)}
               className="text-red-500 hover:text-red-700 focus:outline-none"
               aria-label="Remove bookmark"
