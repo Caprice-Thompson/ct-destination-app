@@ -117,7 +117,7 @@ export function Landing() {
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-xs text-gray-500 text-center leading-relaxed">
-                Save favourite destinations and get personalised recommendations
+                Save favourite destinations and get exclusive data by creating an account. No credit card required.
               </p>
             </div>
           </div>

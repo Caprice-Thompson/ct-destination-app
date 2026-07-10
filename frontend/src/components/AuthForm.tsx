@@ -51,7 +51,7 @@ export const AuthForm = ({ mode = "login" }: AuthFormProps) => {
           title={isSignUp ? "Create your account" : "Welcome back"}
           description={
             isSignUp
-              ? "Sign up to save your favorite destinations"
+              ? "Sign up to save your favorite destinations and have access to exclusive features"
               : "Sign in to your account"
           }
           className="font-extrabold"

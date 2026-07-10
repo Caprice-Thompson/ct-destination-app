@@ -13,42 +13,41 @@ export function StatCard({
   icon,
   color = "blue",
 }: StatCardProps) {
-  const colorClasses: Record<ColorVariant, { bg: string; icon: string; border: string }> = {
-    blue: {
-      bg: "bg-gradient-to-br from-blue-50 to-cyan-50",
-      icon: "text-blue-600",
-      border: "border-blue-100/50",
-    },
-    pink: {
-      bg: "bg-gradient-to-br from-purple-50 to-pink-50",
-      icon: "text-purple-600",
-      border: "border-purple-100/50",
-    },
-    orange: {
-      bg: "bg-gradient-to-br from-yellow-50 to-orange-50",
-      icon: "text-orange-600",
-      border: "border-orange-100/50",
-    },
-    green: {
-      bg: "bg-gradient-to-br from-green-50 to-teal-50",
-      icon: "text-teal-600",
-      border: "border-green-100/50",
-    },
-  };
+  const colorClasses: Record<ColorVariant, { border: string; label: string }> =
+    {
+      blue: {
+        border: "border-blue-200",
+        label: "text-blue-600",
+      },
+      pink: {
+        border: "border-purple-200",
+        label: "text-purple-600",
+      },
+      orange: {
+        border: "border-orange-200",
+        label: "text-orange-600",
+      },
+      green: {
+        border: "border-green-200",
+        label: "text-green-600",
+      },
+    };
 
   const classes = colorClasses[color];
 
   return (
-    <div className={`${classes.bg} rounded-2xl p-6 border ${classes.border}`}>
+    <div className={`bg-white rounded-xl border ${classes.border} p-5`}>
       {icon && (
-        <div className="flex items-center gap-2 mb-3">
-          <span className={classes.icon}>{icon}</span>
+        <div className="mb-2">
+          <span className={classes.label}>{icon}</span>
         </div>
       )}
-      <div className="space-y-1">
-        <p className="text-sm text-gray-600 font-medium">{label}</p>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-      </div>
+      <p
+        className={`text-xs font-semibold uppercase tracking-wide ${classes.label} mb-1.5`}
+      >
+        {label}
+      </p>
+      <p className="text-lg font-bold text-slate-900 leading-tight">{value}</p>
     </div>
   );
 }

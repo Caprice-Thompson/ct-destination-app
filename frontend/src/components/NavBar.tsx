@@ -19,6 +19,7 @@ interface NavbarProps {
   notifications?: EarthquakeNotificationData[];
   onDismissNotification?: (id: string) => void;
   onDismissAllNotifications?: () => void;
+  isAuthenticated?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -28,6 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   notifications = [],
   onDismissNotification,
   onDismissAllNotifications,
+  isAuthenticated = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -73,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav className="relative bg-linear-to-r from-blue-900 via-indigo-900 to-cyan-900 shadow-2xl">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full px-4 sm:px-6 lg:px-12">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div
@@ -110,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     />
                   </svg>
                   {notifications.length > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold leading-none">
+                    <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4.5 h-4.5 px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold leading-none">
                       {notifications.length > 99 ? "99+" : notifications.length}
                     </span>
                   )}
@@ -127,6 +129,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClose={() => setPanelOpen(false)}
                   />
                 )}
+              </div>
+            )}
+
+            {/* Folder / Bookmarks icon — authenticated users only */}
+            {isAuthenticated && (
+              <div className="relative" ref={bookmarksRef}>
+                <button
+                  type="button"
+                  onClick={handleFolderClick}
+                  className="p-2 rounded-full text-blue-200 hover:text-white hover:bg-white/10 transition-all duration-200"
+                  aria-label="Bookmarks"
+                >
+                  <FaRegFolder className="w-6 h-6" />
+                </button>
+                <BookmarksBar
+                  isOpen={bookmarksOpen}
+                  onClose={() => setBookmarksOpen(false)}
+                />
               </div>
             )}
 
@@ -147,21 +167,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {button.label}
               </Button>
             ))}
-            <div className="relative" ref={bookmarksRef}>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => {
-                  handleFolderClick();
-                }}
-              >
-                <FaRegFolder />
-              </Button>
-              <BookmarksBar
-                isOpen={bookmarksOpen}
-                onClose={() => setBookmarksOpen(false)}
-              />
-            </div>
           </div>
         </div>
       </div>

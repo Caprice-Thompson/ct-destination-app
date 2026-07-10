@@ -45,7 +45,7 @@ export function Home() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="space-y-8">
         <FormContainer onSubmit={handleSearch}>
-          <FormHeader title="Start exploring destinations around the world!"/>
+          <FormHeader title="Start exploring destinations around Europe!"/>
           <div className="text-gray-600 dark:text-gray-300">
 
             {!user && (
@@ -53,7 +53,7 @@ export function Home() {
                 <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
                   <strong className="font-semibold">Tip:</strong> Create an
                   account to save your favourite destinations and get
-                  personalised recommendations!
+                  exclusive data!
                 </p>
               </div>
             )}

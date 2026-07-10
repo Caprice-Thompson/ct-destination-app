@@ -15,15 +15,14 @@ import { Button } from "../components/Button";
 import { InfoCard } from "../components/InfoCard";
 import { StatCard } from "../components/StatCard";
 import { DataRow } from "../components/DataRow";
-import { SubTitle } from "../components/SubTitle";
-import { DescriptionText } from "../components/DescriptionText";
-import { FaGlobeAmericas, FaRegBookmark } from "react-icons/fa";
+import { FaArrowLeft, FaGlobeAmericas, FaRegBookmark } from "react-icons/fa";
 import { BsBuildings } from "react-icons/bs";
 import { WiDaySunny, WiEarthquake } from "react-icons/wi";
 import { DashboardFooter } from "../components/DashboardFooter";
 import { GiKnifeFork } from "react-icons/gi";
 import { convertMonthValue } from "../common/helper";
 import { addCurrentPageToBookmarks } from "../helpers/addBookmarks";
+import { useAuth } from "../hooks/useAuth";
 
 export function Dashboard() {
   const { country, month } = useSearch({ from: dashboardRoute.id });
@@ -42,14 +41,15 @@ export function Dashboard() {
   });
 
   const [bookmarkSaved, setBookmarkSaved] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   if (!country || !month) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 bg-linear-to-br from-blue-400 to-indigo-500 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-sm w-full">
+          <div className="w-12 h-12 bg-blue-600 rounded-xl mx-auto mb-5 flex items-center justify-center">
             <svg
-              className="w-12 h-12 text-white"
+              className="w-6 h-6 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -62,11 +62,11 @@ export function Dashboard() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">
             No search parameters
           </h2>
-          <p className="text-gray-600 mb-8">
-            Please select a country and month from the home page to explore.
+          <p className="text-slate-500 text-sm mb-8">
+            Select a country and month from the home page to explore.
           </p>
           <Link to={AppRoute.Home}>
             <Button className="" type="button" variant="primary">
@@ -80,10 +80,10 @@ export function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-700 font-semibold text-lg">
+          <div className="w-10 h-10 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-slate-500 font-medium">
             Loading destination data...
           </p>
         </div>
@@ -93,11 +93,11 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 bg-linear-to-br from-red-400 to-pink-500 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-sm w-full">
+          <div className="w-12 h-12 bg-red-500 rounded-xl mx-auto mb-5 flex items-center justify-center">
             <svg
-              className="w-12 h-12 text-white"
+              className="w-6 h-6 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -110,10 +110,10 @@ export function Dashboard() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">
             Something went wrong
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-slate-500 text-sm mb-8">
             We couldn&apos;t load the data. Please try again.
           </p>
           <Link to={AppRoute.Home}>
@@ -144,121 +144,107 @@ export function Dashboard() {
       .map((c) => c.cityName) || [];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-linear-to-br from-blue-300/20 to-indigo-300/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-linear-to-tr from-purple-300/20 to-pink-300/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50">
+      {/* Sticky top navigation */}
+      <nav className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link to={AppRoute.Home}>
-            <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm hover:shadow-md">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
+            <button className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+              <FaArrowLeft />
               Explore the World
             </button>
           </Link>
-          <div className="flex flex-col items-end gap-1 relative">
-            <Button
-              type="button"
-              variant="primary"
-              onClick={() => {
-                setBookmarkSaved(true);
-                addCurrentPageToBookmarks();
-                setTimeout(() => setBookmarkSaved(false), 3000);
-              }}
-            >
-              <FaRegBookmark />
-            </Button>
-            <span
-              className={`absolute top-full mt-1 whitespace-nowrap text-sm font-medium text-green-600 transition-opacity ${
-                bookmarkSaved ? "opacity-100" : "opacity-0 pointer-events-none"
-              }`}
-            >
-              Bookmark saved!
+          <div className="relative flex flex-col items-end">
+            {isAuthenticated && (
+              <>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => {
+                    setBookmarkSaved(true);
+                    addCurrentPageToBookmarks();
+                    setTimeout(() => setBookmarkSaved(false), 3000);
+                  }}
+                >
+                  <FaRegBookmark />
+                </Button>
+                <span
+                  className={`absolute top-full mt-1 right-0 whitespace-nowrap text-xs font-medium text-green-600 transition-opacity ${
+                    bookmarkSaved
+                      ? "opacity-100"
+                      : "opacity-0 pointer-events-none"
+                  }`}
+                >
+                  Bookmark saved!
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        {/* Hero */}
+        <div className="flex items-start justify-between gap-6 mb-10 pb-10 border-b border-slate-200">
+          <div>
+            <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full uppercase tracking-wider mb-4">
+              {convertMonthValue(month)}
             </span>
+            <h1 className="text-5xl font-black text-slate-900 mb-3 leading-tight">
+              {countryDetails.countryName}
+            </h1>
+            <p className="text-slate-500 max-w-lg leading-relaxed">
+              Explore comprehensive travel data, cultural insights, and
+              essential facts about any European country.
+            </p>
           </div>
-        </div>
-
-        <div className="mb-12 relative">
           {countryDetails.flagUrl && (
-            <div className="absolute top-0 right-0 bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-4">
-              <img
-                src={countryDetails.flagUrl}
-                alt={`${countryDetails.countryName} flag`}
-                className="w-32 h-24 object-cover rounded-xl"
-              />
-            </div>
+            <img
+              src={countryDetails.flagUrl}
+              alt={`${countryDetails.countryName} flag`}
+              className="w-32 h-20 object-cover rounded-xl border border-slate-200 shrink-0"
+            />
           )}
-          <h1 className="text-5xl lg:text-6xl font-black text-gray-900 mb-4">
-            Discover
-          </h1>
-          <h2 className="text-5xl lg:text-6xl font-black bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            {countryDetails.countryName}
-          </h2>
-          <h3 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6">
-            In {convertMonthValue(month)}
-          </h3>
-          <p className="text-gray-600 text-lg max-w-2xl leading-relaxed">
-            Explore comprehensive travel data, cultural insights, and essential
-            facts about any european country.
+        </div>
+
+        {/* Key stats strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <StatCard
+            label="Capital City"
+            value={countryDetails.capitalCityName}
+            color="green"
+          />
+          <StatCard
+            label="Languages Spoken"
+            value={
+              countryDetails.languages.map((lang) => lang).join(", ") || "N/A"
+            }
+            color="orange"
+          />
+          <StatCard
+            label="Currency"
+            value={`${countryDetails.currency.name} (${countryDetails.currency.symbol})`}
+            color="blue"
+          />
+          <StatCard
+            label="Time Zone"
+            value={countryDetails.timezone[0] || "N/A"}
+            color="pink"
+          />
+        </div>
+
+        {/* Country overview */}
+        <section className="mb-10">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+            Country Overview
           </p>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 mb-12">
-          <div className="grid grid-cols-2 gap-6">
-            <StatCard
-              label="Capital City"
-              value={countryDetails.capitalCityName}
-              color="green"
-            />
-            <StatCard
-              label="Languages Spoken"
-              value={
-                countryDetails.languages.map((lang) => lang).join(", ") || "N/A"
-              }
-              color="orange"
-            />
-            <StatCard
-              label="Currency"
-              value={`${countryDetails.currency.name} (${countryDetails.currency.symbol})`}
-              color="blue"
-            />
-            <StatCard
-              label="Time Zone"
-              value={
-                countryDetails.timezone.map((tz) => tz).join(", ") || "N/A"
-              }
-              color="pink"
-            />
-          </div>
-        </div>
-
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <SubTitle>Complete Country Overview</SubTitle>
-            <DescriptionText>
-              All essential travel data and country facts displayed at a glance
-            </DescriptionText>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             <InfoCard
               title="General Info"
               icon={<FaGlobeAmericas />}
-              iconBg="bg-linear-to-br from-purple-500 to-indigo-600"
+              iconBg="bg-indigo-600"
             >
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <DataRow
                   label="Official Language"
                   value={countryDetails.languages[0] || "N/A"}
@@ -284,9 +270,9 @@ export function Dashboard() {
             <InfoCard
               title="National Dish"
               icon={<GiKnifeFork />}
-              iconBg="bg-linear-to-br from-pink-500 to-rose-600"
+              iconBg="bg-rose-500"
             >
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <DataRow
                   label="Name"
                   value={`${countryData.nationalDish?.dishName}`}
@@ -296,7 +282,6 @@ export function Dashboard() {
                   label="Description"
                   value={`${countryData.nationalDish?.description}`}
                 />
-
                 <DataRow
                   label="Image"
                   value={`${countryData.nationalDish?.imageUrl}`}
@@ -304,122 +289,142 @@ export function Dashboard() {
               </div>
             </InfoCard>
           </div>
-        </div>
+        </section>
 
+        {/* UNESCO World Heritage */}
         {tourismData.unescoSites.length > 0 && (
-          <div className="mb-12">
+          <section className="mb-10">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+              UNESCO World Heritage
+            </p>
             <InfoCard
               title="UNESCO World Heritage Sites"
               icon={<BsBuildings />}
-              iconBg="bg-linear-to-br from-amber-500 to-yellow-600"
-              className="lg:col-span-3"
+              iconBg="bg-amber-500"
             >
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {tourismData.unescoSites.map((site) => (
                   <div
                     key={site.site}
-                    className="p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+                    className="p-4 bg-slate-50 rounded-xl border border-slate-100"
                   >
-                    <h3 className="font-bold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-slate-900 text-sm mb-1.5">
                       {site.site}
                     </h3>
-                    <p className="text-sm text-gray-600">{site.description}</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {site.description}
+                    </p>
                   </div>
                 ))}
               </div>
             </InfoCard>
-          </div>
+          </section>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-6 mb-12">
-          <InfoCard
-            title={`${convertMonthValue(month)} Weather`}
-            icon={<WiDaySunny />}
-            iconBg="bg-linear-to-br from-cyan-500 to-blue-600"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-linear-to-br from-cyan-50 to-blue-50 rounded-2xl">
-                <p className="text-3xl font-black text-gray-900 mb-1">
-                  {weatherSummary.averageMinTemperature.toFixed(1)}°C
-                </p>
-                <p className="text-sm text-gray-600">Average minimum</p>
-              </div>
-              <div className="p-4 bg-linear-to-br from-orange-50 to-yellow-50 rounded-2xl">
-                <p className="text-3xl font-black text-gray-900 mb-1">
-                  {weatherSummary.averageMaxTemperature.toFixed(1)}°C
-                </p>
-                <p className="text-sm text-gray-600">Average maximum</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mt-4">
-              Based on {weatherSummary.totalWeatherRecords} weather records.
-            </p>
-            {isAILoading && (
-              <div className="mt-3 p-4 bg-linear-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100 animate-pulse">
-                <div className="h-8 bg-purple-100 rounded w-20 mb-1" />
-                <div className="h-4 bg-purple-100 rounded w-32" />
-              </div>
-            )}
-            {aiWeather && (
-              <div className="mt-3 p-4 bg-linear-to-br from-purple-50 to-indigo-50 rounded-2xl border border-purple-100">
-                <p className="text-3xl font-black text-gray-900 mb-1">
-                  {aiWeather.temperature}°C
-                </p>
-                <p className="text-sm text-gray-600">AI estimated average</p>
-              </div>
-            )}
-          </InfoCard>
-
-          {earthquakeStatistics && (
+        {/* Climate & Seismic */}
+        <section className="mb-10">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+            Climate & Seismic
+          </p>
+          <div className="grid lg:grid-cols-2 gap-4">
             <InfoCard
-              title="Earthquake Activity"
-              icon={<WiEarthquake />}
-              iconBg="bg-linear-to-br from-red-500 to-orange-600"
+              title={`${convertMonthValue(month)} Weather`}
+              icon={<WiDaySunny />}
+              iconBg="bg-sky-500"
             >
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-linear-to-br from-red-50 to-orange-50 rounded-2xl">
-                  <p className="text-3xl font-black text-gray-900 mb-1">
-                    {`${earthquakeStatistics.monthlyEarthquakePercentage}%`}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                    {weatherSummary.averageMinTemperature.toFixed(1)}°C
                   </p>
-                  <p className="text-sm text-gray-600">
-                    Of earthquakes occur in {convertMonthValue(month)}
-                  </p>
+                  <p className="text-xs text-slate-500">Average minimum</p>
                 </div>
-                <div className="p-4 bg-linear-to-br from-amber-50 to-yellow-50 rounded-2xl">
-                  <p className="text-3xl font-black text-gray-900 mb-1">
-                    {earthquakeStatistics.avgMagnitude?.toFixed(1) || "N/A"}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                    {weatherSummary.averageMaxTemperature.toFixed(1)}°C
                   </p>
-                  <p className="text-sm text-gray-600">Average magnitude</p>
+                  <p className="text-xs text-slate-500">Average maximum</p>
                 </div>
               </div>
+              <p className="text-xs text-slate-400">
+                Based on realistic representation weather records.
+              </p>
+              {isAILoading && (
+                <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-100 animate-pulse">
+                  <div className="h-7 bg-slate-200 rounded w-20 mb-1" />
+                  <div className="h-3 bg-slate-200 rounded w-28" />
+                </div>
+              )}
+              {aiWeather && (
+                <div className="mt-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                    {aiWeather.temperature}°C
+                  </p>
+                  <p className="text-xs text-slate-500">AI estimated average</p>
+                </div>
+              )}
             </InfoCard>
-          )}
-        </div>
 
+            {earthquakeStatistics &&
+              earthquakeStatistics.monthlyEarthquakePercentage > 0 && (
+                <InfoCard
+                  title="Earthquake Activity"
+                  icon={<WiEarthquake />}
+                  iconBg="bg-red-500"
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                        {`${earthquakeStatistics.monthlyEarthquakePercentage}%`}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Of earthquakes occur in {convertMonthValue(month)}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                        {earthquakeStatistics.avgMagnitude?.toFixed(1) || "N/A"}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Average magnitude
+                      </p>
+                    </div>
+                  </div>
+                </InfoCard>
+              )}
+          </div>
+        </section>
+
+        {/* Recent seismic events */}
         {earthquakeData && (
-          <div className="mb-12">
+          <section className="mb-10">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+              Recent Seismic Events
+            </p>
             <InfoCard
-              title="Most Recent Earthquakes"
+              title={`${country}'s Most Recent Earthquakes`}
               icon={<WiEarthquake />}
-              iconBg="bg-linear-to-br from-amber-500 to-yellow-600"
-              className="lg:col-span-3"
+              iconBg="bg-amber-500"
             >
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {earthquakeData.earthquakes.map((eq) => (
                   <div
                     key={eq.place}
-                    className="p-4 bg-linear-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+                    className="p-4 bg-slate-50 rounded-xl border border-slate-100"
                   >
-                    <h3 className="font-bold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-slate-900 text-sm mb-1">
                       {`${eq.place}: ${eq.date.split("T")[0]}`}
                     </h3>
-                    <p className="text-sm text-gray-600">{eq.magnitude}</p>
+                    <p className="text-xs text-slate-500">
+                      Magnitude: {eq.magnitude}
+                    </p>
                   </div>
                 ))}
               </div>
             </InfoCard>
-          </div>
+          </section>
         )}
+
         <DashboardFooter />
       </div>
     </div>

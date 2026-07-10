@@ -73,6 +73,8 @@ function App() {
     setNotifications([]);
   };
 
+  const currentPath = routerState.location.pathname;
+
   const navButtons: NavButton[] = user
     ? [
         {
@@ -84,20 +86,28 @@ function App() {
         },
       ]
     : [
-        {
-          label: "Login",
-          onClick: () => {
-            void navigate({ to: AppRoute.Login });
-          },
-          variant: "primary" as const,
-        },
-        {
-          label: "Sign Up",
-          onClick: () => {
-            void navigate({ to: AppRoute.Signup });
-          },
-          variant: "secondary" as const,
-        },
+        ...(currentPath !== AppRoute.Login
+          ? [
+              {
+                label: "Login",
+                onClick: () => {
+                  void navigate({ to: AppRoute.Login });
+                },
+                variant: "primary" as const,
+              },
+            ]
+          : []),
+        ...(currentPath !== AppRoute.Signup
+          ? [
+              {
+                label: "Sign Up",
+                onClick: () => {
+                  void navigate({ to: AppRoute.Signup });
+                },
+                variant: "secondary" as const,
+              },
+            ]
+          : []),
       ];
 
   return (
@@ -110,6 +120,7 @@ function App() {
           notifications={user ? notifications : undefined}
           onDismissNotification={user ? dismissNotification : undefined}
           onDismissAllNotifications={user ? dismissAllNotifications : undefined}
+          isAuthenticated={!!user}
         />
       )}
       <main>
