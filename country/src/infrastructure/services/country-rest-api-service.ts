@@ -45,13 +45,15 @@ interface RestCountriesApiResponse {
   };
 }
 
-const mapToCountryFacts = (data: RestCountriesApiResponse['data']['objects'][0]): CountryFacts => {
+const mapToCountryFacts = (
+  data: RestCountriesApiResponse["data"]["objects"][0],
+): CountryFacts => {
   const firstCurrency = data.currencies?.[0];
   const currency = new Currency(
     firstCurrency?.name ?? "Unknown",
     firstCurrency?.symbol ?? "",
   );
-  const languages = data.languages?.map(lang => lang.name) ?? [];
+  const languages = data.languages?.map((lang) => lang.name) ?? [];
   const coordinates = new Coordinates(
     data.coordinates.lat,
     data.coordinates.lng,
@@ -74,6 +76,10 @@ const mapToCountryFacts = (data: RestCountriesApiResponse['data']['objects'][0])
     coordinates,
     maps,
     timezone,
+    callingCodes: [],
+    drivingSide: "right",
+    europeanUnionMember: false,
+    schengenAreaMember: false,
   });
 };
 

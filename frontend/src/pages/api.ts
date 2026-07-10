@@ -6,12 +6,11 @@ export interface CountryApiResponse {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
-    population: number;
     timezone: string[];
-    continent: string;
-    drivingSide: {
-      side: string;
-    };
+    callingCodes: string[];
+    drivingSide: "left" | "right";
+    europeanUnionMember: boolean;
+    schengenAreaMember: boolean;
     currency: {
       name: string;
       symbol: string;

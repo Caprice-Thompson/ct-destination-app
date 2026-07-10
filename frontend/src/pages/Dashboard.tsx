@@ -254,8 +254,24 @@ export function Dashboard() {
                   label="Currency"
                   value={`${countryDetails.currency.name} (${countryDetails.currency.symbol})`}
                 />
-                <DataRow label="Time Zone" value="JST (UTC+9)" />
-                <DataRow label="Driving Side" value="Left" />
+                <DataRow
+                  label="Time Zone"
+                  value={countryDetails.timezone?.join(", ") || "N/A"}
+                />
+                <DataRow
+                  label="Driving Side"
+                  value={
+                    countryDetails.drivingSide === "left" ? "Left" : "Right"
+                  }
+                />
+                <DataRow
+                  label="Calling Code"
+                  value={
+                    (countryDetails.callingCodes ?? [])
+                      .map((c) => `+${c}`)
+                      .join(", ") || "N/A"
+                  }
+                />
                 <DataRow
                   label="Capital City"
                   value={countryDetails.capitalCityName}
@@ -263,6 +279,14 @@ export function Dashboard() {
                 <DataRow
                   label="Popular Cities"
                   value={topCities.join(", ") || "N/A"}
+                />
+                <DataRow
+                  label="EU Member"
+                  value={countryDetails.europeanUnionMember ? "Yes" : "No"}
+                />
+                <DataRow
+                  label="Schengen Area"
+                  value={countryDetails.schengenAreaMember ? "Yes" : "No"}
                 />
               </div>
             </InfoCard>
