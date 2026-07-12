@@ -1,13 +1,7 @@
-export const SubTitle = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
+export function SubTitle({ description }: { description: string }) {
   return (
-    <h2 className={`text-3xl font-bold text-gray-900 mb-3 ${className || ""}`}>
-      {children}
-    </h2>
+    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
+      {description}
+    </p>
   );
-};
+}

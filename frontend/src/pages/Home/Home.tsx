@@ -9,6 +9,7 @@ import { FormHeader } from "../../components/Auth/FormHeader";
 import { Button } from "../../components/UI/Button";
 import Dropdown from "../../components/UI/Dropdown";
 import { useAuth } from "../../hooks/useAuth";
+import { SubTitle } from "../../components/UI/SubTitle";
 
 export function Home() {
   const { user } = useAuth();
@@ -59,9 +60,8 @@ export function Home() {
 
             <div className="space-y-8 mt-10">
               <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
-                  Select the country you want to travel to
-                </p>
+                <SubTitle description="Select the country you want to travel to" />
+
                 <Dropdown
                   name="country"
                   className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -72,9 +72,7 @@ export function Home() {
                 />
               </div>
               <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide uppercase">
-                  Select the month you want to explore
-                </p>
+                <SubTitle description="Select the month you want to explore" />
                 <Dropdown
                   name="month"
                   className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"

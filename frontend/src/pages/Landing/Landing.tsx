@@ -3,6 +3,9 @@ import { europeanCountries } from "../../common/constants";
 import { AppRoute } from "../../common/enums";
 import { FormHeader } from "../../components/Auth/FormHeader";
 import { Button } from "../../components/UI/Button";
+import { GiAncientRuins, GiCommercialAirplane } from "react-icons/gi";
+import { FaGlobeAmericas } from "react-icons/fa";
+import { FaVolcano } from "react-icons/fa6";
 
 export function Landing() {
   const router = useRouter();
@@ -35,7 +38,9 @@ export function Landing() {
             <div className="flex items-center space-x-4 text-white">
               <div className="flex items-center space-x-2">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-2xl">🌍</span>
+                  <span className="text-2xl text-blue-500">
+                    <FaGlobeAmericas />
+                  </span>
                 </div>
                 <span className="text-lg">
                   {europeanCountries.length} Countries
@@ -43,13 +48,17 @@ export function Landing() {
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-2xl">🏛️</span>
+                  <span className="text-2xl text-amber-500">
+                    <GiAncientRuins />
+                  </span>
                 </div>
                 <span className="text-lg">UNESCO Sites</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-2xl">🌋</span>
+                  <span className="text-2xl text-red-500">
+                    <FaVolcano />
+                  </span>
                 </div>
                 <span className="text-lg">Live Data</span>
               </div>
@@ -69,7 +78,9 @@ export function Landing() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 border border-blue-100">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center transform rotate-3 shadow-lg">
-                <span className="text-3xl">✈️</span>
+                <span className="text-3xl text-white-500">
+                  <GiCommercialAirplane />
+                </span>
               </div>
               <FormHeader
                 title="Welcome"
