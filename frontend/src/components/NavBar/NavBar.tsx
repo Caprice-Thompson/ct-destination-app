@@ -5,7 +5,7 @@ import { GoBell } from "react-icons/go";
 import type { EarthquakeNotificationData } from "../../api/api";
 import { NotificationPanel } from "../Notification/NotificationPanel";
 import { Button } from "../UI/Button";
-import { BookmarksBar } from "./BookmarkBar";
+import { BookmarkFolder } from "./BookmarkFolder";
 
 export interface NavButton {
   label: string;
@@ -133,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <FaRegFolder className="w-6 h-6" />
                 </button>
-                <BookmarksBar
+                <BookmarkFolder
                   isOpen={bookmarksOpen}
                   onClose={() => setBookmarksOpen(false)}
                 />

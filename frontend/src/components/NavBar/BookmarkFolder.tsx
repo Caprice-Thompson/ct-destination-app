@@ -5,7 +5,7 @@ import {
   removeBookmark,
 } from "../../utils/getBookmarks";
 
-export function BookmarksBar({
+export function BookmarkFolder({
   isOpen,
   onClose,
 }: {
