@@ -8,9 +8,6 @@ export interface ApplicationConfig {
     secretAccessKey: string;
     sessionToken?: string;
   };
-  database: {
-    connectionString: string;
-  };
   service: {
     name: string;
   };
@@ -30,7 +27,6 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     AWS_ACCESS_KEY_ID: z.string().default(""),
     AWS_SECRET_ACCESS_KEY: z.string().default(""),
     AWS_SESSION_TOKEN: z.string().optional(),
-    DATABASE_URL: z.string().default(""),
     DYNAMODB_EARTHQUAKES_TABLE: z.string().default(""),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
@@ -49,9 +45,6 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       region: parsedEnv.AWS_REGION,
       secretAccessKey: parsedEnv.AWS_SECRET_ACCESS_KEY,
       sessionToken: parsedEnv.AWS_SESSION_TOKEN ?? "",
-    },
-    database: {
-      connectionString: parsedEnv.DATABASE_URL ?? "",
     },
     service: {
       name: parsedEnv.SERVICE_NAME,

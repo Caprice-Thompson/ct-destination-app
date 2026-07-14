@@ -10,7 +10,6 @@ describe("makeCoordinatesRepository", () => {
       accessKeyId: "test",
       secretAccessKey: "test",
     },
-    database: { connectionString: "postgres://localhost/test" },
     service: { name: "earthquakes-test" },
     tables: { earthquakes: "eq-table" },
     urls: {
@@ -38,12 +37,18 @@ describe("makeCoordinatesRepository", () => {
     it("should fetch and return coordinates successfully", async () => {
       const deps = buildDependencies();
       const repository = makeCoordinatesRepository(deps);
-      const mockResponse = [
-        {
-          name: { common: "Spain", official: "Kingdom of Spain" },
-          latlng: [40, -3] as [number, number],
+      const mockResponse = {
+        data: {
+          objects: [
+            {
+              coordinates: {
+                lat: 40,
+                lng: -3,
+              },
+            },
+          ],
         },
-      ];
+      };
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
@@ -55,7 +60,8 @@ describe("makeCoordinatesRepository", () => {
       expect(result.latitude).toBe(40);
       expect(result.longitude).toBe(-3);
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://example.invalid/v3.1/name/Spain",
+        "https://example.invalid/v3.1?names.common=Spain",
+        expect.any(Object),
       );
       expect(deps.logger.info).toHaveBeenCalledWith(
         "Coordinates fetched successfully",
@@ -72,18 +78,25 @@ describe("makeCoordinatesRepository", () => {
       const repository = makeCoordinatesRepository(deps);
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: async () => [
-          {
-            name: { common: "United Kingdom", official: "UK" },
-            latlng: [54, -2] as [number, number],
+        json: async () => ({
+          data: {
+            objects: [
+              {
+                coordinates: {
+                  lat: 54,
+                  lng: -2,
+                },
+              },
+            ],
           },
-        ],
+        }),
       });
 
       await repository.getCoordinatesByCountryName("United Kingdom");
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://example.invalid/v3.1/name/United%20Kingdom",
+        "https://example.invalid/v3.1?names.common=United%20Kingdom",
+        expect.any(Object),
       );
     });
 
@@ -114,11 +127,15 @@ describe("makeCoordinatesRepository", () => {
       const repository = makeCoordinatesRepository(deps);
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: async () => [
-          {
-            name: { common: "Test", official: "Test" },
+        json: async () => ({
+          data: {
+            objects: [
+              {
+                coordinates: null,
+              },
+            ],
           },
-        ],
+        }),
       });
 
       await expect(

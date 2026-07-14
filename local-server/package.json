@@ -5,7 +5,7 @@
   "scripts": {
     "build": "cd ../country && npm run build && cd ../tourism && npm run build && cd ../earthquakes && npm run build && cd ../weather && npm run build && cd ../notifications && npm run build",
     "dev": "npm run build && nodemon",
-    "start": "npm run build && tsx --tsconfig ./tsconfig.json server.ts",
+    "start": "npm run build && tsx --tsconfig ./tsconfig.json ./src/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -5,16 +5,10 @@ export interface ApplicationConfig {
     secretAccessKey: string;
     sessionToken?: string;
   };
-  database: {
-    connectionString: string;
-  };
   service: {
     name: string;
   };
   tables: {
     weather: string;
-  };
-  urls: {
-    externalWeatherAPI: string;
   };
 }

@@ -101,8 +101,6 @@ export function createApiHandler<TResult>(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ error: "Internal server error" }),
       };
-    } finally {
-      await dependencies.rdsClient.closeConnection();
     }
   };
 

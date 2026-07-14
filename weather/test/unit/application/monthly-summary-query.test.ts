@@ -1,6 +1,6 @@
 import type { ApplicationConfig } from "@application/interfaces/config";
 import { getMonthlyWeatherSummary } from "@application/monthly-weather-summary/monthly-summary-query";
-import { Temperature, WeatherData } from "@domain/entities/weather";
+import { WeatherData } from "@domain/entities/weather";
 import type { Dependencies } from "@infrastructure/dependencies";
 import type { DbClient } from "../../../../shared/db/src/rds_client";
 
@@ -11,12 +11,8 @@ describe("getMonthlyWeatherSummary", () => {
       accessKeyId: "test",
       secretAccessKey: "test",
     },
-    database: { connectionString: "postgres://localhost/test" },
     service: { name: "weather-test" },
     tables: { weather: "weather-table" },
-    urls: {
-      externalWeatherAPI: "https://example.invalid/weather",
-    },
   };
 
   const buildDependencies = (
@@ -33,15 +29,11 @@ describe("getMonthlyWeatherSummary", () => {
         Dependencies["weatherRepository"]["getWeatherDataByCountry"]
       >,
     };
-    const externalWeatherAPIService = {
-      getWeatherData: jest.fn(),
-    };
 
     return {
       config: baseConfig,
       logger,
       rdsClient: {} as DbClient,
-      externalWeatherAPIService,
       weatherRepository,
       ...overrides,
     } as Dependencies;
@@ -74,28 +66,8 @@ describe("getMonthlyWeatherSummary", () => {
   it("should calculate average min and max temperatures for weather rows in target month", async () => {
     const dependencies = buildDependencies();
     const rows = [
-      new WeatherData(
-        "ES",
-        "Spain",
-        "2024-03-01",
-        "light",
-        new Temperature(10, 20),
-        "70",
-        "1010",
-        "10",
-        "8",
-      ),
-      new WeatherData(
-        "ES",
-        "Spain",
-        "2024-03-02",
-        "moderate",
-        new Temperature(12, 24),
-        "65",
-        "1012",
-        "9",
-        "10",
-      ),
+      new WeatherData("ES", "Spain", "Madrid", "2024-03-01", 26, 10, 8),
+      new WeatherData("ES", "Spain", "Madrid", "2024-03-02", 12, 24, 9),
     ];
     jest
       .mocked(dependencies.weatherRepository.getWeatherDataByCountry)
@@ -113,8 +85,8 @@ describe("getMonthlyWeatherSummary", () => {
       countryName: "Spain",
       month: "3",
       totalWeatherRecords: 2,
-      averageMinTemperature: 11,
-      averageMaxTemperature: 22,
+      averageMinTemperature: 19,
+      averageMaxTemperature: 17,
     });
   });
 

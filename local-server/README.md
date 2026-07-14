@@ -43,7 +43,7 @@ To use local mock data instead of calling the built Lambda handlers, set this in
 USE_MOCK_DATA=true
 ```
 
-Mock data is available for Spain, Japan, and Italy.
+Mock data is available for Spain and Italy.
 
 ## Available Endpoints
 
@@ -54,6 +54,3 @@ Mock data is available for Spain, Japan, and Italy.
 - `GET /api/weather?countryName=Spain&month=1` - Get monthly weather summary
 - `GET /health` - Health check
 
-## Frontend Configuration
-
-Update your frontend's Vite config to proxy API requests to this server during development.

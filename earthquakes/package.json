@@ -9,7 +9,8 @@
     "build": "esbuild src/api/*.ts src/api/handlers/*.ts --minify --bundle --target=es2020 --platform=node --sourcemap --outdir=dist --external:pg-native",
     "lint:fix": "biome check --write .",
     "lint": "biome lint --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "ingest:local": "tsx src/run-local-ingest.ts"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "esbuild": "^0.27.2",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
+    "tsx": "^4.23.1",
     "typescript": "^5.9.3"
   }
 }

@@ -1,7 +1,7 @@
 import {
   getEarthquakesSinceQuery,
   type GetEarthquakesSinceQuery,
-} from "@application/get-earthquakes-since/get-earthquakes-since-query";
+} from "@application/get-earthquakes-since-last-date/get-earthquakes-since-query";
 import type { Dependencies } from "@infrastructure/dependencies";
 import { type APIGatewayProxyEvent, createApiHandler } from "./wrappers";
 

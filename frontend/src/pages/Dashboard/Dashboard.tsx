@@ -229,62 +229,65 @@ export function Dashboard() {
         )}
 
         {/* Climate & Seismic */}
-        <section className="mb-10">
-          <TextTitle description="Climate & Seismic" />
-          <div className="grid lg:grid-cols-2 gap-4">
-            <InfoCard
-              title={`${convertMonthValue(month)} Weather`}
-              icon={<WiDaySunny />}
-              iconBg="bg-sky-500"
-            >
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                  <p className="text-2xl font-bold text-slate-900 mb-0.5">
-                    {weatherSummary.averageMinTemperature.toFixed(1)}°C
-                  </p>
-                  <p className="text-xs text-slate-500">Average minimum</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                  <p className="text-2xl font-bold text-slate-900 mb-0.5">
-                    {weatherSummary.averageMaxTemperature.toFixed(1)}°C
-                  </p>
-                  <p className="text-xs text-slate-500">Average maximum</p>
-                </div>
-              </div>
-              <p className="text-xs text-slate-400">
-                Based on realistic representation weather records.
-              </p>
-            </InfoCard>
-
-            {earthquakeStatistics &&
-              earthquakeStatistics.monthlyEarthquakePercentage > 0 && (
-                <InfoCard
-                  title="Earthquake Activity"
-                  icon={<WiEarthquake />}
-                  iconBg="bg-red-500"
-                >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <p className="text-2xl font-bold text-slate-900 mb-0.5">
-                        {`${earthquakeStatistics.monthlyEarthquakePercentage}%`}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Of earthquakes occur in {convertMonthValue(month)}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <p className="text-2xl font-bold text-slate-900 mb-0.5">
-                        {earthquakeStatistics.avgMagnitude?.toFixed(1) || "N/A"}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Average magnitude
-                      </p>
-                    </div>
+        {weatherSummary && weatherSummary.totalWeatherRecords > 0 && (
+          <section className="mb-10">
+            <TextTitle description="Climate & Seismic" />
+            <div className="grid lg:grid-cols-2 gap-4">
+              <InfoCard
+                title={`${convertMonthValue(month)} Weather`}
+                icon={<WiDaySunny />}
+                iconBg="bg-sky-500"
+              >
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                      {weatherSummary.averageMinTemperature.toFixed(1)}°C
+                    </p>
+                    <p className="text-xs text-slate-500">Average minimum</p>
                   </div>
-                </InfoCard>
-              )}
-          </div>
-        </section>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                      {weatherSummary.averageMaxTemperature.toFixed(1)}°C
+                    </p>
+                    <p className="text-xs text-slate-500">Average maximum</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Based on realistic representation weather records.
+                </p>
+              </InfoCard>
+
+              {earthquakeStatistics &&
+                earthquakeStatistics.monthlyEarthquakePercentage > 0 && (
+                  <InfoCard
+                    title="Earthquake Activity"
+                    icon={<WiEarthquake />}
+                    iconBg="bg-red-500"
+                  >
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                          {`${earthquakeStatistics.monthlyEarthquakePercentage}%`}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Of earthquakes occur in {convertMonthValue(month)}
+                        </p>
+                      </div>
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-2xl font-bold text-slate-900 mb-0.5">
+                          {earthquakeStatistics.avgMagnitude?.toFixed(1) ||
+                            "N/A"}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Average magnitude
+                        </p>
+                      </div>
+                    </div>
+                  </InfoCard>
+                )}
+            </div>
+          </section>
+        )}
 
         {/* Recent seismic events */}
         {earthquakeData && (
@@ -294,7 +297,11 @@ export function Dashboard() {
               title={`${country}'s Most Recent Earthquakes`}
               icon={<WiEarthquake />}
               iconBg="bg-amber-500"
-            >
+            >{earthquakeData.earthquakes.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                No recent earthquakes recorded in {country} for the last 25 years.
+              </p>
+            ) : (
               <div className="grid sm:grid-cols-2 gap-3">
                 {earthquakeData.earthquakes.map((eq) => (
                   <div
@@ -310,9 +317,10 @@ export function Dashboard() {
                   </div>
                 ))}
               </div>
-            </InfoCard>
-          </section>
-        )}
+            )}
+          </InfoCard>
+        </section>
+      )}
 
         <DashboardFooter />
       </div>
