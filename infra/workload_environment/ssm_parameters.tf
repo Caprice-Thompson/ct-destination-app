@@ -86,26 +86,14 @@ resource "aws_ssm_parameter" "rds_security_group_id" {
   }
 }
 
-resource "aws_ssm_parameter" "db_username" {
-  name      = "/main/db/USERNAME"
+resource "aws_ssm_parameter" "db_secret_arn" {
+  name      = "/main/db/SECRET_ARN"
   type      = "String"
-  value     = var.db_username
+  value     = aws_db_instance.main.master_user_secret[0].secret_arn
   overwrite = true
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-db-username"
-    Environment = var.environment
-  }
-}
-
-resource "aws_ssm_parameter" "db_password" {
-  name      = "/main/db/PASSWORD"
-  type      = "SecureString"
-  value     = var.db_password
-  overwrite = true
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-db-password"
+    Name        = "${var.project_name}-${var.environment}-db-secret-arn"
     Environment = var.environment
   }
 }

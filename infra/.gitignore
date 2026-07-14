@@ -23,9 +23,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Lambda deployment package
-lambda-package.zip
-
 # Lock file
 .terraform.lock.hcl
-notes.md

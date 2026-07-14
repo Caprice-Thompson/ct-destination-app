@@ -5,7 +5,7 @@ data "archive_file" "eq_monthly_stats" {
 }
 
 resource "aws_iam_role" "eq_monthly_stats_lambda_role" {
-  name = "${var.project_name}-${var.service_name}-eq_monthly_stats-role"
+  name = "${var.service_name}-eq_monthly_stats-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -21,7 +21,7 @@ resource "aws_iam_role" "eq_monthly_stats_lambda_role" {
   })
 
   tags = {
-    Name    = "${var.project_name}-${var.service_name}-eq_monthly_stats-role"
+    Name    = "${var.service_name}-eq_monthly_stats-role"
     Service = var.service_name
   }
 }
@@ -31,13 +31,13 @@ resource "aws_cloudwatch_log_group" "eq_monthly_stats_logs" {
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name    = "${var.project_name}-${var.service_name}-eq_monthly_stats-logs"
+    Name    = "${var.service_name}-eq_monthly_stats-logs"
     Service = var.service_name
   }
 }
 
 resource "aws_iam_role_policy" "eq_monthly_stats_lambda_policy" {
-  name = "${var.project_name}-${var.service_name}-eq_monthly_stats-policy"
+  name = "${var.service_name}-eq_monthly_stats-policy"
   role = aws_iam_role.eq_monthly_stats_lambda_role.id
 
   policy = jsonencode({
@@ -98,7 +98,7 @@ resource "aws_lambda_function" "eq_monthly_stats" {
   }
 
   tags = {
-    Name     = "${var.project_name}-${var.service_name}-eq-monthly-stats"
+    Name     = "${var.service_name}-eq-monthly-stats"
     Service  = var.service_name
     Function = "monthly-stats"
   }

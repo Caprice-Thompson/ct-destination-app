@@ -3,20 +3,6 @@ data "aws_ssm_parameter" "private_subnet_id" {
   name = "/main/infrastructure/PRIVATE_SUBNET_ID"
 }
 
-data "aws_ssm_parameter" "db_username" {
-  name = "/main/db/USERNAME"
-}
-
-data "aws_ssm_parameter" "db_password" {
-  name            = "/main/db/PASSWORD"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "rds_endpoint" {
-  name = "/tourism/db/RDS_ENDPOINT"
-}
-
-# Build Lambda deployment package
 data "archive_file" "get_tourism_information" {
   type        = "zip"
   source_dir  = "${path.module}/../../tourism/dist"
@@ -79,14 +65,9 @@ resource "aws_iam_role_policy" "get_tourism_information_lambda_policy" {
       {
         Effect = "Allow"
         Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
+          "secretsmanager:GetSecretValue"
         ]
-        Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/main/*",
-          data.aws_ssm_parameter.db_username.arn,
-          data.aws_ssm_parameter.db_password.arn
-        ]
+        Resource = aws_db_instance.main.master_user_secret[0].secret_arn
       },
       {
         Effect = "Allow"
@@ -108,7 +89,7 @@ resource "aws_lambda_function" "get_tourism_information" {
   filename         = data.archive_file.get_tourism_information.output_path
   function_name    = "${var.environment}-get-tourism-information"
   role             = aws_iam_role.get_tourism_information_lambda_role.arn
-  handler          = "get-tourism-information.getTourismInformationHandler"
+  handler          = "get-tourism-information.handler"
   source_code_hash = data.archive_file.get_tourism_information.output_base64sha256
   runtime          = var.lambda_runtime
   timeout          = var.lambda_timeout
@@ -121,18 +102,17 @@ resource "aws_lambda_function" "get_tourism_information" {
 
   environment {
     variables = {
-      DB_HOST           = data.aws_ssm_parameter.rds_endpoint.value
-      DB_PORT           = "5432"
-      DB_NAME           = var.db_name
-      DB_USERNAME_PARAM = data.aws_ssm_parameter.db_username.name
-      DB_PASSWORD_PARAM = data.aws_ssm_parameter.db_password.name
-      NODE_ENV          = var.node_env
-      LOG_LEVEL         = "info"
+      DB_HOST       = aws_db_instance.main.address
+      DB_PORT       = "5432"
+      DB_NAME       = var.db_name
+      DB_SECRET_ARN = aws_db_instance.main.master_user_secret[0].secret_arn
+      NODE_ENV      = var.node_env
+      LOG_LEVEL     = "info"
     }
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-tourism-information"
+    Name        = "${var.environment}-get-tourism-information"
     Environment = var.environment
     Service     = "tourism"
     Function    = "get-tourism-information"
@@ -152,7 +132,7 @@ resource "aws_ssm_parameter" "get_tourism_information_lambda" {
   overwrite = true
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-tourism-information-lambda-param"
+    Name        = "${var.environment}-get-tourism-information-lambda-param"
     Environment = var.environment
     Service     = "tourism"
   }

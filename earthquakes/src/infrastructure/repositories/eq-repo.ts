@@ -45,7 +45,9 @@ export function makeEarthquakeRepository({
       accessKeyId: config.aws.accessKeyId,
       secretAccessKey: config.aws.secretAccessKey,
     },
-    ...(process.env.AWS_ENDPOINT_URL && { endpoint: process.env.AWS_ENDPOINT_URL }),
+    ...(process.env.AWS_ENDPOINT_URL && {
+      endpoint: process.env.AWS_ENDPOINT_URL,
+    }),
   });
   const docClient = DynamoDBDocumentClient.from(ddbClient);
 
@@ -116,19 +118,24 @@ export function makeEarthquakeRepository({
 
     for (let i = 0; i < earthquakes.length; i += BATCH_SIZE) {
       const batch = earthquakes.slice(i, i + BATCH_SIZE);
-      const putRequests: EarthquakeDBItem[] = batch.map((eq) => ({
-        eventId: eq.eventId,
-        time: new Date(eq.date).getTime(),
-        name: eq.name,
-        magnitude: eq.magnitude,
-        date: eq.date,
-        type: eq.type,
-        tsunami: eq.tsunami,
-        place: eq.place,
-        country: findCountryInString(eq.place),
+      const putRequests = batch.map((eq) => ({
+        PutRequest: {
+          Item: {
+            countryName: findCountryInString(eq.place) || "Unknown",
+            eventId: eq.eventId,
+            time: new Date(eq.date).getTime(),
+            name: eq.name,
+            magnitude: eq.magnitude,
+            date: eq.date,
+            type: eq.type,
+            tsunami: eq.tsunami,
+            place: eq.place,
+            country: findCountryInString(eq.place) || "Unknown",
+          },
+        },
       }));
 
-      let requestItems: Record<string, EarthquakeDBItem[]> = {
+      let requestItems: any = {
         [tableName]: putRequests,
       };
 

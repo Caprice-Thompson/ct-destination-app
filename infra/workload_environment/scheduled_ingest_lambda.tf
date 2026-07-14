@@ -5,7 +5,7 @@ data "archive_file" "scheduled_ingest" {
 }
 
 resource "aws_iam_role" "scheduled_ingest_lambda_role" {
-  name = "${var.project_name}-${var.service_name}-scheduled-ingest-role"
+  name = "${var.service_name}-scheduled-ingest-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -21,7 +21,7 @@ resource "aws_iam_role" "scheduled_ingest_lambda_role" {
   })
 
   tags = {
-    Name    = "${var.project_name}-${var.service_name}-scheduled-ingest-role"
+    Name    = "${var.service_name}-scheduled-ingest-role"
     Service = var.service_name
   }
 }
@@ -31,13 +31,13 @@ resource "aws_cloudwatch_log_group" "scheduled_ingest_logs" {
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name    = "${var.project_name}-${var.service_name}-scheduled-ingest-logs"
+    Name    = "${var.service_name}-scheduled-ingest-logs"
     Service = var.service_name
   }
 }
 
 resource "aws_iam_role_policy" "scheduled_ingest_lambda_policy" {
-  name = "${var.project_name}-${var.service_name}-scheduled-ingest-policy"
+  name = "${var.service_name}-scheduled-ingest-policy"
   role = aws_iam_role.scheduled_ingest_lambda_role.id
 
   policy = jsonencode({
@@ -99,7 +99,7 @@ resource "aws_lambda_function" "scheduled_ingest" {
   }
 
   tags = {
-    Name     = "${var.project_name}-${var.service_name}-scheduled-ingest"
+    Name     = "${var.service_name}-scheduled-ingest"
     Service  = var.service_name
     Function = "scheduled-ingest"
   }

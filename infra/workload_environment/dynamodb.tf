@@ -40,7 +40,7 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   tags = {
-    Name    = "${var.service_name}-historical_earthquakes"
+    Name    = "${var.environment}-historical_earthquakes"
     Service = var.service_name
   }
 }

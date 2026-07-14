@@ -1,4 +1,4 @@
-# Variables
+# Variables for Workload Environment
 
 variable "aws_region" {
   description = "AWS region to deploy resources"
@@ -24,29 +24,52 @@ variable "service_name" {
   default     = "country"
 }
 
-variable "db_username" {
-  description = "Database master username"
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
   type        = string
-  default     = "/main/db/USERNAME"
-}
-
-variable "db_password" {
-  description = "Database master password"
-  type        = string
-  sensitive   = true
-  default     = "/main/db/PASSWORD"
+  default     = "10.0.0.0/16"
 }
 
 variable "db_name" {
-  description = "Database name"
+  description = "Database name shared across all microservices"
   type        = string
-  default     = "country"
+  default     = "destination_app"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "Allocated storage for RDS in GB"
+  type        = number
+  default     = 20
+}
+
+variable "db_engine_version" {
+  description = "PostgreSQL engine version"
+  type        = string
+  default     = "17"
 }
 
 variable "db_identifier" {
-  description = "db identifier name"
+  description = "RDS instance identifier"
   type        = string
-  default     = "country-db"
+  default     = "destination-db"
+}
+
+variable "enable_nat_gateway" {
+  description = "Enable NAT Gateway for private subnets"
+  type        = bool
+  default     = true
+}
+
+variable "db_backup_retention_days" {
+  description = "Number of days to retain automated backups (1-35). Free tier allows max 1 day."
+  type        = number
+  default     = 1
 }
 
 variable "node_env" {
@@ -77,4 +100,14 @@ variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
   default     = 3
+}
+
+variable "earthquakes_api_url" {
+  description = "External earthquakes data API URL"
+  type        = string
+}
+
+variable "rest_countries_api_url" {
+  description = "REST Countries API URL"
+  type        = string
 }

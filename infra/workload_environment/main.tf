@@ -6,12 +6,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4"
+    }
   }
 
-  # Remote backend for state management
   backend "s3" {
     bucket               = "destination-app-production-terraform-state"
-    key                  = "shared/terraform.tfstate"
+    key                  = "earthquakes/terraform.tfstate"
     region               = "eu-west-2"
     dynamodb_table       = "destination-app-production-terraform-locks"
     encrypt              = true
@@ -23,9 +26,17 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Data sources
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+data "aws_ssm_parameter" "earthquakes_api_url" {
+  name = "/earthquakes/api/EARTHQUAKES_API_URL"
+}
+
+data "aws_ssm_parameter" "rest_countries_api_url" {
+  name = "/earthquakes/api/REST_COUNTRIES_API_URL"
+}
+
 

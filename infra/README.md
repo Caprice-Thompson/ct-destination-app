@@ -1,59 +1,61 @@
 # Infrastructure Deployment with OpenTofu
 
-This directory contains OpenTofu (Terraform) configuration files for deploying the Country Destination App to AWS.
+This directory contains OpenTofu (Terraform) configuration files for deploying the Destination App to AWS.
 
-terraform init
-terraform plan
-terraform apply
+All infrastructure is deployed from the `workload_environment/` directory.
+
+```bash
+cd workload_environment
+tofu init
+tofu plan
+tofu apply
+```
 
 ## Architecture
 
 The infrastructure includes:
 
 - **VPC**: Custom VPC with public and private subnets across 2 availability zones
-- **Lambda Functions**:
-  - `list-country-info`: Handles GET requests via API Gateway
-  - `ingest-country-data`: Triggered daily by EventBridge to fetch and store country data
-- **RDS PostgreSQL**: Database for storing country information
-- **API Gateway**: REST API endpoint for querying country information
-- **EventBridge**: Scheduled rule for daily data ingestion
+- **RDS PostgreSQL 17**: Shared database (`destination_app`) with managed master password in Secrets Manager
+- **API Gateway**: Unified REST API with 7 endpoints
+- **Lambda Functions**: 7 microservice handlers (country, tourism, earthquakes, weather, notifications, etc.)
+- **DynamoDB**: Tables for historical earthquakes and weather data
+- **EventBridge**: Scheduled monthly ingestion of earthquake data
 - **Security Groups**: Proper network isolation between Lambda and RDS
-- **CloudWatch**: Log groups for Lambda functions
+- **CloudWatch**: Log groups for all Lambda functions
 
 ## Prerequisites
 
-1. **OpenTofu/Terraform installed** (already installed)
+1. **OpenTofu/Terraform installed**
 2. **AWS CLI configured** with appropriate credentials:
    ```bash
    aws configure
    ```
-3. **Node.js project built**:
+3. **All microservices built**:
    ```bash
-   cd ../country
-   npm install
-   npm run build
+   cd ../country && npm install && npm run build
+   cd ../tourism && npm install && npm run build
+   cd ../earthquakes && npm install && npm run build
+   cd ../weather && npm install && npm run build
+   cd ../notifications && npm install && npm run build
    ```
 
 ## Deployment Steps
 
 ### 1. Configure Variables
 
-Copy the example variables file and customize it:
-
-```bash
-cp terraform.tfvars.example terraform.tfvars
-```
-
-Edit `terraform.tfvars` and set your values:
+Edit `workload_environment/terraform.tfvars` and set your values:
 
 ```hcl
-aws_region   = "us-east-1"
-environment  = "dev"
-project_name = "ct-destination"
-db_username  = "dbadmin"
-db_password  = "your-secure-password-here"  # Use a strong password
-node_env     = "production"
+aws_region              = "eu-west-2"
+environment             = "main"
+project_name            = "ct-destination-app"
+node_env                = "production"
+rest_countries_api_url  = "https://api.restcountries.com/countries/v5"
+earthquakes_api_url     = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
 ```
+
+**Note**: The database master password is automatically generated and managed by AWS Secrets Manager. No manual password configuration needed.
 
 ### 2. Initialize OpenTofu
 
@@ -62,6 +64,7 @@ tofu init
 ```
 
 This will download the required provider plugins.
+cd workload_environment
 
 ### 3. Review the Deployment Plan
 
@@ -83,16 +86,14 @@ Type `yes` when prompted to confirm the deployment.
 
 ### 5. Run Database Migrations
 
-After deployment, you'll need to run migrations. First, get the RDS endpoint from outputs:
-
-```bash
-tofu output rds_endpoint
-```
-
-Then, from the `country` directory, run migrations:
+retrieve the RDS secret from AWS Secrets Manager and run migrations from the `country` directory:
 
 ```bash
 cd ../country
+# Get the secret ARN from Terraform outputs or AWS Secrets Manager
+tofu output rds_db_secret_arn  # From workload_environment/
+
+# Retrieve credentials and run migrations
 export DATABASE_URL="postgresql://dbadmin:your-password@<rds-endpoint>/countrydb"
 npm run db:migrate
 ```
@@ -105,38 +106,56 @@ Get your API endpoint:
 tofu output api_gateway_url
 ```
 
-Test the endpoint:
+Test the endpoint: # From workload_environment/
+
+````
+
+Test the endpoints:
 
 ```bash
-curl "https://<api-id>.execute-api.us-east-1.amazonaws.com/dev/country-info?countryName=France"
-```
+# Country information
+curl "https://<api-url>/main/country-info?countryName=France"
 
-## Managing Infrastructure
+# Tourism information
+curl "https://<api-url>/main/tourism-info?countryName=France"
+
+# Recent earthquakes
+curl "https://<api-url>/main/earthquakes?countryName=Chile"
+
+# Earthquake monthly statistics
+curl "https://<api-url>/main/earthquakes-monthly?countryName=Japan&month=2024-01"
+
+# Weather summary
+curl "https://<api-url>/main/weather?countryName=Kenya&month=2024-01"
+
+# Earthquake notifications
+curl "https://<api-url>/main/notifications" -H "Authorization: Bearer <user-token>
 
 ### View Outputs
 
 ```bash
 tofu output
-```
+````
 
 ### Update Infrastructure
 
 After making changes to the configuration:
+eu-west-2, pay-as-you-go):
 
-```bash
-tofu plan
-tofu apply
-```
+- **RDS db.t3.micro**: ~$15/month (free tier eligible)
+- **Lambda**: Pay per invocation (mostly free tier)
+- **API Gateway**: Pay per request (~$0.35 per million requests)
+- **DynamoDB**: On-demand pricing (~$1.25 per million write units, $0.25 per million read units)
+- **NAT Gateway**: ~$32/month (charged per hour and data processing)
+- **Data transfer**: Variable
 
-### Destroy Infrastructure
+**Total**: ~$50-70/month in production
 
-**Warning**: This will delete all resources including the database.
+To reduce costs:
 
-```bash
-tofu destroy
-```
-
-## Costs
+- Disable NAT Gateway if Lambda functions don't require internet access
+- Use DynamoDB on-demand billing (currently enabled)
+- Consider reserved capacity for predictable workloads
 
 Estimated monthly costs (us-east-1, dev environment):
 
@@ -166,9 +185,14 @@ To reduce costs:
 
 1. Increase timeout in `main.tf` (current: 30s for list, 300s for ingest)
 2. Optimize database queries
-3. Add connection pooling
+3. AB_HOST`: RDS endpoint
 
-### Build errors
+- `DB_PORT`: PostgreSQL port (5432)
+- `DB_NAME`: Database name (`destination_app`)
+- `DB_SECRET_ARN`: AWS Secrets Manager secret ARN for credentials
+- `NODE_ENV`: Node environment (production/development)
+- `LOG_LEVEL`: Logging level (info)
+- Service-specific: `DYNAMODB_EARTHQUAKES_TABLE`, `DYNAMODB_WEATHER_TABLE`, etc.
 
 Ensure the Lambda package is built:
 
@@ -184,24 +208,27 @@ The `dist` directory must exist before running `tofu apply`.
 Lambda functions receive these environment variables:
 
 - `DATABASE_URL`: PostgreSQL connection string
-- `NODE_ENV`: Node environment (production/development)
-- `LOG_LEVEL`: Logging level (info)
+- `NODE_ENV`: Node environment (product(add to `.gitignore`)
 
-## Security Notes
-
-1. **Never commit** `terraform.tfvars` with real credentials
-2. Use AWS Secrets Manager for production passwords
-3. Enable VPC Flow Logs for production
-4. Consider using RDS IAM authentication
-5. Implement API Gateway authentication (API keys, Cognito, etc.)
-
-## Next Steps
-
-For production deployments:
-
-1. Set up remote state (S3 + DynamoDB)
-2. Implement CI/CD pipeline
-3. Add monitoring and alerting
-4. Configure auto-scaling
-5. Set up multi-region deployment
-6. Implement proper secret management
+2. **Master password** is automatically generated and stored in AWS Secrets Manager (no manual password management)
+3. Enable VPC Flow Logs for production monitoring
+4. Implement API Gateway authentication (API keys, Cognito, etc.)
+5. Use IAM policies to restrict Lambda function permissions
+6. Enable encryption in transit and at rest for RDS and DynamoDB
+7. **Never commit** `terraform.tfvars` with real credentials
+8. Use AWS Secrets Manager for production passwords
+9. Enable VPC Flow Logs for production
+10. Consider using RDS IAM authentication
+11. Implement API Gateway authenticati for state locking)
+12. Implement CI/CD pipeline (GitHub Actions, GitLab CI, etc.)
+13. Add CloudWatch dashboards and alarms
+14. Configure Lambda auto-scaling based on concurrency
+15. Enable RDS Performance Insights and Enhanced Monitoring
+16. Implement multi-region deployment strategy
+17. Set up backup and disaster recovery procedures
+18. Set up remote state (S3 + DynamoDB)
+19. Implement CI/CD pipeline
+20. Add monitoring and alerting
+21. Configure auto-scaling
+22. Set up multi-region deployment
+23. Implement proper secret management

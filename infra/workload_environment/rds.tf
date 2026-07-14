@@ -1,3 +1,31 @@
+resource "aws_security_group" "lambda" {
+  name        = "${var.project_name}-${var.environment}-lambda-sg"
+  description = "Security group for Lambda functions in VPC"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "${var.environment}-lambda-sg"
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group_rule" "rds_allow_lambda" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds.id
+  source_security_group_id = aws_security_group.lambda.id
+  description              = "Allow Lambda to connect to RDS"
+}
+
 # RDS Subnet Group
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project_name}-${var.environment}-db-subnet-group"
@@ -40,7 +68,7 @@ resource "aws_security_group" "rds" {
 # RDS Parameter Group
 resource "aws_db_parameter_group" "main" {
   name   = "${var.project_name}-${var.environment}-postgres-params"
-  family = "postgres15"
+  family = "postgres17"
 
   parameter {
     name  = "log_connections"
@@ -70,9 +98,9 @@ resource "aws_db_instance" "main" {
   storage_type          = "gp2"
   storage_encrypted     = true
 
-  db_name  = "postgres"
-  username = var.db_username
-  password = var.db_password
+  db_name                     = "destination_app"
+  username                    = "destination"
+  manage_master_user_password = true
 
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
@@ -88,7 +116,7 @@ resource "aws_db_instance" "main" {
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-postgres"
+    Name        = "${var.environment}-postgres"
     Environment = var.environment
   }
 }

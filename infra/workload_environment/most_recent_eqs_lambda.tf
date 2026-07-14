@@ -104,7 +104,7 @@ resource "aws_lambda_function" "most_recent_eqs" {
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-most-recent-eqs"
+    Name        = "${var.environment}-most-recent-eqs"
     Environment = var.environment
     Service     = "earthquakes"
     Function    = "most-recent-eqs"
