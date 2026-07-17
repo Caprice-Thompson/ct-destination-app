@@ -53,16 +53,6 @@ resource "aws_iam_role_policy" "eq_monthly_stats_lambda_policy" {
         Resource = "${aws_cloudwatch_log_group.eq_monthly_stats_logs.arn}:*"
       },
       {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/*"
-        ]
-      },
-      {
         Sid    = "AllowDynamoDBQuery"
         Effect = "Allow"
         Action = [
@@ -80,7 +70,7 @@ resource "aws_iam_role_policy" "eq_monthly_stats_lambda_policy" {
 
 resource "aws_lambda_function" "eq_monthly_stats" {
   filename         = data.archive_file.eq_monthly_stats.output_path
-  function_name    = "${var.service_name}-eq-monthly-stats"
+  function_name    = "eq-monthly-stats"
   role             = aws_iam_role.eq_monthly_stats_lambda_role.arn
   handler          = "get-earthquake-monthly-summary.handler"
   source_code_hash = data.archive_file.eq_monthly_stats.output_base64sha256
@@ -91,7 +81,7 @@ resource "aws_lambda_function" "eq_monthly_stats" {
   environment {
     variables = {
       SERVICE_NAME               = var.service_name
-      DYNAMODB_EARTHQUAKES_TABLE = resource.aws_ssm_parameter.historical_earthquakes_dynamodb_table.value
+      DYNAMODB_EARTHQUAKES_TABLE = aws_dynamodb_table.historical_earthquakes.name
       NODE_ENV                   = var.node_env
       LOG_LEVEL                  = "info"
     }

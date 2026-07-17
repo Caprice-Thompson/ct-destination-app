@@ -19,7 +19,7 @@ The infrastructure includes:
 - **RDS PostgreSQL 17**: Shared database (`destination_app`) with managed master password in Secrets Manager
 - **API Gateway**: Unified REST API with 7 endpoints
 - **Lambda Functions**: 7 microservice handlers (country, tourism, earthquakes, weather, notifications, etc.)
-- **DynamoDB**: Tables for historical earthquakes and weather data
+- **DynamoDB**: Table for historical earthquakes
 - **EventBridge**: Scheduled monthly ingestion of earthquake data
 - **Security Groups**: Proper network isolation between Lambda and RDS
 - **CloudWatch**: Log groups for all Lambda functions

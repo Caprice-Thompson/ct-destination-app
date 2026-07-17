@@ -124,16 +124,3 @@ resource "aws_lambda_function" "list_weather_summary" {
     aws_cloudwatch_log_group.list_weather_summary_lambda_logs
   ]
 }
-
-resource "aws_ssm_parameter" "weather_dynamodb_table" {
-  name      = "/weather/db/WEATHER_DYNAMODB_TABLE"
-  type      = "String"
-  value     = aws_dynamodb_table.weather_data.name
-  overwrite = true
-
-  tags = {
-    Name        = "${var.environment}-weather-dynamodb-table"
-    Environment = var.environment
-    Service     = "weather"
-  }
-}

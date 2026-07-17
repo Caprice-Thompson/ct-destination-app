@@ -53,16 +53,6 @@ resource "aws_iam_role_policy" "scheduled_ingest_lambda_policy" {
         Resource = "${aws_cloudwatch_log_group.scheduled_ingest_logs.arn}:*"
       },
       {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/*"
-        ]
-      },
-      {
         Sid    = "AllowDynamoDBBatchWrite"
         Effect = "Allow"
         Action = [
@@ -89,10 +79,11 @@ resource "aws_lambda_function" "scheduled_ingest" {
 
   environment {
     variables = {
-      EARTHQUAKES_API_URL        = data.aws_ssm_parameter.earthquakes_api_url.value
-      REST_COUNTRIES_API_URL     = data.aws_ssm_parameter.rest_countries_api_url.value
+      EARTHQUAKES_API_URL            = var.earthquakes_api_url
+      REST_COUNTRIES_API_URL         = var.rest_countries_api_url
+      REST_COUNTRIES_AUTHORIZATION   = var.rest_countries_authorization
       SERVICE_NAME               = var.service_name
-      DYNAMODB_EARTHQUAKES_TABLE = resource.aws_ssm_parameter.historical_earthquakes_dynamodb_table.value
+      DYNAMODB_EARTHQUAKES_TABLE = aws_dynamodb_table.historical_earthquakes.name
       NODE_ENV                   = var.node_env
       LOG_LEVEL                  = "info"
     }

@@ -1,20 +1,14 @@
 output "api_gateway_url" {
-  description = "URL of the API Gateway"
-  value       = "${aws_api_gateway_stage.main.invoke_url}/earthquakes"
+  description = "Base URL of the API Gateway stage"
+  value       = aws_api_gateway_stage.main.invoke_url
 }
 
-output "lambda_function_name" {
-  description = "Name of the Lambda function"
-  value       = aws_lambda_function.most_recent_eqs.function_name
+output "rds_endpoint" {
+  description = "RDS instance endpoint hostname"
+  value       = aws_db_instance.main.address
 }
 
-output "lambda_function_arn" {
-  description = "ARN of the Lambda function"
-  value       = aws_lambda_function.most_recent_eqs.arn
+output "rds_db_secret_arn" {
+  description = "Secrets Manager ARN for the RDS master user password"
+  value       = aws_db_instance.main.master_user_secret[0].secret_arn
 }
-
-output "api_gateway_id" {
-  description = "ID of the API Gateway"
-  value       = aws_api_gateway_rest_api.main.id
-}
-

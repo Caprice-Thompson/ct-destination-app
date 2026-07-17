@@ -1,5 +1,5 @@
 resource "aws_security_group" "lambda" {
-  name        = "${var.project_name}-${var.environment}-lambda-sg"
+  name        = "${var.environment}-lambda-sg"
   description = "Security group for Lambda functions in VPC"
   vpc_id      = aws_vpc.main.id
 
@@ -28,18 +28,18 @@ resource "aws_security_group_rule" "rds_allow_lambda" {
 
 # RDS Subnet Group
 resource "aws_db_subnet_group" "main" {
-  name       = "${var.project_name}-${var.environment}-db-subnet-group"
+  name       = "${var.environment}-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-db-subnet-group"
+    Name        = "${var.environment}-db-subnet-group"
     Environment = var.environment
   }
 }
 
 # RDS Security Group
 resource "aws_security_group" "rds" {
-  name        = "${var.project_name}-${var.environment}-rds-sg"
+  name        = "${var.environment}-rds-sg"
   description = "Security group for RDS PostgreSQL instance"
   vpc_id      = aws_vpc.main.id
 
@@ -60,14 +60,14 @@ resource "aws_security_group" "rds" {
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-rds-sg"
+    Name        = "${var.environment}-rds-sg"
     Environment = var.environment
   }
 }
 
 # RDS Parameter Group
 resource "aws_db_parameter_group" "main" {
-  name   = "${var.project_name}-${var.environment}-postgres-params"
+  name   = "${var.environment}-postgres-params"
   family = "postgres17"
 
   parameter {
@@ -81,7 +81,7 @@ resource "aws_db_parameter_group" "main" {
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-postgres-params"
+    Name        = "${var.environment}-postgres-params"
     Environment = var.environment
   }
 }
@@ -98,8 +98,8 @@ resource "aws_db_instance" "main" {
   storage_type          = "gp2"
   storage_encrypted     = true
 
-  db_name                     = "destination_app"
-  username                    = "destination"
+  db_name                     = var.db_name
+  username                    = var.db_username
   manage_master_user_password = true
 
   db_subnet_group_name   = aws_db_subnet_group.main.name

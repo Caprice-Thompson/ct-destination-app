@@ -9,7 +9,7 @@ variable "aws_region" {
 variable "environment" {
   description = "Environment name"
   type        = string
-  default     = "production"
+  default     = "main"
 }
 
 variable "project_name" {
@@ -21,7 +21,7 @@ variable "project_name" {
 variable "service_name" {
   description = "Service domain name"
   type        = string
-  default     = "country"
+  default     = "ct"
 }
 
 variable "vpc_cidr" {
@@ -52,12 +52,6 @@ variable "db_engine_version" {
   description = "PostgreSQL engine version"
   type        = string
   default     = "17"
-}
-
-variable "db_identifier" {
-  description = "RDS instance identifier"
-  type        = string
-  default     = "destination-db"
 }
 
 variable "enable_nat_gateway" {
@@ -110,4 +104,22 @@ variable "earthquakes_api_url" {
 variable "rest_countries_api_url" {
   description = "REST Countries API URL"
   type        = string
+}
+
+variable "rest_countries_authorization" {
+  description = "Bearer token for REST Countries API"
+  type        = string
+  sensitive   = true
+}
+
+variable "population_api_url" {
+  description = "External city population API URL"
+  type        = string
+  default     = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records"
+}
+
+variable "db_username" {
+  description = "RDS username"
+  type = string
+  default = "destination"
 }

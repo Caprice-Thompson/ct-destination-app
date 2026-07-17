@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "historical_earthquakes" {
-  name           = "${var.service_name}-historical_earthquakes"
+  name           = "historical_earthquakes"
   billing_mode   = "PROVISIONED"
   read_capacity  = 1
   write_capacity = 1
@@ -40,7 +40,7 @@ resource "aws_dynamodb_table" "historical_earthquakes" {
   }
 
   tags = {
-    Name    = "${var.environment}-historical_earthquakes"
+    Name    = "historical_earthquakes"
     Service = var.service_name
   }
 }

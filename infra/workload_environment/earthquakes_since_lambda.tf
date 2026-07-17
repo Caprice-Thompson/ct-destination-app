@@ -5,7 +5,7 @@ data "archive_file" "get_earthquakes_since" {
 }
 
 resource "aws_iam_role" "get_earthquakes_since_lambda_role" {
-  name = "${var.project_name}-${var.environment}-get-earthquakes-since-role"
+  name = "${var.environment}-get-earthquakes-since-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -21,7 +21,7 @@ resource "aws_iam_role" "get_earthquakes_since_lambda_role" {
   })
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-earthquakes-since-role"
+    Name        = "${var.environment}-get-earthquakes-since-role"
     Environment = var.environment
     Service     = "earthquakes"
   }
@@ -32,14 +32,14 @@ resource "aws_cloudwatch_log_group" "get_earthquakes_since_lambda_logs" {
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-earthquakes-since-logs"
+    Name        = "${var.environment}-get-earthquakes-since-logs"
     Environment = var.environment
     Service     = "earthquakes"
   }
 }
 
 resource "aws_iam_role_policy" "get_earthquakes_since_lambda_policy" {
-  name = "${var.project_name}-${var.environment}-get-earthquakes-since-policy"
+  name = "${var.environment}-get-earthquakes-since-policy"
   role = aws_iam_role.get_earthquakes_since_lambda_role.id
 
   policy = jsonencode({
@@ -82,12 +82,13 @@ resource "aws_lambda_function" "get_earthquakes_since" {
 
   environment {
     variables = {
-      EARTHQUAKES_API_URL        = data.aws_ssm_parameter.earthquakes_api_url.value
-      REST_COUNTRIES_API_URL     = data.aws_ssm_parameter.rest_countries_api_url.value
-      SERVICE_NAME               = var.service_name
-      DYNAMODB_EARTHQUAKES_TABLE = aws_dynamodb_table.historical_earthquakes.name
-      NODE_ENV                   = var.node_env
-      LOG_LEVEL                  = "info"
+      EARTHQUAKES_API_URL            = var.earthquakes_api_url
+      REST_COUNTRIES_API_URL         = var.rest_countries_api_url
+      REST_COUNTRIES_AUTHORIZATION   = var.rest_countries_authorization
+      SERVICE_NAME                   = var.service_name
+      DYNAMODB_EARTHQUAKES_TABLE     = aws_dynamodb_table.historical_earthquakes.name
+      NODE_ENV                       = var.node_env
+      LOG_LEVEL                      = "info"
     }
   }
 

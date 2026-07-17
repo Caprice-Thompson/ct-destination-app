@@ -1,8 +1,3 @@
-# Data sources for existing SSM parameters (shared infrastructure)
-data "aws_ssm_parameter" "private_subnet_id" {
-  name = "/main/infrastructure/PRIVATE_SUBNET_ID"
-}
-
 data "archive_file" "get_tourism_information" {
   type        = "zip"
   source_dir  = "${path.module}/../../tourism/dist"
@@ -11,7 +6,7 @@ data "archive_file" "get_tourism_information" {
 
 # IAM Role for Lambda function
 resource "aws_iam_role" "get_tourism_information_lambda_role" {
-  name = "${var.project_name}-${var.environment}-get-tourism-information-role"
+  name = "${var.environment}-get-tourism-information-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -27,7 +22,7 @@ resource "aws_iam_role" "get_tourism_information_lambda_role" {
   })
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-tourism-information-role"
+    Name        = "${var.environment}-get-tourism-information-role"
     Environment = var.environment
     Service     = "tourism"
   }
@@ -39,7 +34,7 @@ resource "aws_cloudwatch_log_group" "get_tourism_information_lambda_logs" {
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-get-tourism-information-logs"
+    Name        = "${var.environment}-get-tourism-information-logs"
     Environment = var.environment
     Service     = "tourism"
   }
@@ -47,7 +42,7 @@ resource "aws_cloudwatch_log_group" "get_tourism_information_lambda_logs" {
 
 # IAM Policy for Lambda function
 resource "aws_iam_role_policy" "get_tourism_information_lambda_policy" {
-  name = "${var.project_name}-${var.environment}-get-tourism-information-policy"
+  name = "${var.environment}-get-tourism-information-policy"
   role = aws_iam_role.get_tourism_information_lambda_role.id
 
   policy = jsonencode({
@@ -96,7 +91,7 @@ resource "aws_lambda_function" "get_tourism_information" {
   memory_size      = var.lambda_memory
 
   vpc_config {
-    subnet_ids         = [data.aws_ssm_parameter.private_subnet_id.value]
+    subnet_ids         = aws_subnet.private[*].id
     security_group_ids = [aws_security_group.lambda.id]
   }
 
@@ -122,19 +117,5 @@ resource "aws_lambda_function" "get_tourism_information" {
     aws_iam_role_policy.get_tourism_information_lambda_policy,
     aws_cloudwatch_log_group.get_tourism_information_lambda_logs
   ]
-}
-
-# SSM Parameter for Lambda function name
-resource "aws_ssm_parameter" "get_tourism_information_lambda" {
-  name      = "/${var.service_name}/main/GET_TOURISM_INFORMATION_LAMBDA"
-  type      = "String"
-  value     = aws_lambda_function.get_tourism_information.function_name
-  overwrite = true
-
-  tags = {
-    Name        = "${var.environment}-get-tourism-information-lambda-param"
-    Environment = var.environment
-    Service     = "tourism"
-  }
 }
 

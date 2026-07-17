@@ -5,7 +5,7 @@ data "archive_file" "most_recent_eqs" {
 }
 
 resource "aws_iam_role" "most_recent_eqs_lambda_role" {
-  name = "${var.project_name}-${var.environment}-most-recent-eqs-role"
+  name = "most-recent-eqs-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -55,16 +55,6 @@ resource "aws_iam_role_policy" "most_recent_eqs_lambda_policy" {
         Resource = "${aws_cloudwatch_log_group.most_recent_eqs_lambda_logs.arn}:*"
       },
       {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = [
-          "arn:aws:ssm:${var.aws_region}:*:parameter/*"
-        ]
-      },
-      {
         Sid    = "AllowDynamoDBAccess"
         Effect = "Allow"
         Action = [
@@ -85,7 +75,7 @@ resource "aws_iam_role_policy" "most_recent_eqs_lambda_policy" {
 
 resource "aws_lambda_function" "most_recent_eqs" {
   filename         = data.archive_file.most_recent_eqs.output_path
-  function_name    = "${var.environment}-most-recent-eqs"
+  function_name    = "most-recent-eqs"
   role             = aws_iam_role.most_recent_eqs_lambda_role.arn
   handler          = "get-most-recent-earthquakes.handler"
   source_code_hash = data.archive_file.most_recent_eqs.output_base64sha256
@@ -95,8 +85,9 @@ resource "aws_lambda_function" "most_recent_eqs" {
 
   environment {
     variables = {
-      EARTHQUAKES_API_URL    = data.aws_ssm_parameter.earthquakes_api_url.value
-      REST_COUNTRIES_API_URL = data.aws_ssm_parameter.rest_countries_api_url.value
+      EARTHQUAKES_API_URL            = var.earthquakes_api_url
+      REST_COUNTRIES_API_URL         = var.rest_countries_api_url
+      REST_COUNTRIES_AUTHORIZATION   = var.rest_countries_authorization
       SERVICE_NAME           = var.service_name
       NODE_ENV               = var.node_env
       LOG_LEVEL              = "info"
@@ -104,7 +95,7 @@ resource "aws_lambda_function" "most_recent_eqs" {
   }
 
   tags = {
-    Name        = "${var.environment}-most-recent-eqs"
+    Name        = "most-recent-eqs"
     Environment = var.environment
     Service     = "earthquakes"
     Function    = "most-recent-eqs"

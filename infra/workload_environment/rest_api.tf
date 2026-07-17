@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "main" {
-  name        = "${var.project_name}-${var.environment}-api"
+  name        = "${var.environment}-api"
   description = "Unified API Gateway for Destination App"
 
   endpoint_configuration {
@@ -7,7 +7,7 @@ resource "aws_api_gateway_rest_api" "main" {
   }
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-api"
+    Name        = "${var.environment}-api"
     Environment = var.environment
   }
 }
@@ -266,7 +266,7 @@ resource "aws_api_gateway_stage" "main" {
   stage_name    = var.environment
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-api-stage"
+    Name        = "${var.environment}-api-stage"
     Environment = var.environment
   }
 }

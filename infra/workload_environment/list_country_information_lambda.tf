@@ -10,20 +10,21 @@ resource "aws_lambda_function" "list_country_information" {
   memory_size      = var.lambda_memory
 
   vpc_config {
-    subnet_ids         = [data.aws_ssm_parameter.private_subnet_id.value]
+    subnet_ids         = aws_subnet.private[*].id
     security_group_ids = [aws_security_group.lambda.id]
   }
 
   environment {
     variables = {
-      DB_HOST                = aws_db_instance.main.address
-      DB_PORT                = "5432"
-      DB_NAME                = var.db_name
-      DB_SECRET_ARN          = aws_db_instance.main.master_user_secret[0].secret_arn
-      NODE_ENV               = var.node_env
-      LOG_LEVEL              = "info"
-      REST_COUNTRIES_API_URL = data.aws_ssm_parameter.country_rest_countries_api_url.value
-      POPULATION_API_URL     = data.aws_ssm_parameter.population_api_url.value
+      DB_HOST                      = aws_db_instance.main.address
+      DB_PORT                      = "5432"
+      DB_NAME                      = var.db_name
+      DB_SECRET_ARN                = aws_db_instance.main.master_user_secret[0].secret_arn
+      NODE_ENV                     = var.node_env
+      LOG_LEVEL                    = "info"
+      REST_COUNTRIES_API_URL       = var.rest_countries_api_url
+      REST_COUNTRIES_AUTHORIZATION = var.rest_countries_authorization
+      POPULATION_API_URL           = var.population_api_url
     }
   }
 
@@ -39,23 +40,12 @@ resource "aws_lambda_function" "list_country_information" {
   ]
 }
 
-# Data sources for existing SSM parameters
-data "aws_ssm_parameter" "country_rest_countries_api_url" {
-  name = "/country/api/REST_COUNTRIES_API_URL"
-}
-
-data "aws_ssm_parameter" "population_api_url" {
-  name = "/country/api/POPULATION_API_URL"
-}
-
-# Build Lambda deployment packages
 data "archive_file" "list_country_information" {
   type        = "zip"
   source_dir  = "${path.module}/../../country/dist"
   output_path = "${path.module}/.terraform/lambda-packages/list-country-information.zip"
 }
 
-# IAM Role for Lambda function
 resource "aws_iam_role" "list_country_information_lambda_role" {
   name = "${var.environment}-list-country-information-role"
 
@@ -78,20 +68,18 @@ resource "aws_iam_role" "list_country_information_lambda_role" {
   }
 }
 
-# CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "list_country_information_lambda_logs" {
   name              = "/aws/lambda/${var.environment}-list-country-information"
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-list-country-information-logs"
+    Name        = "${var.environment}-list-country-information-logs"
     Environment = var.environment
   }
 }
 
-# IAM Policy for Lambda function
 resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
-  name = "${var.project_name}-${var.environment}-list-country-information-policy"
+  name = "${var.environment}-list-country-information-policy"
   role = aws_iam_role.list_country_information_lambda_role.id
 
   policy = jsonencode({
@@ -126,13 +114,4 @@ resource "aws_iam_role_policy" "list_country_information_lambda_policy" {
       }
     ]
   })
-}
-
-
-
-resource "aws_ssm_parameter" "list_country_information_lambda" {
-  name      = "/${var.service_name}/main/LIST_COUNTRY_INFORMATION_LAMBDA"
-  type      = "String"
-  value     = aws_lambda_function.list_country_information.function_name
-  overwrite = true
 }
