@@ -1,5 +1,10 @@
 import type { CountryInformationRepository } from "@application/interfaces/repositories";
-import { Coordinates, CountryFacts, Currency, MapDetails } from "@domain/entities/country-facts";
+import {
+  Coordinates,
+  CountryFacts,
+  Currency,
+  MapDetails,
+} from "@domain/entities/country-facts";
 import type { Dependencies } from "@infrastructure/dependencies";
 
 export function makeCountryInformationRepository({
@@ -7,7 +12,9 @@ export function makeCountryInformationRepository({
   rdsClient,
 }: Pick<Dependencies, "logger" | "rdsClient">): CountryInformationRepository {
   return {
-    async getCountryInformation(countryName: string): Promise<CountryFacts | null> {
+    async getCountryInformation(
+      countryName: string,
+    ): Promise<CountryFacts | null> {
       try {
         logger.debug("Starting to fetch country information from database", {
           countryName,
@@ -43,7 +50,9 @@ export function makeCountryInformationRepository({
           return null;
         }
 
-        logger.info("Country information fetched successfully", { countryName });
+        logger.info("Country information fetched successfully", {
+          countryName,
+        });
 
         return new CountryFacts({
           countryCode: result.country_code,
@@ -51,11 +60,18 @@ export function makeCountryInformationRepository({
           capitalCityName: result.capital,
           flagUrl: result.flag_svg,
           languages: result.languages ? result.languages.split(",") : [],
-          currency: result.currencies ? new Currency(result.currencies, "") : new Currency("", ""),
+          currency: result.currencies
+            ? new Currency(result.currencies, "")
+            : new Currency("", ""),
           coordinates: new Coordinates(result.latitude, result.longitude),
-          maps: new MapDetails(result.google_maps_url, result.open_street_maps_url),
+          maps: new MapDetails(
+            result.google_maps_url,
+            result.open_street_maps_url,
+          ),
           timezone: result.timezones ? result.timezones : [],
-          callingCodes: result.calling_codes ? result.calling_codes.split(",") : [],
+          callingCodes: result.calling_codes
+            ? result.calling_codes.split(",")
+            : [],
           drivingSide: result.driving_side || "right",
           europeanUnionMember: result.is_eu,
           schengenAreaMember: result.is_schengen,

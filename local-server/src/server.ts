@@ -12,9 +12,7 @@ import express, {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from .env.local file
-
-dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env.local") });
 dotenv.config();
 
 const app = express();
@@ -35,7 +33,9 @@ type LambdaResponse = {
 type LambdaHandler = (event: LambdaEvent) => Promise<LambdaResponse>;
 
 const importBuiltHandler = async (relativePath: string) => {
-  const module = (await import(new URL(relativePath, import.meta.url).href)) as {
+  const module = (await import(
+    new URL(relativePath, import.meta.url).href
+  )) as {
     handler: LambdaHandler;
   };
 
@@ -45,29 +45,32 @@ const importBuiltHandler = async (relativePath: string) => {
 const mockData = USE_MOCK_DATA
   ? {
       countries: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/countries.json"), "utf-8"),
+        fs.readFileSync(
+          path.join(__dirname, "../mocks/countries.json"),
+          "utf-8",
+        ),
       ),
       tourism: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/tourism.json"), "utf-8"),
+        fs.readFileSync(path.join(__dirname, "../mocks/tourism.json"), "utf-8"),
       ),
       earthquakes: JSON.parse(
         fs.readFileSync(
-          path.join(__dirname, "mocks/earthquakes.json"),
+          path.join(__dirname, "../mocks/earthquakes.json"),
           "utf-8",
         ),
       ),
       earthquakeStatistics: JSON.parse(
         fs.readFileSync(
-          path.join(__dirname, "mocks/earthquake-statistics.json"),
+          path.join(__dirname, "../mocks/earthquake-statistics.json"),
           "utf-8",
         ),
       ),
       weather: JSON.parse(
-        fs.readFileSync(path.join(__dirname, "mocks/weather.json"), "utf-8"),
+        fs.readFileSync(path.join(__dirname, "../mocks/weather.json"), "utf-8"),
       ),
       notifications: JSON.parse(
         fs.readFileSync(
-          path.join(__dirname, "mocks/notifications.json"),
+          path.join(__dirname, "../mocks/notifications.json"),
           "utf-8",
         ),
       ),
@@ -100,7 +103,7 @@ app.get("/api/countries", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../country/dist/list-country-information.js",
+      "../../country/dist/list-country-information.js",
     );
 
     const event = {
@@ -136,7 +139,7 @@ app.get("/api/tourism", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../tourism/dist/get-tourism-information.js",
+      "../../tourism/dist/get-tourism-information.js",
     );
 
     const event = {
@@ -173,7 +176,7 @@ app.get("/api/earthquakes", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../earthquakes/dist/get-most-recent-earthquakes.js",
+      "../../earthquakes/dist/get-most-recent-earthquakes.js",
     );
 
     const event = {
@@ -204,7 +207,7 @@ app.get("/api/earthquakes/since", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../earthquakes/dist/get-earthquakes-since.js",
+      "../../earthquakes/dist/get-earthquakes-since.js",
     );
 
     const event = {
@@ -250,7 +253,7 @@ app.get("/api/earthquakes/statistics", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../earthquakes/dist/get-earthquake-monthly-summary.js",
+      "../../earthquakes/dist/get-earthquake-monthly-summary.js",
     );
 
     const event = {
@@ -282,7 +285,7 @@ app.get("/api/notifications", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../notifications/dist/get-eq-notifications.js",
+      "../../notifications/dist/get-eq-notifications.js",
     );
 
     const event = {
@@ -328,7 +331,7 @@ app.get("/api/weather", async (req: Request, res: Response) => {
     }
 
     const handler = await importBuiltHandler(
-      "../weather/dist/list-weather-summary.js",
+      "../../weather/dist/list-weather-summary.js",
     );
 
     const event = {
@@ -344,57 +347,6 @@ app.get("/api/weather", async (req: Request, res: Response) => {
       error: "Internal server error",
       message: error instanceof Error ? error.message : "Unknown error",
     });
-  }
-});
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-app.get("/api/ai/weather", async (req: Request, res: Response) => {
-  try {
-    const { countryName, month } = req.query;
-
-    if (!countryName || typeof countryName !== "string") {
-      return res.status(400).json({ error: "countryName is required" });
-    }
-
-    if (!month || typeof month !== "string") {
-      return res.status(400).json({ error: "month is required" });
-    }
-
-    const monthIndex = parseInt(month, 10) - 1;
-    const monthName = MONTH_NAMES[monthIndex] ?? month;
-
-    const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434";
-    const prompt = `Give me a single number in degrees Celsius for the average temperature in ${countryName} in ${monthName}. Reply with only the number, nothing else.`;
-
-    const ollamaResponse = await fetch(`${ollamaUrl}/api/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "llama3.2:1b", prompt, stream: false }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!ollamaResponse.ok) {
-      return res.status(503).json({ error: "AI service unavailable" });
-    }
-
-    const ollamaData = (await ollamaResponse.json()) as { response: string };
-    const parsed = parseFloat(ollamaData.response?.trim());
-
-    if (isNaN(parsed)) {
-      return res.status(422).json({ error: "Could not parse AI response" });
-    }
-
-    res.json({ temperature: parsed });
-  } catch (error) {
-    if (error instanceof Error && error.name === "TimeoutError") {
-      return res.status(503).json({ error: "AI service timed out" });
-    }
-    console.error("Error in /api/ai/weather:", error);
-    res.status(503).json({ error: "AI service unavailable" });
   }
 });
 

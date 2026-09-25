@@ -1,5 +1,6 @@
 import process from "node:process";
 import { z } from "zod";
+import { ConfigurationException } from "./exceptions";
 
 export interface ApplicationConfig {
   aws: {
@@ -34,7 +35,13 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     SERVICE_NAME: z.string(),
   });
 
-  const parsedEnv = schema.parse(process.env);
+  const parseResult = schema.safeParse(process.env);
+
+  if (!parseResult.success) {
+    throw new ConfigurationException(parseResult.error);
+  }
+
+  const parsedEnv = parseResult.data;
 
   // const encodedPGPassword = encodeURIComponent(process.env.PGPASSWORD ?? "");
   // const connectionString = `postgresql://${process.env.PGUSER}:${encodedPGPassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
