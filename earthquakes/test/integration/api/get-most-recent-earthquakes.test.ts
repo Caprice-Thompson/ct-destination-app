@@ -28,12 +28,12 @@ describe("get-most-recent-earthquakes handler", () => {
       accessKeyId: "test",
       secretAccessKey: "test",
     },
-    database: { connectionString: "postgres://localhost/test" },
     service: { name: "earthquakes-test" },
     tables: { earthquakes: "eq-table" },
     urls: {
       usgsApi: "https://example.invalid/fdsnws/event/1/query",
       restCountriesApiUrl: "https://example.invalid/v3.1",
+      restCountriesAuthorization: "fake-auth",
     },
   };
 
@@ -46,9 +46,6 @@ describe("get-most-recent-earthquakes handler", () => {
         warn: jest.fn(),
         error: jest.fn(),
       },
-      rdsClient: {
-        closeConnection: jest.fn().mockResolvedValue(undefined),
-      } as unknown as DbClient,
       coordinatesRepository: {
         getCoordinatesByCountryName: jest.fn(),
       },
@@ -126,7 +123,6 @@ describe("get-most-recent-earthquakes handler", () => {
       expect(body.earthquakes[0].name).toBe("Mock location A");
       expect(body.earthquakes[0].magnitude).toBe(4.3);
       expect(body.countryName).toBe("Spain");
-      expect(mockDependencies.rdsClient.closeConnection).toHaveBeenCalled();
     });
 
     it("should return empty earthquakes array when USGS returns none", async () => {
@@ -218,7 +214,6 @@ describe("get-most-recent-earthquakes handler", () => {
       const body = JSON.parse(response.body) as { error: string };
       expect(body.error).toBe("Internal server error");
       expect(mockDependencies.logger.error).toHaveBeenCalled();
-      expect(mockDependencies.rdsClient.closeConnection).toHaveBeenCalled();
     });
 
     it("should return 500 when USGS service fails", async () => {

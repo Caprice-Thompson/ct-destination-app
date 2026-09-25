@@ -7,6 +7,7 @@ export interface ApplicationConfig {
   };
   api: {
     restCountriesUrl: string;
+    restCountriesAuthorization: string;
     populationApiUrl: string;
   };
 }

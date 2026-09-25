@@ -1,0 +1,582 @@
+city,country,population,createdAt
+Cairo,Egypt,"10044894",
+Tehran,Iran,"9033003",
+Mexico City,Mexico,"9209944",
+Riyadh,Saudi Arabia,"6694000",
+Delhi,India,"16753235",
+Chengdu,China,"20937757",
+Chongqing,China,"32054159",
+Nanjing,China,"9314685",
+Baghdad,Iraq,"8126755",
+Istanbul,Turkey,"15519267",
+Santiago,Chile,"236453",
+Wuhan,China,"12447718",
+New York City,United States,"8804190",
+Kolkata,India,"4496694",
+Surat,India,"4466826",
+Manila,Philippines,"1780148",
+Madrid,Spain,"3266126",
+Xi'an,China,"12183280",
+Houston,United States,"2325502",
+Buenos Aires,Argentina,"3054300",
+Suzhou,China,"12748262",
+Dallas,United States,"1345047",
+Toronto,Canada,"2731571",
+Dar es Salaam,Tanzania,"5383728",
+Miami,United States,"470914",
+Singapore,Singapore,"5638700",
+Belo Horizonte,Brazil,"2502557",
+Atlanta,United States,"498715",
+Mumbai,India,"12478447",
+Philadelphia,United States,"1526006",
+Fukuoka,Japan,"1588924",
+Johannesburg,South Africa,"4803262",
+Lima,Peru,"8894000",
+Khartoum,Sudan,"1410858",
+Saint Petersburg,Russia,"5601911",
+Barcelona,Spain,"1620343",
+Qingdao,China,"10071722",
+Washington,United States,"702455",
+Dalian,China,"7450785",
+Pune,India,"3124458",
+Beijing,China,"21893095",
+Alexandria,Egypt,"5441866",
+Jinan,China,"9202432",
+Harbin,China,"10635971",
+Foshan,China,"9498863",
+Guadalajara,Mexico,"1385621",
+Hong Kong,Hong Kong,"7298600",
+Hyderabad,India,"6993262",
+Chennai,India,"6727000",
+Kinshasa,DR Congo,"17071000",
+Shenyang,China,"8294000",
+Guangzhou,China,"18676605",
+London,United Kingdom,"8825001",
+Tianjin,China,"13866009",
+Bangkok,Thailand,"8305218",
+Los Angeles,United States,"3990456",
+Lahore,Pakistan,"13004135",
+Dongguan,China,"10466625",
+Paris,France,"2148271",
+Ahmedabad,India,"5570585",
+Kuala Lumpur,Malaysia,"1768000",
+Shenzhen,China,"17494398",
+Luanda,Angola,"2165867",
+Seoul,South Korea,"10013781",
+Bangalore,India,"8443675",
+Moscow,Russia,"13200000",
+Hangzhou,China,"11936010",
+Karachi,Pakistan,"20382881",
+Chicago,United States,"2746388",
+Tokyo,Japan,"13515271",
+São Paulo,Brazil,"12252023",
+Nagoya,Japan,"2320361",
+Jakarta,Indonesia,"10154134",
+Shanghai,China,"24870895",
+Dhaka,Bangladesh,"10295407",
+Osaka,Japan,"2725006",
+Lagos,Nigeria,,
+Ho Chi Minh City,Vietnam,"7431000",
+Bogotá,Colombia,"7963000",
+Rio de Janeiro,Brazil,"6520000",
+Yangon,Myanmar,"4728524",
+Moscow,Russia,"12756500",
+Paris,France,"11418300",
+London,United Kingdom,"9927020",
+Madrid,Spain,"6834320",
+Barcelona,Spain,"5752150",
+Saint Petersburg,Russia,"5608910",
+Rome,Italy,"4361370",
+Berlin,Germany,"3584240",
+Milan,Italy,"3174960",
+Athens,Greece,"3156620",
+Lisbon,Portugal,"3040920",
+Kiev,Ukraine,"3015780",
+Manchester,United Kingdom,"2853370",
+Birmingham,United Kingdom,"2724410",
+Naples,Italy,"2185610",
+Brussels,Belgium,"2150320",
+Minsk,Belarus,"2075900",
+Vienna,Austria,"2020320",
+Turin,Italy,"181430",
+Warsaw,Poland,"180019",
+Lyon,France,"179972",
+Hamburg,Germany,"178889",
+Budapest,Hungary,"178365",
+Stockholm,Sweden,"175472",
+Bucharest,Romania,"174992",
+Glasgow,United Kingdom,"173028",
+Novosibirsk,Russia,"171044",
+Marseille,France,"165410",
+Munich,Germany,"159605",
+Yekaterinburg,Russia,"154000",
+Zurich,Switzerland,"146685",
+Belgrade,Serbia,"141501",
+Kharkiv,Ukraine,"141376",
+Copenhagen,Denmark,"140968",
+Helsinki,Finland,"136216",
+Porto,Portugal,"133900",
+Prague,Czechia,"133535",
+Dublin,Ireland,"131382",
+Kazan,Russia,"130207",
+Sofia,Bulgaria,"128487",
+Nizhniy Novgorod,Russia,"124959",
+Chelyabinsk,Russia,"124801",
+Amsterdam,Netherlands,"119613",
+Krasnoyarsk,Russia,"118127",
+Omsk,Russia,"118110",
+Samara,Russia,"115340",
+Ufa,Russia,"114969",
+Oslo,Norway,"113011",
+Lille,France,"109822",
+Toulouse,France,"108890",
+Voronezh,Russia,"108773",
+Perm,Russia,"108744",
+Rostov-na-Donu,Russia,"107448",
+Antwerp,Belgium,"106866",
+Rotterdam,Netherlands,"103082",
+Bordeaux,France,"102599",
+Krasnodar,Russia,"102248",
+Odessa,Ukraine,"100155",
+Volgograd,Russia,"99169",
+Southampton,United Kingdom,"97413",
+Koeln,Germany,"96339",
+Nice,France,"96117",
+Liverpool,United Kingdom,"93532",
+Tyumen,Russia,"93329",
+Bergamo,Italy,"92716",
+Dnipro,Ukraine,"92648",
+Donetsk,Ukraine,"87062",
+Palermo,Italy,"85276",
+Valencia,Spain,"84307",
+Newcastle upon Tyne,United Kingdom,"83994",
+Saratov,Russia,"83721",
+Nottingham,United Kingdom,"82550",
+Bologna,Italy,"82170",
+Thessaloniki,Greece,"81601",
+Zaporizhia,Ukraine,"79621",
+Krakow,Poland,"76935",
+Sheffield,United Kingdom,"76227",
+Zaragoza,Spain,"74484",
+The Hague,Netherlands,"72934",
+Bristol,United Kingdom,"72593",
+Lviv,Ukraine,"71750",
+Nantes,France,"71695",
+Florence,Italy,"71524",
+Sevilla,Spain,"70320",
+Tol'yatti,Russia,"70287",
+Padova,Italy,"70286",
+Liege,Belgium,"69076",
+Zagreb,Croatia,"68476",
+Genoa,Italy,"67501",
+Busto Arsizio,Italy,"67091",
+Belfast,United Kingdom,"65659",
+Izhevsk,Russia,"65311",
+Geneva,Switzerland,"65008",
+Frankfurt am Main,Germany,"65000",
+Gothenburg,Sweden,"64984",
+Irkutsk,Russia,"64940",
+Verona,Italy,"64627",
+Khabarovsk,Russia,"64533",
+Lodz,Poland,"64487",
+Duesseldorf,Germany,"64419",
+Barnaul,Russia,"64282",
+Wroclaw,Poland,"64209",
+Seregno,Italy,"64152",
+Stuttgart,Germany,"63762",
+Brighton,United Kingdom,"63732",
+Bari,Italy,"62693",
+Skopje,North Macedonia,"62549",
+Ulyanovsk,Russia,"62279",
+Yaroslavl,Russia,"61363",
+Tomsk,Russia,"61337",
+Riga,Latvia,"61298",
+Leipzig,Germany,"61095",
+Vladivostok,Russia,"61007",
+Makhachkala,Russia,"60328",
+Malaga,Spain,"59633",
+Toulon,France,"59622",
+Dresden,Germany,"59619",
+Dortmund,Germany,"59094",
+Kryvyi Rih,Ukraine,"59040",
+Catania,Italy,"59005",
+Basel,Switzerland,"58308",
+Essen,Germany,"58092",
+Utrecht,Netherlands,"57978",
+Leicester,United Kingdom,"57975",
+Khabarovsk Vtoroy,Russia,"57830",
+Gomel,Belarus,"57768",
+Balashikha,Russia,"57359",
+Kemerovo,Russia,"57113",
+Orenburg,Russia,"57032",
+Bremen,Germany,"56969",
+Edinburgh,United Kingdom,"56816",
+Pristina,Kosovo,"55000",
+Grenoble,France,"54705",
+Novokuznetsk,Russia,"54687",
+Tirana,	Albania,	"542740"
+Vilnius,	Lithuania,	"541364"
+Hannover,	Germany,	"539317"
+Astrakhan,	Russia,	"534947"
+Bournemouth,	United Kingdom,	"530872"
+Duisburg,	Germany,	"530435"
+Kirov,	Russia,	"520957"
+Kirov	Russia	520957
+Penza,	Russia,	"520534"
+Ryazan',	Russia,	"520173"
+Murcia,	Spain,	"519260"
+Cheboksary,	Russia,	"518153"
+Poznan,	Poland,	"515784"
+Mykolayiv,	Ukraine,	"510840"
+Naberezhnyye Chelny,	Russia,	"509870"
+Kalininskiy,	Russia,	"504641"
+Lipetsk,	Russia,	"502685"
+Nuernberg,	Germany,	"499237"
+Cardiff,	United Kingdom,	"498999"
+Brescia,	Italy,	"498049"
+Kaliningrad,	Russia,	"496049"
+Como,	Italy,	"494348"
+Strasbourg,	France,	"492925"
+Montpellier,	France,	"490812"
+Palma,	Spain,	"487966"
+Avignon,	France,	"486710"
+Chisinau,	Moldova,	"483755"
+Sochi,	Russia,	"483567"
+Rouen,	France,	"481335"
+Gent,	Belgium,	"480931"
+Cagliari,	Italy,	"479957"
+Kursk,	Russia,	"476580"
+Mykolaiv,	Ukraine,	"474969"
+Lausanne,	Switzerland,	"474272"
+Latina,	Italy,	"469560"
+Gdansk,	Poland,	"465486"
+Taranto,	Italy,	"462639"
+Tula,	Russia,	"461381"
+Coventry,	United Kingdom,	"458904"
+Tallinn,	Estonia,	"458713"
+Leeds,	United Kingdom,	"455123"
+Ulan-Ude,	Russia,	"452638"
+Bern,	Switzerland,	"451771"
+Bratislava,	Slovakia,	"444962"
+Caserta,	Italy,	"434143"
+Tver,	Russia,	"427675"
+Salerno,	Italy,	"424227"
+Mariupol,	Ukraine,	"423423"
+Belgorod,	Russia,	"421107"
+Magnitogorsk,	Russia,	"421085"
+Charleroi,	Belgium,	"420510"
+Surgut,	Russia,	"415682"
+Wandsbek,	Germany,	"411422"
+Sevastopol,	Ukraine,	"401452"
+Middlesbrough,	United Kingdom,	"400118"
+Stoke-on-Trent,	United Kingdom,	"399450"
+Khmelnytskyi,	Ukraine,	"398346"
+Ivanovo,	Russia,	"398188"
+Szczecin,	Poland,	"395737"
+Bryansk,	Russia,	"390441"
+Treviso,	Italy,	"387781"
+Pescara,	Italy,	"385765"
+Vitebsk,	Belarus,	"385191"
+Saint-Etienne,	France,	"383621"
+Luhansk,	Ukraine,	"383182"
+Bochum,	Germany,	"382931"
+Alicante,	Spain,	"382014"
+Las Palmas de Gran Canaria,	Spain,	"381847"
+Brno,	Czechia,	"381161"
+Bochum-Hordel,	Germany,	"380000"
+Makiyivka,	Ukraine,	"376610"
+Eindhoven,	Netherlands,	"374979"
+Kaunas,	Lithuania,	"374643"
+Rennes,	France,	"374366"
+Tours,	France,	"371872"
+Brest,	Belarus,	"371715"
+Mahilyow,	Belarus,	"369200"
+Bethune,	France,	"366909"
+Modena,	Italy,	"365286"
+Chita,	Russia,	"364351"
+Stavropol',	Russia,	"363064"
+Vladimir,	Russia,	"360531"
+Reading,	United Kingdom,	"358252"
+Arkhangel'sk,	Russia,	"356051"
+Kaluga,	Russia,	"353296"
+Tampere,	Finland,	"352557"
+Vinnytsia,	Ukraine,	"352115"
+Sunderland,	United Kingdom,	"351353"
+Sarajevo,	Bosnia and Herzegovina,	"350162"
+Mannheim,	Germany,	"349187"
+Wuppertal,	Germany,	"348295"
+Bilbao,	Spain,	"347009"
+Cordoba,	Spain,	"346943"
+Plovdiv,	Bulgaria,	"346883"
+Valenciennes,	France,	"346237"
+Podolsk,	Russia,	"345245"
+Yakutsk,	Russia,	"344869"
+Barletta,	Italy,	"343444"
+Nizhny Tagil,	Russia,	"343377"
+Malmo,	Sweden,	"342887"
+Preston,	United Kingdom,	"340779"
+Simferopol,	Ukraine,	"339492"
+Birkenhead,	United Kingdom,	"338036"
+Parma,	Italy,	"337694"
+Krasnogvargeisky,	Russia,	"337091"
+Bydgoszcz,	Poland,	"337052"
+Vicenza,	Italy,	"335259"
+Bielefeld,	Germany,	"334894"
+Varna,	Bulgaria,	"334055"
+Nola,	Italy,	"331025"
+Kingston upon Hull,	United Kingdom,	"330607"
+Saransk,	Russia,	"326961"
+Newport,	United Kingdom,	"326945"
+Smolensk,	Russia,	"326802"
+Lublin,	Poland,	"325344"
+Karlsruhe,Germany,"324477",
+Volzhskiy,Russia,"323293",
+Swansea,United Kingdom,"322374",
+Bonn,Germany,"320613",
+Kherson,Ukraine,"320477",
+Cherepovets,Russia,"319577",
+Murmansk,Russia,"319263",
+Islington,United Kingdom,"319143",
+Vologda,Russia,"318690",
+Poltava,Ukraine,"317847",
+Hrodna,Belarus,"317365",
+Katowice,Poland,"317316",
+Iasi,Romania,"316149",
+Lecco,Italy,"314874",
+Orel,Russia,"313714",
+Ostrava,Czechia,"313088",
+Vigo,Spain,"308854",
+Cluj-Napoca,Romania,"308265",
+Chernihiv,Ukraine,"307684",
+Timisoara,Romania,"306374",
+Kurgan,Russia,"305330",
+Craiova,Romania,"304142",
+Constanta,Romania,"303399",
+Valladolid,Spain,"301090",
+Bradford,United Kingdom,"299310",
+Cherkasy,Ukraine,"297568",
+Vladikavkaz,Russia,"296882",
+Southend-on-Sea,United Kingdom,"295310",
+Sumy,Ukraine,"294456",
+Galati,Romania,"294087",
+Bialystok,Poland,"291855",
+Tambov,Russia,"290933",
+Marienthal,Germany,"287101",
+Zhytomyr,Ukraine,"282192",
+Hamburg-Nord,Germany,"280000",
+Yoshkar-Ola,Russia,"279100",
+Taganrog,Russia,"279056",
+Horlivka,Ukraine,"278550",
+Kostroma,Russia,"277656",
+Gijon,Spain,"277554",
+Brasov,Romania,"276088",
+Komsomolsk-on-Amur,Russia,"275908",
+Nal'chik,Russia,"272800",
+Wiesbaden,Germany,"272432",
+Ljubljana,Slovenia,"272220",
+Derby,United Kingdom,"270468",
+Muenster,Germany,"270184",
+Gelsenkirchen,Germany,"270028",
+Sterlitamak,Russia,"267231",
+Eixample,Spain,"266477",
+Aachen,Germany,"265208",
+Petrozavodsk,Russia,"265025",
+Moenchengladbach,Germany,"261742",
+Plymouth,United Kingdom,"260203",
+Augsburg,Germany,"259196",
+Luton,United Kingdom,"258018",
+L'Hospitalet de Llobregat,Spain,"257038",
+Espoo,Finland,"256760",
+Latina,Spain,"256644",
+Bratsk,Russia,"256600",
+Rivne,Ukraine,"255106",
+Gdynia,Poland,"253730",
+Carabanchel,Spain,"253678",
+Wolverhampton,United Kingdom,"252791",
+Eimsbuettel,Germany,"251907",
+Altona,Germany,"250192",
+Nis,Serbia,"250000",
+Kropyvnytskyi,Ukraine,"249454",
+Kamianske,Ukraine,"248575",
+Czestochowa,Poland,"248125",
+City of Westminster,United Kingdom,"247614",
+Chemnitz,Germany,"247220",
+Orsk,Russia,"246836",
+A Coruna,Spain,"246056",
+Nizhnevartovsk,Russia,"244937",
+Braunschweig,Germany,"244715",
+Puente de Vallecas,Spain,"244151",
+Angarsk,Russia,"243158",
+Mar'ino,Russia,"243000",
+Novorossiysk,Russia,"241856",
+Khimki,Russia,"239967",
+Blackpool,United Kingdom,"239409",
+Krefeld,Germany,"237984",
+Arhus,Denmark,"237551",
+Kosice,Slovakia,"236563",
+Chernivtsi,Ukraine,"236250",
+Sant Marti,Spain,"235719",
+Ternopil,Ukraine,"235676",
+Gasteiz / Vitoria,Spain,"235661",
+Granada,Spain,"234325",
+Nizhnekamsk,Russia,"234297",
+Halle (Saale),Germany,"234107",
+Hamburg-Mitte,Germany,"233144",
+Dzerzhinsk,Russia,"233126",
+Kiel,Germany,"232758",
+Syktyvkar,Russia,"230139",
+Elche,Spain,"230112",
+Milton Keynes,United Kingdom,"229941",
+Magdeburg,Germany,"229826",
+Ploiesti,Romania,"228851",
+Ciudad Lineal,Spain,"228171",
+Bexley,United Kingdom,"228000",
+Kremenchuk,Ukraine,"227494",
+Sosnowiec,Poland,"227295",
+Staryy Oskol,Russia,"226977",
+Neue Neustadt,Germany,"226851",
+Radom,Poland,"226794",
+Groznyy,Russia,"226100",
+Oviedo,Spain,"224005",
+Santa Cruz de Tenerife,Spain,"222417",
+Graz,Austria,"222326",
+Shakhty,Russia,"221312",
+Blagoveshchensk,Russia,"221296",
+Banja Luka,Bosnia and Herzegovina,"221106",
+Babruysk,Belarus,"220517",
+Fuencarral-El Pardo,Spain,"220085",
+Messina,Italy,"219948",
+Badalona,Spain,"219547",
+Oberhausen,Germany,"219176",
+Prokop'yevsk,Russia,"219000",
+Rybinsk,Russia,"216724",
+Vykhino-Zhulebino,Russia,"216000",
+Freiburg,Germany,"215966",
+Northampton,United Kingdom,"215963",
+Zelenograd,Russia,"215727",
+Archway,United Kingdom,"215667",
+Biysk,Russia,"215430",
+Novi Sad,Serbia,"215400",
+Velikiy Novgorod,Russia,"215062",
+Centralniy,Russia,"214625",
+Lutsk,Ukraine,"213661",
+Bergen,Norway,"213585",
+Braila,Romania,"213569",
+Norwich,United Kingdom,"213166",
+Mokotow,Poland,"212670",
+Luebeck,Germany,"212207",
+Cartagena,Spain,"211996",
+Terrassa,Spain,"210941",
+Torun,Poland,"208717",
+Kielce,Poland,"208598",
+Jerez de la Frontera,Spain,"207532",
+Oradea,Romania,"206614",
+Sabadell,Spain,"206493",
+Mostoles,Spain,"206478",
+Linz,Austria,"204846",
+Alcala de Henares,Spain,"204574",
+Ivano-Frankivsk,Ukraine,"204200",
+Debrecen,Hungary,"204124",
+Erfurt,Germany,"203254",
+Vasyl'evsky Ostrov,Russia,"203058",
+Harburg,Germany,"202571",
+Pskov,Russia,"201990",
+Favoriten,Austria,"201882",
+Nicosia,Cyprus,"200452",
+Severnyy,Russia,"200000",
+Tilburg,Netherlands,"199613",
+Balakovo,Russia,"199572",
+Armavir,Russia,"199548",
+Bila Tserkva,Ukraine,"199163",
+Dudley,United Kingdom,"199059",
+Hagen,Germany,"198972",
+Gliwice,Poland,"198835",
+Pamplona,Spain,"198491",
+Rostock,Germany,"198293",
+Fuenlabrada,Spain,"197836",
+Aberdeen,United Kingdom,"196670",
+Reims,France,"196565",
+Engel's,Russia,"196011",
+Burgas,Bulgaria,"195966",
+Kassel,Germany,"194501",
+Severodvinsk,Russia,"194292",
+Portsmouth,United Kingdom,"194150",
+Klaipeda,Lithuania,"192307",
+Zabrze,Poland,"192177",
+Zlatoust,Russia,"191366",
+Cork,Ireland,"190384",
+Vantaa,Finland,"190058",
+Syzran',Russia,"189338",
+Bytom,Poland,"189186",
+Almeria,Spain,"188810",
+Praga Poludnie,Poland,"187845",
+Sutton,United Kingdom,"187600",
+Petropavlovsk-Kamchatsky,Russia,"187282",
+Trieste,Italy,"187056",
+Donaustadt,Austria,"187007",
+Leganes,Spain,"186066",
+Le Havre,France,"185972",
+Swindon,United Kingdom,"185609",
+Dun Laoghaire,Ireland,"185400",
+San Sebastian,Spain,"185357",
+Hamm,Germany,"185327",
+Mainz,Germany,"184997",
+Cergy-Pontoise,France,"183430",
+Korolyov,Russia,"183402",
+Sants-Montjuic,Spain,"183120",
+Santander,Spain,"182700",
+Kamensk-Ural'skiy,Russia,"182500",
+Prato,Italy,"181820",
+Saarbruecken,Germany,"181227",
+Groningen,Netherlands,"181194",
+Crawley,United Kingdom,"180508",
+Castello de la Plana,Spain,"180005",
+Yasenevo,Russia,"180000",
+Burgos,Spain,"178966",
+Amadora,Portugal,"178858",
+Ipswich,United Kingdom,"178835",
+Bielsko-Biala,Poland,"176515",
+Yuzhno-Sakhalinsk,Russia,"176484",
+Almere Stad,Netherlands,"176432",
+Split,Croatia,"176314",
+Turku,Finland,"175945",
+Wigan,United Kingdom,"175405",
+Kramators'k,Ukraine,"173700",
+Croydon,United Kingdom,"173314",
+Miskolc,Hungary,"172637",
+Walsall,United Kingdom,"172141",
+Herne,Germany,"172108",
+Lyublino,Russia,"172000",
+Mansfield,United Kingdom,"171958",
+Olsztyn,Poland,"171803",
+Prizren,Kosovo,"171464",
+Bacau,Romania,"171396",
+Oxford,United Kingdom,"171380",
+Muelheim,Germany,"171000",
+Albacete,Spain,"169716",
+Reggio Calabria,Italy,"169140",
+Arad,Romania,"169065",
+Baranovichi,Belarus,"168772",
+Angers,France,"168279",
+Horta-Guinardo,Spain,"168092",
+Patras,Greece,"168034",
+Alcorcon,Spain,"167967",
+Berezniki,Russia,"167748",
+Volgodonsk,Russia,"167731",
+Breda,Netherlands,"167673",
+Pitesti,Romania,"167669",
+Miass,Russia,"167500",
+Abakan,Russia,"167289",
+Neukoelln,Germany,"167248",
+Getafe,Spain,"167164",
+Novocherkassk,Russia,"166974",
+Osnabrueck,Germany,"166462",
+Nou Barris,Spain,"166310",
+Warrington,United Kingdom,"165456",
+Szeged,Hungary,"164883",
+Zenica,Bosnia and Herzegovina,"164423",
+Solingen,Germany,"164359",
+Pilsen,Czechia,"164180",
+Nazran',Russia,"164131",
+Slough,United Kingdom,"163777",
+Piraeus,Greece,"163688",

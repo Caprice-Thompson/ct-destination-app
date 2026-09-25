@@ -88,4 +88,3 @@ tofu destroy
 ```
 
 ⚠️ **Warning**: Never destroy the backend while you have infrastructure using it!
-

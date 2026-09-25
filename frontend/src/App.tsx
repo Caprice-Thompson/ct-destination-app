@@ -1,14 +1,14 @@
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  type EarthquakeNotificationData,
+  fetchEarthquakeNotifications,
+} from "./api/api";
 import { AppRoute } from "./common/enums";
+import type { NavButton } from "./components/NavBar/NavBar";
+import { Navbar } from "./components/NavBar/NavBar";
 import { useAuth } from "./hooks/useAuth";
 import { supabase } from "./lib/supabase";
-import {
-  fetchEarthquakeNotifications,
-  type EarthquakeNotificationData,
-} from "./pages/api";
-import { Navbar } from "./components/NavBar";
-import type { NavButton } from "./components/NavBar";
 
 const NOTIFICATION_POLL_INTERVAL_MS = 60_000;
 
@@ -73,13 +73,10 @@ function App() {
     setNotifications([]);
   };
 
+  const currentPath = routerState.location.pathname;
+
   const navButtons: NavButton[] = user
     ? [
-        {
-          label: user.email ?? "Account",
-          onClick: () => {},
-          variant: "secondary" as const,
-        },
         {
           label: "Logout",
           onClick: () => {
@@ -89,20 +86,28 @@ function App() {
         },
       ]
     : [
-        {
-          label: "Login",
-          onClick: () => {
-            void navigate({ to: AppRoute.Login });
-          },
-          variant: "primary" as const,
-        },
-        {
-          label: "Sign Up",
-          onClick: () => {
-            void navigate({ to: AppRoute.Signup });
-          },
-          variant: "secondary" as const,
-        },
+        ...(currentPath !== AppRoute.Login
+          ? [
+              {
+                label: "Login",
+                onClick: () => {
+                  void navigate({ to: AppRoute.Login });
+                },
+                variant: "primary" as const,
+              },
+            ]
+          : []),
+        ...(currentPath !== AppRoute.Signup
+          ? [
+              {
+                label: "Sign Up",
+                onClick: () => {
+                  void navigate({ to: AppRoute.Signup });
+                },
+                variant: "secondary" as const,
+              },
+            ]
+          : []),
       ];
 
   return (
@@ -115,6 +120,7 @@ function App() {
           notifications={user ? notifications : undefined}
           onDismissNotification={user ? dismissNotification : undefined}
           onDismissAllNotifications={user ? dismissAllNotifications : undefined}
+          isAuthenticated={!!user}
         />
       )}
       <main>

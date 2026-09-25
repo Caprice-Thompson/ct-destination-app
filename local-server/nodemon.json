@@ -1,10 +1,11 @@
 {
   "watch": [
-    "server.ts",
+    "src/server.ts",
     "../country/src/**/*.ts",
     "../tourism/src/**/*.ts",
     "../earthquakes/src/**/*.ts",
-    "../weather/src/**/*.ts"
+    "../weather/src/**/*.ts",
+    "../notifications/src/**/*.ts"
   ],
   "ext": "ts",
   "ignore": [
@@ -14,6 +15,6 @@
     "../*/test/**",
     "**/*.test.ts"
   ],
-  "exec": "npm run build && tsx --tsconfig ./tsconfig.json server.ts",
+  "exec": "npm run build && tsx --tsconfig ./tsconfig.json ./src/server.ts",
   "delay": 1000
 }

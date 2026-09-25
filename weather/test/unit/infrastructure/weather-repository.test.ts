@@ -23,12 +23,8 @@ describe("makeWeatherRepository", () => {
       accessKeyId: "test",
       secretAccessKey: "test",
     },
-    database: { connectionString: "postgres://localhost/test" },
     service: { name: "weather-test" },
     tables: { weather: "weather-table" },
-    urls: {
-      externalWeatherAPI: "https://example.invalid/weather",
-    },
   };
 
   const logger = {
@@ -94,12 +90,10 @@ describe("makeWeatherRepository", () => {
           countryName: "Greece",
           month: "6",
           date: "2024-06-01",
-          wind: "light",
-          temperature: { min: 18, max: 28 },
-          humidity: "60",
-          pressure: "1011",
-          visibility: "10",
-          windSpeed: "7",
+          capitalCity: "Athens",
+          minTemperature: 18,
+          maxTemperature: 28,
+          averageTemperature: 23,
         },
       ],
     });
@@ -109,7 +103,8 @@ describe("makeWeatherRepository", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(WeatherData);
     expect(result[0].countryName).toBe("Greece");
-    expect(result[0].temperature.min).toBe(18);
-    expect(result[0].temperature.max).toBe(28);
+    expect(result[0].minTemperature).toBe(18);
+    expect(result[0].maxTemperature).toBe(28);
+    expect(result[0].averageTemperature).toBe(23);
   });
 });

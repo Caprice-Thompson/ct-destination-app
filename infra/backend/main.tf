@@ -92,11 +92,10 @@ output "backend_config" {
   value       = <<-EOF
     backend "s3" {
       bucket         = "${aws_s3_bucket.terraform_state.id}"
-      key            = "country/terraform.tfstate"
+      key            = "workload_environment/terraform.tfstate"
       region         = "${var.aws_region}"
       dynamodb_table = "${aws_dynamodb_table.terraform_locks.id}"
       encrypt        = true
     }
   EOF
 }
-

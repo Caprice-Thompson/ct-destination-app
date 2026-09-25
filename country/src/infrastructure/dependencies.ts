@@ -4,6 +4,7 @@ import { makeLogger } from "./logger";
 import type { RdsClient } from "./rds";
 import { makeRdsClient } from "./rds";
 import { makeNationalDishRepository } from "./repositories/national-dish-repository";
+import { makeCountryInformationRepository } from "./repositories/country-information-repository";
 import { makeCountryRestApiService } from "./services/country-rest-api-service";
 import { makePopulationApiService } from "./services/population-api-service";
 
@@ -12,6 +13,7 @@ export type Dependencies = {
   config: Interfaces.ApplicationConfig;
   rdsClient: RdsClient;
   countryApiRepository: Interfaces.CountryRestApiService;
+  countryInformationRepository: Interfaces.CountryInformationRepository;
   populationApiRepository: Interfaces.PopulationApiService;
   countryDataRepository: Interfaces.NationalDishRepository;
 };
@@ -22,6 +24,10 @@ export async function makeDependencies(): Promise<Dependencies> {
   const rdsClient = await makeRdsClient(config);
   const countryApiRepository = makeCountryRestApiService({
     config,
+    logger,
+  });
+  const countryInformationRepository = makeCountryInformationRepository({
+    rdsClient,
     logger,
   });
   const populationApiRepository = makePopulationApiService({
@@ -38,6 +44,7 @@ export async function makeDependencies(): Promise<Dependencies> {
     config,
     rdsClient,
     countryApiRepository,
+    countryInformationRepository,
     populationApiRepository,
     countryDataRepository,
   };

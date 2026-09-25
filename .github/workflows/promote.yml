@@ -161,3 +161,38 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           flags: weather
+
+  test-notifications:
+    name: Test Notifications Service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: notifications/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./notifications
+        run: npm ci --legacy-peer-deps
+
+      - name: Run linter
+        working-directory: ./notifications
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./notifications
+        run: npm test -- --coverage --ci
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./notifications/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          flags: notifications

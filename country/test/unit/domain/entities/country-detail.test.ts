@@ -53,6 +53,11 @@ describe("CountryDetail Entity", () => {
         "https://goo.gl/maps/spain",
         "https://osm.org/spain",
       ),
+      timezone: ["CET", "CEST"],
+      callingCodes: ["+34"],
+      drivingSide: "right",
+      europeanUnionMember: true,
+      schengenAreaMember: true,
     });
   };
 
@@ -100,6 +105,31 @@ describe("CountryDetail Entity", () => {
       expect(maps?.googleMaps).toBe("https://goo.gl/maps/spain");
       expect(maps?.openStreetMaps).toBe("https://osm.org/spain");
     });
+
+    it("should return timezones", () => {
+      const country = createTestCountry();
+      expect(country.timezones).toEqual(["CET", "CEST"]);
+    });
+
+    it("should return calling codes", () => {
+      const country = createTestCountry();
+      expect(country.callingCodeList).toEqual(["+34"]);
+    });
+
+    it("should return driving side rule", () => {
+      const country = createTestCountry();
+      expect(country.drivingSideRule).toBe("right");
+    });
+
+    it("should return European Union membership status", () => {
+      const country = createTestCountry();
+      expect(country.isEuropeanUnionMember).toBe(true);
+    });
+
+    it("should return Schengen Area membership status", () => {
+      const country = createTestCountry();
+      expect(country.isSchengenAreaMember).toBe(true);
+    });
   });
 
   describe("toJSON", () => {
@@ -113,6 +143,11 @@ describe("CountryDetail Entity", () => {
         capitalCityName: "Madrid",
         flagUrl: "https://flagcdn.com/es.svg",
         languages: ["Spanish", "Catalan", "Basque"],
+        timezone: ["CET", "CEST"],
+        callingCodes: ["+34"],
+        drivingSide: "right",
+        europeanUnionMember: true,
+        schengenAreaMember: true,
         currency: {
           name: "Euro",
           symbol: "€",
@@ -138,6 +173,11 @@ describe("CountryDetail Entity", () => {
         currency: new Currency("Unknown", ""),
         coordinates: new Coordinates(0, 0),
         maps: new MapDetails("", ""),
+        timezone: [],
+        callingCodes: [],
+        drivingSide: "right",
+        europeanUnionMember: false,
+        schengenAreaMember: false,
       });
 
       const json = country.toJSON();

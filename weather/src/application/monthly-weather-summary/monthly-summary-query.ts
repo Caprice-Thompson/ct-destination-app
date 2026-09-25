@@ -42,8 +42,8 @@ export async function getMonthlyWeatherSummary(
 
   const totals = weatherData.reduce(
     (acc, weather) => ({
-      min: acc.min + weather.temperature.min,
-      max: acc.max + weather.temperature.max,
+      min: acc.min + weather.minTemperature,
+      max: acc.max + weather.maxTemperature,
     }),
     { min: 0, max: 0 },
   );

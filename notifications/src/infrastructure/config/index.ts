@@ -16,7 +16,7 @@ export interface ApplicationConfig {
 export async function makeConfig(): Promise<ApplicationConfig> {
   const schema = z.object({
     DATABASE_URL: z.string().default(""),
-    EARTHQUAKES_API_URL: z
+    EARTHQUAKES_SERVICE_URL: z
       .string()
       .default("http://localhost:3001/api/earthquakes/since"),
     SERVICE_NAME: z.string(),
@@ -32,7 +32,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       name: parsedEnv.SERVICE_NAME,
     },
     urls: {
-      earthquakesApi: parsedEnv.EARTHQUAKES_API_URL,
+      earthquakesApi: parsedEnv.EARTHQUAKES_SERVICE_URL,
     },
   };
 }

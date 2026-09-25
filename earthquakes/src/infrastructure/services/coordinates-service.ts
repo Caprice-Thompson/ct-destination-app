@@ -2,12 +2,15 @@ import type { CoordinatesRepository } from "@application/interfaces/repositories
 import { Coordinates } from "@domain/entities/coordinates";
 import type { Dependencies } from "@infrastructure/dependencies";
 
-interface CoordinatesResponse {
-  name: {
-    common: string;
-    official: string;
+interface CoordinatesApiResponse {
+  data: {
+    objects: Array<{
+      coordinates: {
+        lat: number;
+        lng: number;
+      };
+    }>;
   };
-  latlng?: [number, number];
 }
 
 export function makeCoordinatesRepository({
@@ -19,13 +22,18 @@ export function makeCoordinatesRepository({
       countryName: string,
     ): Promise<Coordinates> {
       try {
-        const url = `${config.urls.restCountriesApiUrl}/name/${encodeURIComponent(countryName)}`;
+        const url = `${config.urls.restCountriesApiUrl}?names.common=${encodeURIComponent(countryName)}`;
         logger.debug("Starting to fetch coordinates from REST Countries API", {
           countryName,
           url,
         });
-
-        const response = await fetch(url);
+        console.log("url", url);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${config.urls.restCountriesAuthorization}`,
+          },
+        });
+        console.log("response", response);
 
         if (!response.ok) {
           throw new Error(
@@ -33,19 +41,19 @@ export function makeCoordinatesRepository({
           );
         }
 
-        const data = (await response.json()) as CoordinatesResponse[];
+        const data = (await response.json()) as CoordinatesApiResponse;
 
-        const countryData = data[0];
-
-        if (!countryData.latlng) {
+        if (!data.data?.objects?.[0]?.coordinates) {
           throw new Error(
             `No coordinates available for country: ${countryName}`,
           );
         }
 
+        const countryData = data.data.objects[0];
+
         const coordinates = new Coordinates({
-          latitude: countryData.latlng[0],
-          longitude: countryData.latlng[1],
+          latitude: countryData.coordinates.lat,
+          longitude: countryData.coordinates.lng,
         });
 
         logger.info("Coordinates fetched successfully", {

@@ -1,21 +1,8 @@
 import type { WeatherRepository } from "@application/interfaces";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { Temperature, WeatherData } from "@domain/entities/weather";
+import { WeatherData } from "@domain/entities/weather";
 import type { Dependencies } from "@infrastructure/dependencies";
-
-type WeatherDataDBItem = {
-  countryCode?: string;
-  countryName: string;
-  month: string;
-  wind: string;
-  temperature: number | { min: number; max: number };
-  humidity: string;
-  pressure: string;
-  visibility: string;
-  windSpeed: string;
-  date: string;
-};
 
 export function makeWeatherRepository({
   config,
@@ -27,6 +14,9 @@ export function makeWeatherRepository({
       secretAccessKey: config.aws.secretAccessKey,
       sessionToken: config.aws.sessionToken,
     },
+    ...(process.env.AWS_ENDPOINT_URL && {
+      endpoint: process.env.AWS_ENDPOINT_URL,
+    }),
   });
   const docClient = DynamoDBDocumentClient.from(ddbClient);
 
@@ -55,22 +45,15 @@ export function makeWeatherRepository({
       return [];
     }
 
-    return (response.Items as WeatherDataDBItem[]).map((item) => {
-      const temperature =
-        typeof item.temperature === "number"
-          ? new Temperature(item.temperature, item.temperature)
-          : new Temperature(item.temperature.min, item.temperature.max);
-
+    return (response.Items as WeatherData[]).map((item) => {
       return new WeatherData(
-        item.countryCode ?? "",
+        item.countryCode,
         item.countryName,
+        item.capitalCity,
         item.date,
-        item.wind,
-        temperature,
-        item.humidity,
-        item.pressure,
-        item.visibility,
-        item.windSpeed,
+        item.minTemperature,
+        item.maxTemperature,
+        item.averageTemperature,
       );
     });
   };

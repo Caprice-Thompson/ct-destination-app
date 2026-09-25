@@ -11,12 +11,12 @@ describe("getMonthlyEarthquakeStatisticsQuery", () => {
       accessKeyId: "test",
       secretAccessKey: "test",
     },
-    database: { connectionString: "postgres://localhost/test" },
     service: { name: "earthquakes-test" },
     tables: { earthquakes: "eq-table" },
     urls: {
       usgsApi: "https://example.invalid/fdsnws/event/1/query",
       restCountriesApiUrl: "https://example.invalid/v3.1",
+      restCountriesAuthorization: "fake-auth",
     },
   };
 
@@ -46,7 +46,6 @@ describe("getMonthlyEarthquakeStatisticsQuery", () => {
     return {
       config: baseConfig,
       logger,
-      rdsClient: {} as DbClient,
       earthquakeRepository,
       coordinatesRepository,
       usgsService,

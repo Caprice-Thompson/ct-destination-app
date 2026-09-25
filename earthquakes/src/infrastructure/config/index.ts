@@ -1,5 +1,6 @@
 import process from "node:process";
 import { z } from "zod";
+import { ConfigurationException } from "./exceptions";
 
 export interface ApplicationConfig {
   aws: {
@@ -7,9 +8,6 @@ export interface ApplicationConfig {
     region: string;
     secretAccessKey: string;
     sessionToken?: string;
-  };
-  database: {
-    connectionString: string;
   };
   service: {
     name: string;
@@ -20,6 +18,7 @@ export interface ApplicationConfig {
   urls: {
     usgsApi: string;
     restCountriesApiUrl: string;
+    restCountriesAuthorization: string;
   };
 }
 
@@ -29,14 +28,20 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     AWS_ACCESS_KEY_ID: z.string().default(""),
     AWS_SECRET_ACCESS_KEY: z.string().default(""),
     AWS_SESSION_TOKEN: z.string().optional(),
-    DATABASE_URL: z.string().default(""),
     DYNAMODB_EARTHQUAKES_TABLE: z.string().default(""),
     EARTHQUAKES_API_URL: z.string(),
     REST_COUNTRIES_API_URL: z.string(),
+    REST_COUNTRIES_AUTHORIZATION: z.string(),
     SERVICE_NAME: z.string(),
   });
 
-  const parsedEnv = schema.parse(process.env);
+  const parseResult = schema.safeParse(process.env);
+
+  if (!parseResult.success) {
+    throw new ConfigurationException(parseResult.error);
+  }
+
+  const parsedEnv = parseResult.data;
 
   // const encodedPGPassword = encodeURIComponent(process.env.PGPASSWORD ?? "");
   // const connectionString = `postgresql://${process.env.PGUSER}:${encodedPGPassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
@@ -48,9 +53,6 @@ export async function makeConfig(): Promise<ApplicationConfig> {
       secretAccessKey: parsedEnv.AWS_SECRET_ACCESS_KEY,
       sessionToken: parsedEnv.AWS_SESSION_TOKEN ?? "",
     },
-    database: {
-      connectionString: parsedEnv.DATABASE_URL ?? "",
-    },
     service: {
       name: parsedEnv.SERVICE_NAME,
     },
@@ -60,6 +62,7 @@ export async function makeConfig(): Promise<ApplicationConfig> {
     urls: {
       usgsApi: parsedEnv.EARTHQUAKES_API_URL,
       restCountriesApiUrl: parsedEnv.REST_COUNTRIES_API_URL,
+      restCountriesAuthorization: parsedEnv.REST_COUNTRIES_AUTHORIZATION,
     },
   };
 }

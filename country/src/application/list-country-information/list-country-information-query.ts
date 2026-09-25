@@ -12,6 +12,11 @@ export interface CountryInformationResult {
     capitalCityName: string;
     flagUrl: string;
     languages: string[];
+    timezone: string[];
+    callingCodes: string[];
+    drivingSide: "left" | "right";
+    europeanUnionMember: boolean;
+    schengenAreaMember: boolean;
     currency: {
       name: string;
       symbol: string;
@@ -45,6 +50,7 @@ export async function listCountryInformationQuery(
 ): Promise<CountryInformationResult> {
   const {
     countryApiRepository,
+    countryInformationRepository,
     countryDataRepository,
     populationApiRepository,
     logger,
@@ -56,7 +62,26 @@ export async function listCountryInformationQuery(
 
   logger.debug(`Fetching country facts for country: ${countryName}`);
 
-  const countryFacts = await countryApiRepository.getCountryFacts(countryName);
+  let countryFacts = null;
+
+  try {
+    countryFacts =
+      await countryInformationRepository.getCountryInformation(countryName);
+    if (countryFacts) {
+      logger.info(`Country facts resolved from database for: ${countryName}`);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.warn(
+      `Database lookup failed for ${countryName}, falling back to REST API`,
+      { error: errorMessage },
+    );
+  }
+
+  if (!countryFacts) {
+    logger.debug(`Fetching country facts from REST API for: ${countryName}`);
+    countryFacts = await countryApiRepository.getCountryFacts(countryName);
+  }
 
   if (!countryFacts) {
     throw new Error(`Country Facts not found: ${countryName}`);
@@ -83,6 +108,11 @@ export async function listCountryInformationQuery(
       capitalCityName: countryFacts.capital ?? "",
       flagUrl: countryFacts.flag ?? "",
       languages: countryFacts.languageList,
+      timezone: countryFacts.timezones,
+      callingCodes: countryFacts.callingCodeList,
+      drivingSide: countryFacts.drivingSideRule,
+      europeanUnionMember: countryFacts.isEuropeanUnionMember,
+      schengenAreaMember: countryFacts.isSchengenAreaMember,
       currency: {
         name: countryFacts.currencyInfo.name,
         symbol: countryFacts.currencyInfo.symbol,

@@ -5,9 +5,6 @@ export interface ApplicationConfig {
     secretAccessKey: string;
     sessionToken?: string;
   };
-  database: {
-    connectionString: string;
-  };
   service: {
     name: string;
   };
@@ -17,5 +14,6 @@ export interface ApplicationConfig {
   urls: {
     usgsApi: string;
     restCountriesApiUrl: string;
+    restCountriesAuthorization: string;
   };
 }

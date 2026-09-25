@@ -15,7 +15,7 @@ export async function makeTourismInformationRepository({
           description
         FROM unesco_sites
         WHERE LOWER(country_name) = LOWER($1)
-        ORDER BY site ASC
+        ORDER BY site ASC LIMIT 3
       `;
 
       const sites = await rdsClient.queryMultipleRows<UNESCOSites>({

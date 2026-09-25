@@ -42,6 +42,11 @@ describe("listCountryInformationHandler", () => {
         currency: new Currency("Euro", "€"),
         coordinates: new Coordinates(40.0, -4.0),
         maps: new MapDetails("https://google.com", "https://osm.org"),
+        timezone: ["CET", "CEST"],
+        callingCodes: ["+34"],
+        drivingSide: "right",
+        europeanUnionMember: true,
+        schengenAreaMember: true,
       });
 
       const mockPopulation = [
@@ -86,6 +91,11 @@ describe("listCountryInformationHandler", () => {
         currency: new Currency("Test", "T"),
         coordinates: new Coordinates(0, 0),
         maps: new MapDetails("", ""),
+        timezone: ["CET"],
+        callingCodes: ["+34"],
+        drivingSide: "right",
+        europeanUnionMember: true,
+        schengenAreaMember: true,
       });
 
       jest
@@ -154,6 +164,11 @@ describe("listCountryInformationHandler", () => {
         currency: new Currency("Euro", "€"),
         coordinates: new Coordinates(40.0, -4.0),
         maps: new MapDetails("", ""),
+        timezone: ["CET"],
+        callingCodes: ["+34"],
+        drivingSide: "right",
+        europeanUnionMember: true,
+        schengenAreaMember: true,
       });
 
       jest
@@ -183,6 +198,11 @@ describe("listCountryInformationHandler", () => {
         currency: new Currency("Euro", "€"),
         coordinates: new Coordinates(40.0, -4.0),
         maps: new MapDetails("", ""),
+        timezone: ["CET"],
+        callingCodes: ["+34"],
+        drivingSide: "right",
+        europeanUnionMember: true,
+        schengenAreaMember: true,
       });
 
       jest
@@ -211,6 +231,11 @@ describe("listCountryInformationHandler", () => {
         currency: new Currency("Swiss Franc", "CHF"),
         coordinates: new Coordinates(46.8182, 8.2275),
         maps: new MapDetails("", ""),
+        timezone: ["CET", "CEST"],
+        callingCodes: ["+41"],
+        drivingSide: "right",
+        europeanUnionMember: false,
+        schengenAreaMember: true,
       });
 
       jest

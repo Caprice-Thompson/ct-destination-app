@@ -35,6 +35,6 @@
       "@api/*": ["../earthquakes/src/api/*", "../weather/src/api/*"]
     }
   },
-  "include": ["server.ts"],
+  "include": ["src/server.ts"],
   "exclude": ["node_modules", "dist"]
 }
