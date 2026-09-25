@@ -299,7 +299,7 @@ export function Dashboard() {
               iconBg="bg-amber-500"
             >{earthquakeData.earthquakes.length === 0 ? (
               <p className="text-sm text-slate-500">
-                No recent earthquakes recorded in {country} for the last 25 years.
+                No major recent earthquakes recorded in {country} for the last 25 years.
               </p>
             ) : (
               <div className="grid sm:grid-cols-2 gap-3">
