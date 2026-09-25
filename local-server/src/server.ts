@@ -18,7 +18,7 @@ dotenv.config();
 const app = express();
 const PORT = 3001;
 
-const USE_MOCK_DATA = process.env.USE_MOCK_DATA === "true";
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA === "false";
 
 type LambdaEvent = {
   queryStringParameters: Record<string, string>;
