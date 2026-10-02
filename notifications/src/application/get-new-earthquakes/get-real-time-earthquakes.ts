@@ -1,24 +1,20 @@
-import type { Logger } from "@application/interfaces/logger";
-import type {
-  EarthquakeEventsRepository,
-  UserRepository,
-} from "@application/interfaces/repositories";
-import type { NotificationResponse } from "@domain/entities/notification-response";
+import type { EarthquakeEvent } from "@infrastructure/services/earthquakes-api-service";
 import { validateGetNewEarthquakesRequest } from "./get-real-time-earthquakes-validator";
+import type { Dependencies } from "@infrastructure/dependencies";
+
 
 export type GetNewEarthquakesQuery = Readonly<{
   userId: string;
 }>;
 
-export type GetNewEarthquakesDependencies = Readonly<{
-  earthquakeEventsRepository: EarthquakeEventsRepository;
-  userRepository: UserRepository;
-  logger: Logger;
-}>;
-
+export interface NotificationResponse {
+  newEvents: EarthquakeEvent[];
+  lastChecked: Date;
+}
+  
 export async function getNewEarthquakes(
   query: GetNewEarthquakesQuery,
-  dependencies: GetNewEarthquakesDependencies,
+  dependencies: Pick<Dependencies, "earthquakeEventsRepository" | "userRepository" | "logger">,
 ): Promise<NotificationResponse> {
   const { earthquakeEventsRepository, userRepository, logger } = dependencies;
   const { userId } = await validateGetNewEarthquakesRequest(query);
@@ -29,7 +25,8 @@ export async function getNewEarthquakes(
   const lastChecked =
     await userRepository.getLastNotificationsCheckedAt(userId);
   const baseline = lastChecked ?? now;
-  const newEvents = await earthquakeEventsRepository.findSince(baseline);
+  const newEvents =
+    await earthquakeEventsRepository.findEarthquakesAfterDate(baseline);
 
   await userRepository.updateLastNotificationsCheckedAt(userId, now);
 

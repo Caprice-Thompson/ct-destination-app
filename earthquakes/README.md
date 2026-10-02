@@ -65,3 +65,15 @@ npm install
 npm run build
 npm test
 ```
+
+## Local Ingestion
+
+Start DynamoDB Local from the repository root, then run the ingestion from this directory:
+
+```bash
+docker compose up -d dynamodb-local dynamodb-setup
+export REST_COUNTRIES_AUTHORIZATION="<your REST Countries API token>"
+npm run ingest:local
+```
+
+The local runner supplies the API URLs, service name, AWS test credentials, region, and `historical_earthquakes` table name. The API token is intentionally not stored in the repository.

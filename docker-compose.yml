@@ -20,7 +20,16 @@ services:
     image: amazon/dynamodb-local:latest
     ports:
       - "8000:8000"
-    command: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+    command:
+      [
+        "-jar",
+        "DynamoDBLocal.jar",
+        "-sharedDb",
+        "-dbPath",
+        "/home/dynamodblocal/data",
+      ]
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
 
   dynamodb-setup:
     image: amazon/aws-cli:latest
@@ -63,3 +72,4 @@ services:
 
 volumes:
   postgres_data:
+  dynamodb_data:

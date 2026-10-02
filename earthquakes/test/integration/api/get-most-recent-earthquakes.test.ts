@@ -7,7 +7,6 @@ import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import type { DbClient } from "../../../../shared/db/src/rds_client";
 
 jest.mock("@shared/utils/src/tracing", () => ({
   withTraceLogging: <I, O>(

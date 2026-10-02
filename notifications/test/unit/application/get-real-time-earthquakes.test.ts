@@ -1,10 +1,10 @@
 import { getNewEarthquakes } from "@application/get-new-earthquakes/get-real-time-earthquakes";
-import type { EarthquakeEvent } from "@domain/entities/earthquake-event";
+import type { EarthquakeEvent } from "@infrastructure/services/earthquakes-api-service";
 
 describe("getNewEarthquakesUseCase", () => {
   const buildDependencies = () => ({
     earthquakeEventsRepository: {
-      findSince: jest.fn(),
+      findEarthquakesAfterDate: jest.fn(),
     },
     userRepository: {
       getLastNotificationsCheckedAt: jest.fn(),
@@ -27,7 +27,7 @@ describe("getNewEarthquakesUseCase", () => {
     jest.clearAllMocks();
   });
 
-  it("returns events since the user's last notification check", async () => {
+  it("should return events since the user's last notification check", async () => {
     const dependencies = buildDependencies();
     const lastChecked = new Date("2026-06-17T11:00:00.000Z");
     const events: EarthquakeEvent[] = [
@@ -42,15 +42,14 @@ describe("getNewEarthquakesUseCase", () => {
     dependencies.userRepository.getLastNotificationsCheckedAt.mockResolvedValue(
       lastChecked,
     );
-    dependencies.earthquakeEventsRepository.findSince.mockResolvedValue(events);
-
-    const result = await getNewEarthquakes(
-      { userId: "user-1" },
-      dependencies,
+    dependencies.earthquakeEventsRepository.findEarthquakesAfterDate.mockResolvedValue(
+      events,
     );
 
+    const result = await getNewEarthquakes({ userId: "user-1" }, dependencies);
+
     expect(
-      dependencies.earthquakeEventsRepository.findSince,
+      dependencies.earthquakeEventsRepository.findEarthquakesAfterDate,
     ).toHaveBeenCalledWith(lastChecked);
     expect(
       dependencies.userRepository.updateLastNotificationsCheckedAt,
@@ -61,22 +60,21 @@ describe("getNewEarthquakesUseCase", () => {
     });
   });
 
-  it("initialises first-time users without returning historical events", async () => {
+  it("should initialise first-time users without returning historical events", async () => {
     const dependencies = buildDependencies();
     const now = new Date("2026-06-17T12:00:00.000Z");
 
     dependencies.userRepository.getLastNotificationsCheckedAt.mockResolvedValue(
       null,
     );
-    dependencies.earthquakeEventsRepository.findSince.mockResolvedValue([]);
-
-    const result = await getNewEarthquakes(
-      { userId: "user-2" },
-      dependencies,
+    dependencies.earthquakeEventsRepository.findEarthquakesAfterDate.mockResolvedValue(
+      [],
     );
 
+    const result = await getNewEarthquakes({ userId: "user-2" }, dependencies);
+
     expect(
-      dependencies.earthquakeEventsRepository.findSince,
+      dependencies.earthquakeEventsRepository.findEarthquakesAfterDate,
     ).toHaveBeenCalledWith(now);
     expect(
       dependencies.userRepository.updateLastNotificationsCheckedAt,

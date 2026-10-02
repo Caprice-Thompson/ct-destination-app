@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "..",
     "baseUrl": "./src",
     "target": "esnext",
     "lib": ["esnext"],

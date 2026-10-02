@@ -1,31 +1,27 @@
-import type { EarthquakeRepository } from "@application/interfaces/repositories";
-import type { Logger } from "@application/interfaces/logger";
 import type { Earthquake } from "@domain/entities/earthquake";
 import { validateGetEarthquakesSinceRequest } from "./get-earthquakes-since-validator";
+import { Dependencies } from "@infrastructure/dependencies";
 
-export type GetEarthquakesSinceQuery = Readonly<{
+export type GetEarthquakesSinceDateQuery = Readonly<{
   since: string;
 }>;
 
-export type GetEarthquakesSinceDependencies = Readonly<{
-  earthquakeRepository: EarthquakeRepository;
-  logger: Logger;
-}>;
-
-export async function getEarthquakesSinceQuery(
-  query: GetEarthquakesSinceQuery,
-  dependencies: GetEarthquakesSinceDependencies,
+export async function getEarthquakesSinceDateQuery(
+  query: GetEarthquakesSinceDateQuery,
+  dependencies: Pick<Dependencies, "earthquakeRepository" | "logger">,
 ): Promise<{ earthquakes: Earthquake[] }> {
   const { earthquakeRepository, logger } = dependencies;
 
-  logger.info("Starting get earthquakes since query", { since: query.since });
+  logger.info("Starting get earthquakes since last date query", {
+    since: query.since,
+  });
 
   const { since } = await validateGetEarthquakesSinceRequest(query);
   const timestamp = new Date(since);
 
   const earthquakes = await earthquakeRepository.findSince(timestamp);
 
-  logger.info("Get earthquakes since query completed", {
+  logger.info("Get earthquakes since last date query completed", {
     since,
     earthquakesCount: earthquakes.length,
   });

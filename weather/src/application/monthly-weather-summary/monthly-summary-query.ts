@@ -47,7 +47,9 @@ export async function getMonthlyWeatherSummary(
     }),
     { min: 0, max: 0 },
   );
-
+  logger.info("Finished get monthly weather summary query successfully", {
+    query,
+  });
   return {
     countryName,
     month,

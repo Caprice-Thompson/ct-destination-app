@@ -28,9 +28,6 @@ export async function makeConfig(): Promise<ApplicationConfig> {
 
   const parsedEnv = schema.parse(process.env);
 
-  // const encodedPGPassword = encodeURIComponent(process.env.PGPASSWORD ?? "");
-  // const connectionString = `postgresql://${process.env.PGUSER}:${encodedPGPassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
-
   return {
     aws: {
       accessKeyId: parsedEnv.AWS_ACCESS_KEY_ID,

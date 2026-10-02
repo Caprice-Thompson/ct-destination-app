@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BsBuildings } from "react-icons/bs";
 import { FaGlobeAmericas } from "react-icons/fa";
 import { GiKnifeFork } from "react-icons/gi";
@@ -14,6 +15,36 @@ import { ResponseDialog } from "../../components/Errors/ResponseDialog";
 import { Pill } from "../../components/UI/Pill";
 import { useAuth } from "../../hooks/useAuth";
 import { useSearch } from "../../hooks/useSearch";
+
+function NationalDishImage({
+  imageUrl,
+  dishName,
+}: {
+  imageUrl: string | null | undefined;
+  dishName: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!imageUrl || hasError) {
+    return (
+      <div className="mt-3 flex aspect-[4/3] w-full items-center justify-center rounded-md bg-slate-100 text-sm text-slate-500">
+        Image unavailable
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt={`National dish: ${dishName}`}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setHasError(true)}
+      className="mt-3 aspect-[4/3] w-full rounded-md object-cover"
+    />
+  );
+}
 
 export function Dashboard() {
   const { data, isLoading, error, country, month } = useSearch();
@@ -187,13 +218,15 @@ export function Dashboard() {
                   value={`${countryData.nationalDish?.dishName}`}
                   bold
                 />
-                <DataRow
-                  label="Description"
-                  value={`${countryData.nationalDish?.description}`}
-                />
-                <DataRow
-                  label="Image"
-                  value={`${countryData.nationalDish?.imageUrl}`}
+                <NationalDishImage
+                  key={
+                    countryData.nationalDish?.imageUrl ??
+                    countryData.nationalDish?.dishName
+                  }
+                  imageUrl={countryData.nationalDish?.imageUrl}
+                  dishName={
+                    countryData.nationalDish?.dishName ?? "National dish"
+                  }
                 />
               </div>
             </InfoCard>
@@ -297,30 +330,32 @@ export function Dashboard() {
               title={`${country}'s Most Recent Earthquakes`}
               icon={<WiEarthquake />}
               iconBg="bg-amber-500"
-            >{earthquakeData.earthquakes.length === 0 ? (
-              <p className="text-sm text-slate-500">
-                No major recent earthquakes recorded in {country} for the last 25 years.
-              </p>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {earthquakeData.earthquakes.map((eq) => (
-                  <div
-                    key={eq.place}
-                    className="p-4 bg-slate-50 rounded-xl border border-slate-100"
-                  >
-                    <h3 className="font-semibold text-slate-900 text-sm mb-1">
-                      {`${eq.place}: ${eq.date.split("T")[0]}`}
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Magnitude: {eq.magnitude}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </InfoCard>
-        </section>
-      )}
+            >
+              {earthquakeData.earthquakes.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  No major recent earthquakes recorded in {country} for the last
+                  25 years.
+                </p>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {earthquakeData.earthquakes.map((eq) => (
+                    <div
+                      key={eq.place}
+                      className="p-4 bg-slate-50 rounded-xl border border-slate-100"
+                    >
+                      <h3 className="font-semibold text-slate-900 text-sm mb-1">
+                        {`${eq.place}: ${eq.date.split("T")[0]}`}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Magnitude: {eq.magnitude}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </InfoCard>
+          </section>
+        )}
 
         <DashboardFooter />
       </div>
