@@ -51,12 +51,24 @@ else
 fi
 echo ""
 
+needs_dynamodb=false
+case "$TARGET" in
+    all|seed|weather)
+        needs_dynamodb=true
+        ;;
+esac
+
 if command -v docker >/dev/null 2>&1; then
     PG_USER="${DB_USER:-destination-user}"
     PG_DB="${DB_NAME:-destination_db}"
 
     echo -e "${GREEN}Starting Docker Postgres...${NC}"
     (cd "$REPO_ROOT" && docker compose up -d postgres)
+
+    if [ "$needs_dynamodb" = true ]; then
+        echo -e "${GREEN}Starting Docker DynamoDB Local + table setup...${NC}"
+        (cd "$REPO_ROOT" && docker compose up -d dynamodb-local dynamodb-setup)
+    fi
 
     echo -e "${GREEN}Waiting for Postgres to be ready...${NC}"
     for _ in {1..30}; do
@@ -65,8 +77,18 @@ if command -v docker >/dev/null 2>&1; then
         fi
         sleep 1
     done
+
+    if [ "$needs_dynamodb" = true ]; then
+        echo -e "${GREEN}Waiting for DynamoDB Local to be ready...${NC}"
+        for _ in {1..30}; do
+            if curl -s "http://localhost:8000" >/dev/null 2>&1; then
+                break
+            fi
+            sleep 1
+        done
+    fi
 else
-    echo -e "${YELLOW}Docker is not installed or not on PATH; assuming the database is already running.${NC}"
+    echo -e "${YELLOW}Docker is not installed or not on PATH; assuming databases are already running.${NC}"
 fi
 
 cd "$SCRIPT_DIR"
@@ -79,15 +101,22 @@ fi
 
 export REST_COUNTRIES_AUTHORIZATION="${REST_COUNTRIES_AUTHORIZATION:-}"
 export REST_COUNTRIES_API_URL="${REST_COUNTRIES_API_URL:-https://api.restcountries.com/countries/v5}"
+export AWS_REGION="${AWS_REGION:-eu-west-2}"
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-test}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-test}"
+export AWS_ENDPOINT_URL="${AWS_ENDPOINT_URL:-http://localhost:8000}"
+export DYNAMODB_WEATHER_TABLE="${DYNAMODB_WEATHER_TABLE:-weather_data}"
 
 case "$TARGET" in
-    all|city|national-dishes|unesco|countries)
+    all|seed|city|national-dishes|unesco|countries|weather)
         echo -e "${GREEN}Running ${TARGET} migrations...${NC}"
         npm run "migrate:${TARGET}"
         ;;
     *)
         echo "Unknown migration target: $TARGET"
-        echo "Usage: ./run.sh [all|city|national-dishes|unesco|countries]"
+        echo "Usage: ./run.sh [all|seed|city|national-dishes|unesco|countries|weather]"
+        echo "  seed = city + national-dishes + unesco + weather (committed CSVs only)"
+        echo "  all  = seed + countries (countries needs REST_COUNTRIES_AUTHORIZATION)"
         exit 1
         ;;
 esac

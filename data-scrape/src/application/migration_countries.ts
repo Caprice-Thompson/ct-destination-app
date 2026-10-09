@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { getDatabaseUrl, getSslConfig } from "./db.js";
+import { getDatabaseUrl, getSslConfig } from "../infrastructure/db.js";
 import { config } from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
@@ -8,8 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load env from repo root .env.local first, then data-scrape/.env.local
-config({ path: resolve(__dirname, "..", ".env.local") });
-config({ path: resolve(__dirname, ".env.local") });
+config({ path: resolve(__dirname, "../../..", ".env.local") });
+config({ path: resolve(__dirname, "../..", ".env.local") });
 
 const API_URL = process.env.REST_COUNTRIES_API_URL;
 const API_TOKEN = process.env.REST_COUNTRIES_AUTHORIZATION;

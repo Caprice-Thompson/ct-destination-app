@@ -67,11 +67,25 @@ Install project dependencies:
 npm install
 ```
 
-Start Docker services:
+Start Docker services (Postgres + DynamoDB Local):
 
 ```bash
 docker compose up
 ```
+
+Seed local databases from committed CSV files (required for shared baseline data):
+
+```bash
+cd data-scrape
+cp .env.example .env.local
+npm install
+./run.sh seed
+```
+
+- `./run.sh seed` loads city populations, national dishes, UNESCO sites (Postgres), and weather (DynamoDB) from `data-scrape/src/data/`.
+- `./run.sh all` also loads country information from the REST Countries API (set `REST_COUNTRIES_AUTHORIZATION` in `data-scrape/.env.local`).
+
+See [data-scrape/README.md](./data-scrape/README.md) for details. Do not commit `.env.local` or runtime DB files under `docker/dynamodb/`.
 
 Start the backend:
 

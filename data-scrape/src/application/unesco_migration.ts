@@ -3,7 +3,7 @@ import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getDatabaseUrl, getSslConfig } from './db.js';
+import { getDatabaseUrl, getSslConfig } from '../infrastructure/db.js';
 import { config } from 'dotenv';
 import { dirname, resolve } from 'path';
 
@@ -11,8 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load env from repo root .env.local first, then data-scrape/.env.local
-config({ path: resolve(__dirname, '..', '.env.local') });
-config({ path: resolve(__dirname, '.env.local') });
+config({ path: resolve(__dirname, '../../..', '.env.local') });
+config({ path: resolve(__dirname, '../..', '.env.local') });
 
 export interface RawUNESCOWHCCSV {
     states_name_en: string;
@@ -141,7 +141,7 @@ function deduplicateBatch(records: DatabaseUNESCO[]): DatabaseUNESCO[] {
 
 async function migrate() {
     const databaseUrl = getDatabaseUrl();
-    const csvPath = process.env.CSV_PATH || path.resolve(__dirname, 'unesco_sites.csv');
+    const csvPath = process.env.CSV_PATH || path.resolve(__dirname, '../data/unesco_sites.csv');
 
     if (!fs.existsSync(csvPath)) {
         console.error(`CSV file not found: ${csvPath}`);

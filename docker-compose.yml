@@ -29,7 +29,8 @@ services:
         "/home/dynamodblocal/data",
       ]
     volumes:
-      - dynamodb_data:/home/dynamodblocal/data
+      # Bind mount (not a named volume) so the non-root dynamodblocal user can write
+      - ./docker/dynamodb:/home/dynamodblocal/data
 
   dynamodb-setup:
     image: amazon/aws-cli:latest
@@ -72,4 +73,3 @@ services:
 
 volumes:
   postgres_data:
-  dynamodb_data:
