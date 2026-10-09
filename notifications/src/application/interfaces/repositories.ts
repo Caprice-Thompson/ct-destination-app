@@ -1,7 +1,6 @@
-import type { EarthquakeEvent } from "@domain/entities/earthquake-event";
-
+import type { EarthquakeEvent } from "@infrastructure/services/earthquakes-api-service";
 export interface EarthquakeEventsRepository {
-  findSince(timestamp: Date): Promise<EarthquakeEvent[]>;
+  findEarthquakesAfterDate(timestamp: Date): Promise<EarthquakeEvent[]>;
 }
 
 export interface UserRepository {

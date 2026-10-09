@@ -8,6 +8,7 @@
       "@infrastructure/*": ["src/infrastructure/*"],
       "@shared/*": ["../shared/*"]
     },
+    "rootDir": "..",
     "target": "esnext",
     "lib": ["esnext", "dom"],
     "module": "commonjs",

@@ -2,7 +2,6 @@ import { getMonthlyEarthquakeStatisticsQuery } from "@application/get-monthly-st
 import type { ApplicationConfig } from "@application/interfaces/config";
 import { Earthquake } from "@domain/entities/earthquake";
 import type { Dependencies } from "@infrastructure/dependencies";
-import type { DbClient } from "../../../../shared/db/src/rds_client";
 
 describe("getMonthlyEarthquakeStatisticsQuery", () => {
   const baseConfig: ApplicationConfig = {

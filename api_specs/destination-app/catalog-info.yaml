@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: destination-app
+  description: Developer portal for Destination App OpenAPI documentation.
+spec:
+  type: website
+  owner: guests
+  lifecycle: production

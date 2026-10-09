@@ -1,12 +1,1 @@
-.env.example
 .env.local
-unesco_sites.csv
-national_dishes.csv
-city_population.csv
-run.sh
-application/
-migration_city.ts
-migration_country.ts
-unesco_migration.ts
-migration.ts
-european_daily_weather_2025_v2.csv

@@ -14,7 +14,7 @@ export type ListLatestEarthquakesByCountryQuery = Readonly<{
 }>;
 
 /**
- * Application use case: List latest earthquakes for a country
+ * Application use case: List latest earthquakes for a given country
  */
 export async function listLatestEarthquakesByCountry(
   query: ListLatestEarthquakesByCountryQuery,

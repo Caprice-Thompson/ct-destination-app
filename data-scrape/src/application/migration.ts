@@ -3,7 +3,7 @@ import { parse } from 'csv-parse';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getDatabaseUrl, getSslConfig } from './db.js';
+import { getDatabaseUrl, getSslConfig } from '../infrastructure/db.js';
 import { config } from 'dotenv';
 import { dirname, resolve } from 'path';
 
@@ -11,8 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load env from repo root .env.local first, then data-scrape/.env.local
-config({ path: resolve(__dirname, '..', '.env.local') });
-config({ path: resolve(__dirname, '.env.local') });
+config({ path: resolve(__dirname, '../../..', '.env.local') });
+config({ path: resolve(__dirname, '../..', '.env.local') });
 
 export interface RawNationalDishCSV {
   country_name: string;
@@ -135,7 +135,7 @@ async function migrate() {
     ssl: sslConfig,
   });
 
-  const csvFilePath = path.resolve(__dirname, 'national_dishes.csv');
+  const csvFilePath = path.resolve(__dirname, '../data/national_dishes.csv');
   const parser = fs.createReadStream(csvFilePath).pipe(
     parse({
       columns: true,

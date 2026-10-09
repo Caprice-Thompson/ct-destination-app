@@ -1,0 +1,23 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: destination-app
+  description: European destination information platform
+spec:
+  owner: guests
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: destination-local-api
+  description: Local Express API aggregating destination microservices
+  tags:
+    - openapi
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: destination-app
+  providesApis:
+    - destination-rest-api

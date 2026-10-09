@@ -21,7 +21,7 @@ export function makeNationalDishRepository({
           description: string | null;
         }>({
           query: `
-            SELECT country_name, dish_name, image_url, description
+            SELECT country_name, country_code, dish_name, image_url, description
             FROM national_dish
             WHERE country_name = $1
           `,
@@ -36,10 +36,10 @@ export function makeNationalDishRepository({
         logger.info("National dish fetched successfully", { countryName });
 
         return new NationalDish(
-          result.country_code,
           result.country_name,
           result.dish_name,
           result.image_url,
+          result.country_code,
           result.description ?? undefined,
         );
       } catch (error) {

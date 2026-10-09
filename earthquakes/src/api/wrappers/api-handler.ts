@@ -3,7 +3,6 @@ import {
   type Dependencies,
   makeDependencies,
 } from "@infrastructure/dependencies";
-import { ConfigurationException } from "@infrastructure/config/exceptions";
 import {
   type HackedLambdaContext,
   withTraceLogging,
@@ -71,11 +70,10 @@ export function createApiHandler<TResult>(
       };
     }
 
-    let dependencies: Dependencies | undefined;
+    const dependencies =
+      handlerConfig?.dependencies ?? (await makeDependencies());
 
     try {
-      dependencies = handlerConfig?.dependencies ?? (await makeDependencies());
-
       const result = await handler(dependencies, event, context);
 
       return {
@@ -85,7 +83,7 @@ export function createApiHandler<TResult>(
       };
     } catch (error) {
       if (error instanceof ValidationException) {
-        dependencies?.logger.warn("Validation error", {
+        dependencies.logger.warn("Validation error", {
           errors: error.errors,
         });
         return {
@@ -98,17 +96,7 @@ export function createApiHandler<TResult>(
         };
       }
 
-      if (error instanceof ConfigurationException) {
-        // logger depends on config, so fall back to console when config itself fails to load
-        console.error("Configuration error", { errors: error.errors });
-        return {
-          statusCode: 500,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ error: "Service misconfigured" }),
-        };
-      }
-
-      dependencies?.logger.error("Unhandled error", { error });
+      dependencies.logger.error("Unhandled error", { error });
 
       return {
         statusCode: 500,

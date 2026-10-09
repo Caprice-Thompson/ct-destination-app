@@ -12,8 +12,8 @@ import { config } from "dotenv";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-config({ path: resolve(__dirname, "..", ".env.local") });
-config({ path: resolve(__dirname, ".env.local") });
+config({ path: resolve(__dirname, "../../..", ".env.local") });
+config({ path: resolve(__dirname, "../..", ".env.local") });
 
 const TABLE_NAME = process.env.DYNAMODB_WEATHER_TABLE ?? "weather_data";
 

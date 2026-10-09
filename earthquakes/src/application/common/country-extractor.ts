@@ -1,4 +1,4 @@
-const europeanCountries: string[] = [
+const europeanCountryNames: string[] = [
   "Albania",
   "Andorra",
   "Austria",
@@ -170,14 +170,14 @@ export function findCountryInString(place: string): string {
       return "United States";
     }
 
-    for (const country of europeanCountries) {
+    for (const country of europeanCountryNames) {
       if (country.toLowerCase() === suffix.toLowerCase()) {
         return country;
       }
     }
   }
 
-  for (const country of europeanCountries) {
+  for (const country of europeanCountryNames) {
     const regex = new RegExp(`\\b${country}\\b`, "i");
     if (regex.test(place)) {
       return country;

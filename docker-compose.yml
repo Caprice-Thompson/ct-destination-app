@@ -20,7 +20,17 @@ services:
     image: amazon/dynamodb-local:latest
     ports:
       - "8000:8000"
-    command: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+    command:
+      [
+        "-jar",
+        "DynamoDBLocal.jar",
+        "-sharedDb",
+        "-dbPath",
+        "/home/dynamodblocal/data",
+      ]
+    volumes:
+      # Bind mount (not a named volume) so the non-root dynamodblocal user can write
+      - ./docker/dynamodb:/home/dynamodblocal/data
 
   dynamodb-setup:
     image: amazon/aws-cli:latest

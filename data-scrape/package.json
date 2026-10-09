@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "migrate": "npm run migrate:all",
-    "migrate:all": "npm run migrate:city && npm run migrate:national-dishes && npm run migrate:unesco && npm run migrate:countries",
-    "migrate:city": "tsx migration_city.ts",
-    "migrate:national-dishes": "tsx application/migration_national_dishes.ts",
+    "migrate:all": "npm run migrate:city && npm run migrate:national-dishes && npm run migrate:unesco && npm run migrate:weather && npm run migrate:countries",
+    "migrate:seed": "npm run migrate:city && npm run migrate:national-dishes && npm run migrate:unesco && npm run migrate:weather",
+    "migrate:city": "tsx src/application/migration_city.ts",
+    "migrate:national-dishes": "tsx src/application/migration.ts",
     "migrate:unesco": "tsx src/application/unesco_migration.ts",
     "migrate:countries": "tsx src/application/migration_countries.ts",
     "migrate:weather": "tsx src/application/weather_migration.ts"

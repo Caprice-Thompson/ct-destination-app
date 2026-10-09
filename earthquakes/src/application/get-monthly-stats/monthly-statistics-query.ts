@@ -6,7 +6,7 @@ export type MonthlyEarthquakeStatisticsQuery = Readonly<{
   month: string;
 }>;
 
-export type EarthquakeStatistics = {
+type EarthquakeStatistics = {
   totalEarthquakes: number;
   monthlyEarthquakePercentage: number;
   avgTsunamiCount: number;
@@ -19,13 +19,17 @@ export async function getMonthlyEarthquakeStatisticsQuery(
 ): Promise<EarthquakeStatistics> {
   const { earthquakeRepository, logger } = dependencies;
 
-  logger.info("Starting get monthly earthquake statistics query", { query });
+  logger.info("Starting get monthly earthquake statistics query", {
+    countryName: query.countryName,
+    month: query.month,
+  });
 
   const { countryName, month: targetMonth } =
     await validateMonthlyEarthquakeStatisticsRequest(query);
 
   const allEarthquakesByCountry =
     await earthquakeRepository.getEarthquakesByCountry(countryName);
+
   if (allEarthquakesByCountry.length === 0) {
     return {
       totalEarthquakes: 0,
@@ -52,6 +56,11 @@ export async function getMonthlyEarthquakeStatisticsQuery(
       ? earthquakesInTargetMonth.reduce((sum, eq) => sum + eq.magnitude, 0) /
         totalInMonth
       : 0;
+
+  logger.info("Monthly earthquake statistics query completed successfully", {
+    query,
+  });
+
   return {
     totalEarthquakes,
     monthlyEarthquakePercentage: monthlyPercentage,
@@ -59,3 +68,5 @@ export async function getMonthlyEarthquakeStatisticsQuery(
     avgMagnitude,
   };
 }
+
+export type EarthquakeStatisticsQueryResult = ReturnType<typeof getMonthlyEarthquakeStatisticsQuery>;

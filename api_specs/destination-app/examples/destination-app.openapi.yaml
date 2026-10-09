@@ -1,0 +1,533 @@
+openapi: 3.0.3
+info:
+  title: Destination App API
+  description: Local development API for country, tourism, earthquake, weather, and notification services.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+    description: Local server (local-server)
+tags:
+  - name: health
+  - name: country
+  - name: tourism
+  - name: earthquakes
+  - name: weather
+  - name: notifications
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /api/countries:
+    get:
+      tags: [country]
+      summary: Country information
+      operationId: getCountryInformation
+      parameters:
+        - name: countryName
+          in: query
+          required: true
+          schema:
+            type: string
+          example: Spain
+      responses:
+        "200":
+          description: Country details, city populations, and national dish
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryInformationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/tourism:
+    get:
+      tags: [tourism]
+      summary: UNESCO sites by country
+      operationId: getTourismInformation
+      parameters:
+        - name: countryName
+          in: query
+          required: true
+          schema:
+            type: string
+          example: Spain
+      responses:
+        "200":
+          description: UNESCO World Heritage sites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TourismResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/earthquakes:
+    get:
+      tags: [earthquakes]
+      summary: Most recent earthquakes by country
+      operationId: getMostRecentEarthquakes
+      parameters:
+        - name: countryName
+          in: query
+          required: true
+          schema:
+            type: string
+          example: Spain
+      responses:
+        "200":
+          description: Recent earthquake events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarthquakesByCountryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/earthquakes/since:
+    get:
+      tags: [earthquakes]
+      summary: Earthquakes since timestamp
+      operationId: getEarthquakesSince
+      parameters:
+        - name: since
+          in: query
+          required: true
+          description: ISO-8601 timestamp
+          schema:
+            type: string
+            format: date-time
+          example: "2024-03-01T12:30:00.000Z"
+      responses:
+        "200":
+          description: Earthquake events since the given time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarthquakesSinceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/earthquakes/statistics:
+    get:
+      tags: [earthquakes]
+      summary: Monthly earthquake statistics
+      operationId: getEarthquakeStatistics
+      parameters:
+        - name: countryName
+          in: query
+          required: true
+          schema:
+            type: string
+          example: Spain
+        - name: month
+          in: query
+          required: true
+          description: Month number (1–12)
+          schema:
+            type: string
+          example: "1"
+      responses:
+        "200":
+          description: Monthly summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarthquakeStatisticsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/weather:
+    get:
+      tags: [weather]
+      summary: Weather summary by country and month
+      operationId: getWeatherSummary
+      parameters:
+        - name: countryName
+          in: query
+          required: true
+          schema:
+            type: string
+          example: Spain
+        - name: month
+          in: query
+          required: true
+          description: Month number (1–12)
+          schema:
+            type: string
+          example: "1"
+      responses:
+        "200":
+          description: Average min/max temperatures for the month
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeatherSummaryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/notifications:
+    get:
+      tags: [notifications]
+      summary: Earthquake notifications for authenticated user
+      operationId: getNotifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationsResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalError"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, timestamp]
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-10-09T14:00:00.000Z"
+    CountryInformationResponse:
+      type: object
+      required: [countryDetails]
+      properties:
+        countryDetails:
+          $ref: "#/components/schemas/CountryDetails"
+        cityPopulation:
+          type: array
+          items:
+            $ref: "#/components/schemas/CityPopulation"
+        nationalDish:
+          $ref: "#/components/schemas/NationalDish"
+    CountryDetails:
+      type: object
+      required: [countryCode, countryName, capitalCityName, flagUrl]
+      properties:
+        countryCode:
+          type: string
+          example: ES
+        countryName:
+          type: string
+          example: Spain
+        capitalCityName:
+          type: string
+          example: Madrid
+        flagUrl:
+          type: string
+          format: uri
+          example: https://flagcdn.com/es.svg
+        languages:
+          type: array
+          items:
+            type: string
+          example: [Spanish, Catalan, Galician, Basque]
+        population:
+          type: integer
+          example: 47350000
+        timezone:
+          type: array
+          items:
+            type: string
+          example: ["CET (UTC+1)", "CEST (UTC+2)"]
+        continent:
+          type: string
+          example: Europe
+        callingCodes:
+          type: array
+          items:
+            type: string
+          example: ["+34"]
+        europeanUnionMember:
+          type: boolean
+          example: true
+        schengenAreaMember:
+          type: boolean
+          example: true
+        drivingSide:
+          type: object
+          properties:
+            side:
+              type: string
+              example: right
+        currency:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Euro
+            symbol:
+              type: string
+              example: €
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              example: 40.4168
+            longitude:
+              type: number
+              format: double
+              example: -3.7038
+        maps:
+          type: object
+          properties:
+            googleMaps:
+              type: string
+              format: uri
+            openStreetMaps:
+              type: string
+              format: uri
+    CityPopulation:
+      type: object
+      required: [cityName, population]
+      properties:
+        cityName:
+          type: string
+          example: Madrid
+        population:
+          type: integer
+          example: 3223334
+    NationalDish:
+      type: object
+      required: [countryCode, countryName, dishName]
+      properties:
+        countryCode:
+          type: string
+          example: ES
+        countryName:
+          type: string
+          example: Spain
+        dishName:
+          type: string
+          example: Paella
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        description:
+          type: string
+          nullable: true
+          example: A traditional Spanish rice dish from Valencia
+    TourismResponse:
+      type: object
+      required: [unescoSites]
+      properties:
+        unescoSites:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnescoSite"
+    UnescoSite:
+      type: object
+      required: [countryCode, countryName, areaName, site, description]
+      properties:
+        countryCode:
+          type: string
+          example: ES
+        countryName:
+          type: string
+          example: Spain
+        areaName:
+          type: string
+          example: Catalonia
+        site:
+          type: string
+          example: Works of Antoni Gaudí
+        description:
+          type: string
+          example: Seven properties in Barcelona that are exceptional examples of Gaudí's architectural genius
+    EarthquakeRecord:
+      type: object
+      required:
+        - eventId
+        - name
+        - magnitude
+        - date
+        - type
+        - tsunami
+        - place
+        - country
+      properties:
+        eventId:
+          type: string
+          example: es2024001
+        name:
+          type: string
+          example: M 4.2 - 15 km SE of Granada
+        magnitude:
+          type: number
+          format: double
+          example: 4.2
+        date:
+          type: string
+          format: date-time
+          example: "2024-12-15T10:23:45.000Z"
+        type:
+          type: string
+          example: earthquake
+        tsunami:
+          type: integer
+          description: 0 = no tsunami, 1 = tsunami associated
+          example: 0
+        place:
+          type: string
+          example: 15 km SE of Granada
+        country:
+          type: string
+          example: Spain
+    EarthquakesByCountryResponse:
+      type: object
+      required: [earthquakes, countryName]
+      properties:
+        earthquakes:
+          type: array
+          items:
+            $ref: "#/components/schemas/EarthquakeRecord"
+        countryName:
+          type: string
+          example: Spain
+    EarthquakesSinceResponse:
+      type: object
+      required: [earthquakes]
+      properties:
+        earthquakes:
+          type: array
+          items:
+            $ref: "#/components/schemas/EarthquakeRecord"
+    EarthquakeStatisticsResponse:
+      type: object
+      required:
+        - totalEarthquakes
+        - monthlyEarthquakePercentage
+        - avgTsunamiCount
+        - avgMagnitude
+      properties:
+        totalEarthquakes:
+          type: integer
+          example: 145
+        monthlyEarthquakePercentage:
+          type: number
+          format: double
+          example: 8.5
+        avgTsunamiCount:
+          type: number
+          format: double
+          example: 0.2
+        avgMagnitude:
+          type: number
+          format: double
+          example: 3.4
+    WeatherSummaryResponse:
+      type: object
+      required:
+        - countryName
+        - month
+        - totalWeatherRecords
+        - averageMinTemperature
+        - averageMaxTemperature
+      properties:
+        countryName:
+          type: string
+          example: Spain
+        month:
+          type: string
+          example: "1"
+        totalWeatherRecords:
+          type: integer
+          example: 31
+        averageMinTemperature:
+          type: number
+          format: double
+          example: 6.2
+        averageMaxTemperature:
+          type: number
+          format: double
+          example: 14.1
+    NotificationEvent:
+      type: object
+      required: [id, magnitude, location, occurredAt]
+      properties:
+        id:
+          type: string
+          example: eq2026001
+        magnitude:
+          type: number
+          format: double
+          example: 5.4
+        location:
+          type: string
+          example: 32 km SW of Lisbon, Portugal
+        occurredAt:
+          type: string
+          format: date-time
+          example: "2026-06-18T14:23:12.000Z"
+    NotificationsResponse:
+      type: object
+      required: [newEvents, lastChecked]
+      properties:
+        newEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationEvent"
+        lastChecked:
+          type: string
+          format: date-time
+          example: "2026-06-18T15:00:00.000Z"
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+  responses:
+    BadRequest:
+      description: Missing or invalid query parameter
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Missing query parameter
+            message: countryName is required
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Internal server error
+            message: Unknown error

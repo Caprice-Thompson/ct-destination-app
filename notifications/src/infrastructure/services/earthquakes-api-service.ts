@@ -1,7 +1,6 @@
 import type { ApplicationConfig } from "@application/interfaces/config";
 import type { Logger } from "@application/interfaces/logger";
 import type { EarthquakeEventsRepository } from "@application/interfaces/repositories";
-import type { EarthquakeEvent } from "@domain/entities/earthquake-event";
 
 type EarthquakeApiResponse = {
   earthquakes: Array<{
@@ -12,6 +11,13 @@ type EarthquakeApiResponse = {
   }>;
 };
 
+export interface EarthquakeEvent {
+  id: string;
+  magnitude: number;
+  location: string;
+  occurredAt: Date;
+}
+
 export function makeEarthquakesApiService({
   config,
   logger,
@@ -20,7 +26,9 @@ export function makeEarthquakesApiService({
   logger: Logger;
 }): EarthquakeEventsRepository {
   return {
-    async findSince(timestamp: Date): Promise<EarthquakeEvent[]> {
+    async findEarthquakesAfterDate(
+      timestamp: Date,
+    ): Promise<EarthquakeEvent[]> {
       const since = timestamp.toISOString();
       const url = `${config.urls.earthquakesApi}?since=${encodeURIComponent(since)}`;
 
