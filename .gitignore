@@ -1,3 +1,9 @@
 node_modules
 .env.local
 docker/dynamodb/
+
+# Yarn / PnP at repo root (Backstage uses Yarn under api_specs/destination-app only)
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/
+yarn.lock

@@ -1,0 +1,16 @@
+# Backstage local install / build output
+destination-app/node_modules/
+destination-app/.yarn/install-state.gz
+destination-app/.yarn/cache/
+destination-app/.cache/
+destination-app/dist/
+destination-app/dist-types/
+destination-app/**/dist/
+destination-app/**/dist-types/
+destination-app/coverage/
+destination-app/e2e-test-report/
+destination-app/playwright-report/
+destination-app/test-results/
+
+# Generated from examples/destination-app.openapi.yaml (yarn sync:openapi-catalog / prestart)
+destination-app/examples/destination-api-inline.yaml
