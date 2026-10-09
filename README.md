@@ -2,6 +2,12 @@
 
 A microservices platform designed for travelers and researchers to compile comprehensive information about various destinations in Europe, including country details, earthquake data, UNESCO World Heritage Sites, and weather summaries.
 
+## Website
+
+![Destination App country overview (Italy)](docs/images/destination-app-screenshot.png)
+
+The React frontend aggregates country facts, UNESCO sites, earthquakes, and related data from the backend microservices.
+
 ## Services
 
 The application consists of four Lambda microservices:
