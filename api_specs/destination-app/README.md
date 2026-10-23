@@ -8,7 +8,7 @@ yarn start
 ```
 
 - Edit spec: `examples/destination-app.openapi.yaml`
-- Regenerate catalog entity: `yarn sync:openapi-catalog` (also runs automatically before `yarn start`)
+- Regenerate catalog entity: `yarn sync:openapi-catalog` (`yarn start` runs this first)
 - Catalog entities: `examples/destination-catalog.yaml`, `examples/org.yaml`
 
 See [../README.md](../README.md).

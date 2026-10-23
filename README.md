@@ -79,6 +79,14 @@ Start Docker services (Postgres + DynamoDB Local):
 docker compose up
 ```
 
+Start local Supabase for frontend auth (login, signup, notification tokens). This is separate from the `docker compose` Postgres used for country and tourism data:
+
+```bash
+npx supabase start
+```
+
+Copy `frontend/.env.example` to `frontend/.env.local` and point `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` at the values from `npx supabase status` (the example file uses the default local stack credentials). Studio is usually at http://127.0.0.1:54323. Stop with `npx supabase stop`. For cloud later: `npx supabase link` and `npx supabase db push`.
+
 Seed local databases from committed CSV files (required for shared baseline data):
 
 ```bash
@@ -100,10 +108,11 @@ cd local-server
 npm run dev
 ```
 
-Run the frontend:
+Run the frontend (requires `frontend/.env.local` with Supabase vars):
 
 ```bash
 cd frontend
+cp .env.example .env.local
 npm run dev
 ```
 

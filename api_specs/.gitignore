@@ -7,10 +7,5 @@ destination-app/dist/
 destination-app/dist-types/
 destination-app/**/dist/
 destination-app/**/dist-types/
-destination-app/coverage/
-destination-app/e2e-test-report/
-destination-app/playwright-report/
-destination-app/test-results/
-
-# Generated from examples/destination-app.openapi.yaml (yarn sync:openapi-catalog / prestart)
+# Generated from examples/destination-app.openapi.yaml (yarn sync:openapi-catalog / yarn start)
 destination-app/examples/destination-api-inline.yaml

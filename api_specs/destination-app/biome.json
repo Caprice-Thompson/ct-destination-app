@@ -24,14 +24,8 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
-      "performance": {
-        "noAccumulatingSpread": "off"
-      },
       "style": {
         "noNonNullAssertion": "off"
-      },
-      "a11y": {
-        "noSvgWithoutTitle": "off"
       }
     }
   },
