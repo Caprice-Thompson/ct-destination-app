@@ -15,7 +15,7 @@ Open http://localhost:3000 → **Catalog** → **destination-rest-api** (Definit
 ## Maintain the spec
 
 1. Edit [`destination-app/examples/destination-app.openapi.yaml`](./destination-app/examples/destination-app.openapi.yaml)
-2. Run `yarn sync:openapi-catalog` (or restart with `yarn start`, which runs it via `prestart`)
+2. Run `yarn sync:openapi-catalog` (or `yarn start`, which syncs before launching)
 
 ## What is committed
 
